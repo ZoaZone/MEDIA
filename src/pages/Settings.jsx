@@ -1,140 +1,101 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { Settings, Key, Bell, Globe, Save, CheckCircle2, Loader2, Eye, EyeOff, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { Settings as SettingsIcon, Share2, Key, Upload, Save, Plus, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import PageHeader from "@/components/ui/PageHeader";
-import GlassCard from "@/components/ui/GlassCard";
-import { toast } from "sonner";
 
-const platforms = ["instagram", "facebook", "tiktok", "linkedin", "youtube", "twitter_x", "pinterest"];
+export default function SettingsPage() {
+  const {user}=useOutletContext()||{};
+  const [saved,setSaved]=useState(false);
+  const [saving,setSaving]=useState(false);
+  const [show,setShow]=useState({});
+  const [tab,setTab]=useState("apikeys");
+  const [keys,setKeys]=useState({openai_key:"",twilio_sid:"",twilio_token:"",twilio_phone:"",sendgrid_key:"",whatsapp_token:"",whatsapp_phone_id:""});
+  const [profile,setProfile]=useState({business_name:"",website:"",logo_url:"",timezone:"UTC"});
 
-export default function Settings() {
-  const [agencyForm, setAgencyForm] = useState({ name: "", domain: "", brand_colors: "" });
-  const [showAddAccount, setShowAddAccount] = useState(false);
-  const [accountForm, setAccountForm] = useState({ platform: "instagram", account_name: "", status: "connected" });
-  const qc = useQueryClient();
+  const toggleShow=(k)=>setShow(p=>({...p,[k]:!p[k]}));
 
-  const { data: agencies = [] } = useQuery({ queryKey: ["agencies"], queryFn: () => base44.entities.Agency.list("-created_date", 1) });
-  const { data: accounts = [] } = useQuery({ queryKey: ["social-accounts"], queryFn: () => base44.entities.SocialAccount.list("-created_date", 50) });
-
-  useEffect(() => {
-    if (agencies.length > 0) {
-      setAgencyForm({ name: agencies[0].name || "", domain: agencies[0].domain || "", brand_colors: agencies[0].brand_colors || "" });
-    }
-  }, [agencies]);
-
-  const saveAgency = async () => {
-    if (agencies.length > 0) {
-      await base44.entities.Agency.update(agencies[0].id, agencyForm);
-    } else {
-      await base44.entities.Agency.create({ ...agencyForm, status: "active" });
-    }
-    qc.invalidateQueries({ queryKey: ["agencies"] });
-    toast.success("Settings saved!");
+  const saveSettings=async()=>{
+    setSaving(true);
+    await base44.auth.updateMe({settings:{api_keys:keys,profile}}).catch(()=>{});
+    setSaving(false);setSaved(true);setTimeout(()=>setSaved(false),2500);
   };
 
-  const createAccount = useMutation({
-    mutationFn: (d) => base44.entities.SocialAccount.create({ ...d, connected_at: new Date().toISOString() }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["social-accounts"] }); setShowAddAccount(false); },
-  });
+  const KEY_FIELDS=[
+    {k:"openai_key",l:"OpenAI API Key",ph:"sk-...",help:"For AI content generation — all Media Studio features"},
+    {k:"twilio_sid",l:"Twilio Account SID",ph:"ACxxxxxxxxxxxxxxxx",help:"For SMS campaigns"},
+    {k:"twilio_token",l:"Twilio Auth Token",ph:"xxxxxxxxxxxxxxxx",help:"Twilio auth token"},
+    {k:"twilio_phone",l:"Twilio Phone Number",ph:"+1 555 000 0000",help:"Your SMS sending number"},
+    {k:"sendgrid_key",l:"SendGrid API Key",ph:"SG.xxxxxxxxxxxxxxxx",help:"For email campaigns"},
+    {k:"whatsapp_token",l:"WhatsApp BSP Token",ph:"EAxxxxxxxxxx",help:"WhatsApp Business Solution Provider token"},
+    {k:"whatsapp_phone_id",l:"WhatsApp Phone ID",ph:"1234567890",help:"From Meta Business Suite"},
+  ];
 
-  const deleteAccount = useMutation({
-    mutationFn: (id) => base44.entities.SocialAccount.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["social-accounts"] }),
-  });
+  const TABS=[{v:"apikeys",l:"API Keys",Icon:Key},{v:"profile",l:"Profile",Icon:Globe},{v:"notifications",l:"Notifications",Icon:Bell}];
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
-      <PageHeader title="Settings" subtitle="Manage your agency profile and integrations" />
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-foreground flex items-center gap-2"><Settings className="w-6 h-6 text-fuchsia-400"/>Settings</h1>
+        <p className="text-muted-foreground text-sm">API keys, integrations and account configuration</p>
+      </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-white/5 border border-white/10">
-          <TabsTrigger value="profile" className="data-[state=active]:bg-magenta/20 data-[state=active]:text-magenta">Profile</TabsTrigger>
-          <TabsTrigger value="social" className="data-[state=active]:bg-magenta/20 data-[state=active]:text-magenta">Social Accounts</TabsTrigger>
-          <TabsTrigger value="api" className="data-[state=active]:bg-magenta/20 data-[state=active]:text-magenta">API Keys</TabsTrigger>
-        </TabsList>
+      <div className="flex gap-2 border-b border-border pb-1">
+        {TABS.map(t=>(
+          <button key={t.v} onClick={()=>setTab(t.v)} className={`flex items-center gap-1.5 px-4 py-2 rounded-t-lg text-sm font-medium transition-all ${tab===t.v?"text-fuchsia-400 border-b-2 border-fuchsia-500":"text-muted-foreground hover:text-foreground"}`}>
+            <t.Icon className="w-4 h-4"/>{t.l}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value="profile">
-          <GlassCard>
-            <h3 className="text-sm font-bold text-white mb-4">Agency Profile</h3>
-            <div className="space-y-4">
-              <div><Label className="text-white/60 text-xs">Agency Name</Label><Input value={agencyForm.name} onChange={(e) => setAgencyForm({ ...agencyForm, name: e.target.value })} className="bg-white/5 border-white/10 text-white mt-1" /></div>
-              <div><Label className="text-white/60 text-xs">Domain</Label><Input value={agencyForm.domain} onChange={(e) => setAgencyForm({ ...agencyForm, domain: e.target.value })} className="bg-white/5 border-white/10 text-white mt-1" /></div>
-              <div><Label className="text-white/60 text-xs">Brand Colors (hex, comma-separated)</Label><Input value={agencyForm.brand_colors} onChange={(e) => setAgencyForm({ ...agencyForm, brand_colors: e.target.value })} className="bg-white/5 border-white/10 text-white mt-1" placeholder="#e040fb, #ffd700" /></div>
-              <Button onClick={saveAgency} className="gradient-magenta border-0 text-white hover:opacity-90"><Save className="w-4 h-4 mr-2" /> Save Changes</Button>
-            </div>
-          </GlassCard>
-        </TabsContent>
-
-        <TabsContent value="social">
-          <GlassCard>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-white">Connected Social Accounts</h3>
-              <Button size="sm" onClick={() => setShowAddAccount(true)} className="gradient-magenta border-0 text-white hover:opacity-90 h-8 text-xs">
-                <Plus className="w-3 h-3 mr-1" /> Add Account
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {accounts.length === 0 && <p className="text-xs text-white/30 text-center py-4">No accounts connected</p>}
-              {accounts.map(a => (
-                <div key={a.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <Share2 className="w-4 h-4 text-magenta" />
-                    <div>
-                      <p className="text-sm font-medium text-white">{a.account_name}</p>
-                      <p className="text-xs text-white/30">{a.platform}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={`text-xs ${a.status === "connected" ? "text-emerald-400 border-emerald-400/20" : "text-red-400 border-red-400/20"}`}>{a.status}</Badge>
-                    <Button variant="ghost" size="icon" onClick={() => deleteAccount.mutate(a.id)} className="h-7 w-7 text-white/30 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        </TabsContent>
-
-        <TabsContent value="api">
-          <GlassCard>
-            <h3 className="text-sm font-bold text-white mb-4">API Integrations</h3>
-            <p className="text-xs text-white/40 mb-4">Configure API keys for external services. These are managed through the platform settings.</p>
-            {["Twilio (SMS)", "SendGrid (Email)", "WhatsApp BSP", "OpenAI", "ElevenLabs"].map(service => (
-              <div key={service} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                <div className="flex items-center gap-3">
-                  <Key className="w-4 h-4 text-white/30" />
-                  <span className="text-sm text-white/60">{service}</span>
-                </div>
-                <Badge variant="outline" className="text-xs border-white/10 text-white/30">Configure in Dashboard</Badge>
-              </div>
-            ))}
-          </GlassCard>
-        </TabsContent>
-      </Tabs>
-
-      <Dialog open={showAddAccount} onOpenChange={setShowAddAccount}>
-        <DialogContent className="bg-[#161616] border-white/10 text-white max-w-sm">
-          <DialogHeader><DialogTitle>Add Social Account</DialogTitle></DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div>
-              <Label className="text-white/60 text-xs">Platform</Label>
-              <Select value={accountForm.platform} onValueChange={(v) => setAccountForm({ ...accountForm, platform: v })}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{platforms.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label className="text-white/60 text-xs">Account Name</Label><Input value={accountForm.account_name} onChange={(e) => setAccountForm({ ...accountForm, account_name: e.target.value })} className="bg-white/5 border-white/10 text-white mt-1" placeholder="@youraccount" /></div>
-            <Button onClick={() => createAccount.mutate(accountForm)} disabled={!accountForm.account_name} className="w-full gradient-magenta border-0 text-white hover:opacity-90">Connect Account</Button>
+      {tab==="apikeys"&&(
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+            <Zap className="w-4 h-4 text-amber-400 flex-shrink-0"/>
+            <p className="text-xs text-amber-400/80">Keys are encrypted and used only for your account's campaigns and AI generation.</p>
           </div>
-        </DialogContent>
-      </Dialog>
+          {KEY_FIELDS.map(f=>(
+            <div key={f.k} className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">{f.l}</label>
+              <div className="relative">
+                <input type={show[f.k]?"text":"password"} value={keys[f.k]} onChange={e=>setKeys(p=>({...p,[f.k]:e.target.value}))} placeholder={f.ph} className="w-full h-9 px-3 pr-9 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring font-mono"/>
+                <button onClick={()=>toggleShow(f.k)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{show[f.k]?<EyeOff className="w-3.5 h-3.5"/>:<Eye className="w-3.5 h-3.5"/>}</button>
+              </div>
+              <p className="text-[10px] text-muted-foreground/60">{f.help}</p>
+            </div>
+          ))}
+          <button onClick={saveSettings} disabled={saving} className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
+            {saving?<Loader2 className="w-4 h-4 animate-spin"/>:saved?<><CheckCircle2 className="w-4 h-4"/>Saved!</>:<><Save className="w-4 h-4"/>Save Keys</>}
+          </button>
+        </div>
+      )}
+
+      {tab==="profile"&&(
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+          <p className="text-sm text-muted-foreground">Business info used in AI-generated content</p>
+          {[{k:"business_name",l:"Business Name",ph:"Acme Marketing Co."},{k:"website",l:"Website",ph:"https://yoursite.com"},{k:"logo_url",l:"Logo URL",ph:"https://…/logo.png"},{k:"timezone",l:"Timezone",ph:"Asia/Calcutta"}].map(f=>(
+            <div key={f.k} className="space-y-1.5"><label className="text-xs font-medium text-muted-foreground">{f.l}</label>
+            <input value={profile[f.k]} onChange={e=>setProfile(p=>({...p,[f.k]:e.target.value}))} placeholder={f.ph} className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"/></div>
+          ))}
+          <div className="pt-1 text-xs text-muted-foreground">
+            <p>Account: <span className="text-foreground">{user?.email}</span></p>
+            <p className="mt-0.5">Role: <span className="text-foreground capitalize">{user?.role||"user"}</span></p>
+          </div>
+          <button onClick={saveSettings} disabled={saving} className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
+            {saving?<Loader2 className="w-4 h-4 animate-spin"/>:saved?<><CheckCircle2 className="w-4 h-4"/>Saved!</>:"Save Profile"}
+          </button>
+        </div>
+      )}
+
+      {tab==="notifications"&&(
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+          {[{l:"Campaign sent",d:"Email when bulk campaign is dispatched"},{l:"New lead alert",d:"Alert when a new lead is captured"},{l:"Post published",d:"Confirmation when social post goes live"},{l:"Weekly report",d:"Analytics summary every Monday morning"},{l:"Failed message",d:"Alert when a bulk message fails delivery"}].map(n=>(
+            <div key={n.l} className="flex items-center justify-between p-3 border border-border rounded-xl">
+              <div><p className="text-sm font-medium text-foreground">{n.l}</p><p className="text-xs text-muted-foreground">{n.d}</p></div>
+              <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-fuchsia-500"/>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
