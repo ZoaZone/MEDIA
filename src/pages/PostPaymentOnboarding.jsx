@@ -58,9 +58,9 @@ export default function PostPaymentOnboarding() {
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <div className="w-12 h-12 rounded-xl gradient-magenta flex items-center justify-center mx-auto mb-4 shadow-lg shadow-magenta/20">
-            <span className="text-white font-black text-lg">C</span>
+            <span className="text-white font-black text-lg">M</span>
           </div>
-          <h1 className="text-2xl font-black text-white">Welcome to <span className="gradient-text">CREAM</span></h1>
+          <h1 className="text-2xl font-black text-white">Welcome to <span className="gradient-text">Marketer</span></h1>
           <p className="text-sm text-white/40 mt-2">Let's get you set up in 4 quick steps</p>
         </div>
 

@@ -36,7 +36,7 @@ const AuthenticatedApp = () => {
       <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-magenta flex items-center justify-center shadow-lg shadow-magenta/20">
-            <span className="text-white font-black">C</span>
+            <span className="text-white font-black">M</span>
           </div>
           <div className="w-8 h-8 border-2 border-white/10 border-t-magenta rounded-full animate-spin"></div>
         </div>

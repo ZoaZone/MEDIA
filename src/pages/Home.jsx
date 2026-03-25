@@ -31,9 +31,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg gradient-magenta flex items-center justify-center shadow-lg shadow-magenta/20">
-              <span className="text-white font-black text-xs">C</span>
+              <span className="text-white font-black text-xs">M</span>
             </div>
-            <span className="text-lg font-black tracking-wider gradient-text">CREAM</span>
+            <span className="text-lg font-black tracking-wider gradient-text">Marketer</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-white/50 hover:text-white transition-colors">Features</a>
@@ -141,7 +141,7 @@ export default function Home() {
           <div className="glass rounded-2xl p-12 md:p-16 neon-magenta">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Ready to Scale?</h2>
             <p className="text-white/40 max-w-md mx-auto mb-8">
-              Join agencies using CREAM to create, reach, engage, amplify and monetize.
+                          Join agencies using Marketer to create, reach, engage, amplify and monetize., reach, engage, amplify and monetize.
             </p>
             <Link to="/pricing">
               <Button size="lg" className="gradient-magenta hover:opacity-90 border-0 text-white px-10 h-12 font-semibold">
@@ -157,9 +157,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md gradient-magenta flex items-center justify-center">
-              <span className="text-white font-black text-[10px]">C</span>
+              <span className="text-white font-black text-[10px]">M</span>
             </div>
-            <span className="text-xs font-bold gradient-text">CREAM</span>
+            <span className="text-xs font-bold gradient-text">Marketer</span>
           </div>
           <p className="text-xs text-white/30">© 2026 media.aevoice.ai — All rights reserved.</p>
         </div>

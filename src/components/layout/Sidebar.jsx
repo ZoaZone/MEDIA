@@ -38,10 +38,10 @@ export default function Sidebar() {
       <div className="flex items-center justify-between px-4 py-5 border-b border-white/5">
         <Link to="/dashboard" className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl gradient-magenta flex items-center justify-center shadow-lg shadow-magenta/20">
-            <span className="text-white font-black text-sm">C</span>
+            <span className="text-white font-black text-sm">M</span>
           </div>
           {!collapsed && (
-            <span className="text-lg font-black tracking-wider gradient-text">CREAM</span>
+            <span className="text-lg font-black tracking-wider gradient-text">Marketer</span>
           )}
         </Link>
         <button
