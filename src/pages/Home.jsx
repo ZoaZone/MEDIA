@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link , useNavigate } from "react-router-dom";
+import { useState, useEffect, useEffect } from "react";
 import {
   Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe,
   BarChart3, Zap, ArrowRight, Check, Star, Play, Bot,
@@ -32,6 +32,7 @@ const TESTIMONIALS = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -235,7 +236,8 @@ export default function Home() {
             <a href="https://aevoice.ai" className="hover:text-white/70">aevoice.ai</a>
           </div>
         </div>
-      </footer>
+      <p className="text-center text-xs text-slate-600 mt-4">Part of AEVOICE.AI — The ultimate business technology.</p>
+</footer>
     </div>
   );
 }
