@@ -27,6 +27,17 @@ import Billing from './pages/Billing';
 import PostPaymentOnboarding from './pages/PostPaymentOnboarding';
 import AdminDashboard from './pages/AdminDashboard';
 import AppLayout from './components/layout/AppLayout';
+import Login from './pages/Login';
+
+
+const PUBLIC_ROUTES = new Set(["/', '/Home", "/login", "/Pricing", "/PromoSignup", "/PostPaymentOnboarding", "/LeadCapturePage"]);
+
+function ProtectedRoute({ children }) {
+  const location = useLocation();
+  const token = localStorage.getItem("base44_access_token");
+  if (!token) return <Navigate to="/Home" state={{ from: location.pathname }} replace />;
+  return children;
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -83,6 +94,10 @@ const AuthenticatedApp = () => {
     </Routes>
   );
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
+});
 
 function App() {
   return (
