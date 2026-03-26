@@ -1,11 +1,7 @@
 import React from 'react';
 import { Link , useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe,
-  BarChart3, Zap, ArrowRight, Check, Star, Play, Bot,
-  Image, FileText, Mail, Phone, Instagram, Youtube, Menu, X
-} from "lucide-react";
+import { Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe, BarChart3, Zap, ArrowRight, Check, Star, Play, Bot, Image, FileText, Mail, Phone, Instagram, Youtube, Menu, X, Send, Loader2, MessageSquare, Mic, MicOff } from "lucide-react";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
@@ -31,7 +27,6 @@ const TESTIMONIALS = [
   { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
   { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
 ];
-
 
 // ─────────────────────────────────────────────────────────────────
 // SreeFloatBot — self-contained floating voice chatbot
