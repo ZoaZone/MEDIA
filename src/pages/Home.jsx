@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link , useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -30,6 +31,222 @@ const TESTIMONIALS = [
   { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
   { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
 ];
+
+
+// ─────────────────────────────────────────────────────────────────
+// SreeFloatBot — self-contained floating voice chatbot
+// No external dependencies beyond React hooks
+// ─────────────────────────────────────────────────────────────────
+function SreeFloatBot({ accentColor, siteName, sysPrompt }) {
+  const [open, setOpen]         = React.useState(false);
+  const [msgs, setMsgs]         = React.useState([{ role: "assistant", content: "Hi! I\'m Sree. How can I help with " + siteName + "?" }]);
+  const [input, setInput]       = React.useState("");
+  const [loading, setLoading]   = React.useState(false);
+  const [listening, setListening] = React.useState(false);
+  const [unread, setUnread]     = React.useState(0);
+  const endRef   = React.useRef(null);
+  const recogRef = React.useRef(null);
+
+  React.useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
+  React.useEffect(() => { if (!open && msgs.length > 1) setUnread(u => u + 1); }, [msgs]);
+  React.useEffect(() => { if (open) setUnread(0); }, [open]);
+
+  const sendMsg = async (text) => {
+    const msg = (text || input).trim();
+    if (!msg || loading) return;
+    setInput("");
+    const history = [...msgs, { role: "user", content: msg }];
+    setMsgs(history);
+    setLoading(true);
+    try {
+      const res = await fetch("https://sreeagent.base44.app/functions/sriChat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, history: history.slice(-8), systemPrompt: sysPrompt })
+      });
+      const data = await res.json();
+      const reply = data?.reply || data?.content || "How can I help you today?";
+      setMsgs(h => [...h, { role: "assistant", content: reply }]);
+      // Browser TTS — no backend needed
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(reply);
+        utt.rate = 1.05; utt.pitch = 1.0;
+        window.speechSynthesis.speak(utt);
+      }
+    } catch {
+      setMsgs(h => [...h, { role: "assistant", content: "Something went wrong. Please try again!" }]);
+    }
+    setLoading(false);
+  };
+
+  const startVoice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Voice input works best in Chrome."); return; }
+    window.speechSynthesis?.cancel();
+    const r = new SR();
+    recogRef.current = r;
+    r.lang = "en-US"; r.continuous = false; r.interimResults = false;
+    r.onstart  = () => setListening(true);
+    r.onresult = (e) => { const t = e.results[0][0].transcript; setListening(false); sendMsg(t); };
+    r.onerror  = () => setListening(false);
+    r.onend    = () => setListening(false);
+    r.start();
+  };
+
+  const stopVoice = () => { recogRef.current?.stop(); setListening(false); };
+
+  const ac = accentColor;
+
+  return React.createElement(React.Fragment, null,
+    // ── FAB button ──
+    React.createElement("button", {
+      onClick: () => setOpen(o => !o),
+      style: {
+        position: "fixed", bottom: 24, right: 24, zIndex: 9999,
+        width: 56, height: 56, borderRadius: "50%", border: "none",
+        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        background: `linear-gradient(135deg, ${ac}, ${ac}cc)`,
+        boxShadow: `0 6px 28px ${ac}55, 0 2px 8px rgba(0,0,0,0.4)`,
+        transition: "transform 0.2s", fontSize: 22,
+      },
+      onMouseEnter: e => { e.currentTarget.style.transform = "scale(1.1)"; },
+      onMouseLeave: e => { e.currentTarget.style.transform = "scale(1)"; },
+    },
+      open ? "✕" : "💬",
+      !open && unread > 0 && React.createElement("span", {
+        style: {
+          position: "absolute", top: -3, right: -3,
+          width: 20, height: 20, borderRadius: "50%",
+          background: "#ef4444", color: "white",
+          fontSize: 10, fontWeight: 800,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }
+      }, unread)
+    ),
+
+    // ── Chat panel ──
+    open && React.createElement("div", {
+      style: {
+        position: "fixed", bottom: 92, right: 24, zIndex: 9998,
+        width: 360, maxHeight: 500,
+        borderRadius: 20, overflow: "hidden",
+        display: "flex", flexDirection: "column",
+        background: "rgba(5,12,26,0.97)",
+        border: `1px solid ${ac}33`,
+        boxShadow: `0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px ${ac}22`,
+        backdropFilter: "blur(20px)",
+        fontFamily: "Inter, system-ui, sans-serif",
+      }
+    },
+      // Header
+      React.createElement("div", {
+        style: {
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "12px 16px",
+          background: `linear-gradient(135deg, ${ac}18, transparent)`,
+          borderBottom: `1px solid ${ac}22`,
+          flexShrink: 0,
+        }
+      },
+        React.createElement("div", {
+          style: { width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg,${ac},${ac}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }
+        }, "🤖"),
+        React.createElement("div", { style: { flex: 1 } },
+          React.createElement("p", { style: { margin: 0, fontSize: 13, fontWeight: 700, color: "white" } }, "Sree AI"),
+          React.createElement("p", { style: { margin: 0, fontSize: 10, color: ac, opacity: 0.85 } }, siteName)
+        ),
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+          React.createElement("div", { style: { width: 7, height: 7, borderRadius: "50%", background: "#10b981" } }),
+          React.createElement("span", { style: { fontSize: 10, color: "#10b981" } }, "Online")
+        )
+      ),
+
+      // Messages area
+      React.createElement("div", {
+        style: { flex: 1, overflowY: "auto", padding: "12px 10px", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }
+      },
+        msgs.map((m, i) =>
+          React.createElement("div", {
+            key: i,
+            style: { display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", gap: 6, alignItems: "flex-end" }
+          },
+            m.role === "assistant" && React.createElement("div", {
+              style: { width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg,${ac},${ac}99)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 13 }
+            }, "🤖"),
+            React.createElement("div", {
+              style: {
+                maxWidth: "82%", padding: "8px 12px", fontSize: 12, lineHeight: 1.55,
+                borderRadius: m.role === "user" ? "14px 14px 3px 14px" : "3px 14px 14px 14px",
+                background: m.role === "user" ? `linear-gradient(135deg,${ac},${ac}cc)` : "rgba(255,255,255,0.055)",
+                color: m.role === "user" ? "white" : "#d1d9e8",
+              }
+            }, m.content)
+          )
+        ),
+        loading && React.createElement("div", { style: { display: "flex", gap: 6, alignItems: "flex-end" } },
+          React.createElement("div", { style: { width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg,${ac},${ac}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 } }, "🤖"),
+          React.createElement("div", { style: { padding: "8px 12px", borderRadius: "3px 14px 14px 14px", background: "rgba(255,255,255,0.055)", display: "flex", gap: 3, alignItems: "center" } },
+            [0,1,2].map(j => React.createElement("span", { key: j, style: { width: 5, height: 5, borderRadius: "50%", background: "#475569", display: "inline-block", animation: "sree-bounce 1s ease-in-out infinite", animationDelay: j*0.15+"s" } }))
+          )
+        ),
+        React.createElement("div", { ref: endRef })
+      ),
+
+      // Suggestion pills
+      React.createElement("div", {
+        style: { padding: "4px 10px 6px", display: "flex", gap: 5, flexWrap: "wrap", flexShrink: 0 }
+      },
+        ["How does it work?", "Pricing?", "Get started"].map(s =>
+          React.createElement("button", {
+            key: s, onClick: () => sendMsg(s),
+            style: { padding: "3px 10px", borderRadius: 20, border: `1px solid ${ac}33`, background: `${ac}11`, color: ac, fontSize: 11, cursor: "pointer" }
+          }, s)
+        )
+      ),
+
+      // Input row
+      React.createElement("div", {
+        style: { padding: "8px 10px 12px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: 6, flexShrink: 0 }
+      },
+        // Mic button
+        React.createElement("button", {
+          onClick: listening ? stopVoice : startVoice,
+          style: {
+            width: 36, height: 36, borderRadius: 10, border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 16,
+            background: listening ? "linear-gradient(135deg,#ef4444,#dc2626)" : `linear-gradient(135deg,${ac},${ac}cc)`,
+          }
+        }, listening ? "🔇" : "🎙️"),
+        // Text input
+        React.createElement("input", {
+          value: input,
+          onChange: e => setInput(e.target.value),
+          onKeyDown: e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } },
+          placeholder: "Type or speak...",
+          style: {
+            flex: 1, background: "rgba(255,255,255,0.055)", border: "1px solid rgba(255,255,255,0.09)",
+            borderRadius: 10, padding: "8px 10px", color: "white", fontSize: 12, outline: "none", fontFamily: "inherit",
+          }
+        }),
+        // Send button
+        React.createElement("button", {
+          onClick: () => sendMsg(),
+          disabled: !input.trim() || loading,
+          style: {
+            width: 36, height: 36, borderRadius: 10, border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 16,
+            background: `linear-gradient(135deg,${ac},${ac}cc)`,
+            opacity: (!input.trim() || loading) ? 0.4 : 1,
+          }
+        }, loading ? "⏳" : "➤")
+      )
+    ),
+
+    // CSS for bounce animation
+    React.createElement("style", null, "@keyframes sree-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}")
+  );
+}
 
 export default function Home() {
   const navigate = useNavigate();
@@ -239,5 +456,6 @@ export default function Home() {
       <p className="text-center text-xs text-slate-600 mt-4">Part of AEVOICE.AI — The ultimate business technology.</p>
 </footer>
     </div>
+      <SreeFloatBot accentColor="#d946ef" siteName="MARKETER" sysPrompt="You are Sree, AI assistant for MARKETER at media.aevoice.ai. MARKETER is an AI marketing OS — generates blogs, social posts, ads, emails, schedules to 10+ platforms, runs bulk SMS/WhatsApp/email campaigns, builds lead funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 60 words." />
   );
 }
