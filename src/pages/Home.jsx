@@ -230,7 +230,7 @@ export default function Home() {
             <span className="font-black text-white/80 text-sm">MARKETER</span>
             <span className="text-white/30 text-xs ml-2">by AEVOICE</span>
           </div>
-          <p className="text-white/30 text-xs">© 2026 AEVOICE. All rights reserved · media.aevoice.ai</p>
+          <p className="text-white/30 text-xs">© 2026 AEVOICE · "The omnichannel AI platform for voice calls, SMS, web chat, WhatsApp, email, and social media." · Part of AEVOICE.AI. All rights reserved · media.aevoice.ai</p>
           <div className="flex gap-4 text-xs text-white/40">
             <a href="mailto:care@aevoice.ai" className="hover:text-white/70">care@aevoice.ai</a>
             <a href="https://aevoice.ai" className="hover:text-white/70">aevoice.ai</a>
