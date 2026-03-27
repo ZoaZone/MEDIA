@@ -7,7 +7,6 @@ import {
   Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { Moon, Sun } from "lucide-react";
 
 function DarkToggle() {
   const [dark, setDark] = useState(() => localStorage.getItem("marketer_theme") !== "light");
