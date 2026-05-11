@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import PayPalButton from "@/components/PayPalButton";
 import { Check, Zap, ArrowRight, ArrowLeft, Loader2, Star } from "lucide-react";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
@@ -59,6 +60,7 @@ const FEATURE_MATRIX = [
 
 export default function Pricing() {
   const [billing, setBilling] = useState("monthly");
+  const isIndia = typeof Intl !== "undefined" && Intl.DateTimeFormat().resolvedOptions().timeZone.startsWith("Asia/");
   const [loadingPlan, setLoadingPlan] = useState(null);
 
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me().catch(() => null) });
@@ -148,6 +150,12 @@ export default function Pricing() {
                   {loadingPlan === plan.name ? <Loader2 className="w-4 h-4 animate-spin" /> :
                    <>Start Free Trial <ArrowRight className="w-4 h-4" /></>}
                 </button>
+                {isIndia && (
+                  <div className="mt-3">
+                    <p className="text-xs text-center text-white/40 mb-2">🇮🇳 India? Pay in INR</p>
+                    <PayPalButton amount={Math.round(perMonth * 85)} currency="INR" planName={plan.name} sourceApp="marketer" userEmail={user?.email || ""} />
+                  </div>
+                )}
               </div>
             );
           })}
