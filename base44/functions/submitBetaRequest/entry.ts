@@ -42,13 +42,22 @@ Deno.serve(async (req) => {
       invite_sent: false,
     });
 
-    // Notify admin via Base44 email integration
+    // Notify admin via SendGrid (Base44 SendEmail can't send to external addresses)
     try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: 'hellobizapp@gmail.com',
-        subject: `🚀 New Beta Request from ${full_name}`,
-        body: `A new beta access request has been submitted:\n\nName: ${full_name}\nEmail: ${email}\nCompany: ${company || '—'}\nUse Case: ${use_case || '—'}\n\nReview and approve in your Admin Dashboard → Beta Invites tab.`,
-      });
+      const sgKey = Deno.env.get('SENDGRID_API_KEY');
+      const sgFrom = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@aevoice.ai';
+      if (sgKey) {
+        await fetch('https://api.sendgrid.com/v3/mail/send', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${sgKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            personalizations: [{ to: [{ email: 'hellobizapp@gmail.com' }] }],
+            from: { email: sgFrom, name: 'media.aevoice.ai' },
+            subject: `🚀 New Beta Request from ${full_name}`,
+            content: [{ type: 'text/plain', value: `A new beta access request has been submitted:\n\nName: ${full_name}\nEmail: ${email}\nCompany: ${company || '—'}\nUse Case: ${use_case || '—'}\n\nReview and approve in your Admin Dashboard → Beta Invites tab.` }],
+          }),
+        });
+      }
     } catch (emailErr) {
       console.error('Admin email notification failed (non-fatal):', emailErr);
     }

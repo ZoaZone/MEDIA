@@ -25,6 +25,17 @@
     },
     "note": {
       "type": "string"
+    },
+    "invite_sent": {
+      "type": "boolean",
+      "default": false
+    },
+    "invite_token": {
+      "type": "string"
+    },
+    "invite_expires_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
