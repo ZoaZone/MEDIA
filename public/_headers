@@ -1,0 +1,14 @@
+# Language enforcement — English only
+# Prevents browser auto-translate bars (Chrome/Safari/Edge)
+/*
+  Content-Language: en
+  X-Content-Language: en
+  Cache-Control: no-cache
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Language: en
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Content-Language: en
