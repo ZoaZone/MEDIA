@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { ShieldCheck, Users, Megaphone, BarChart3, DollarSign, Loader2, Search } from "lucide-react";
+import { ShieldCheck, Users, Megaphone, BarChart3, DollarSign, Loader2, Search, Gift, Send, CheckCircle2, X, Plus } from "lucide-react";
 
 export default function AdminDashboard() {
   const {user}=useOutletContext()||{};
   const [tab,setTab]=useState("overview");
   const [search,setSearch]=useState("");
+  const qc=useQueryClient();
+
+  // Beta invite state
+  const [inviteEmails,setInviteEmails]=useState("");
+  const [inviteNote,setInviteNote]=useState("");
+  const [inviting,setInviting]=useState(false);
+  const [inviteResults,setInviteResults]=useState([]);
 
   const {data:subs=[]}=useQuery({queryKey:["admin_subs"],queryFn:()=>base44.entities.Subscription.filter({},"-created_date",200)});
   const {data:campaigns=[]}=useQuery({queryKey:["admin_campaigns"],queryFn:()=>base44.entities.MarketingCampaign.filter({},"-created_date",200)});
@@ -29,6 +36,40 @@ export default function AdminDashboard() {
 
   const filteredSubs=subs.filter(s=>!search||(s.owner_email||"").toLowerCase().includes(search.toLowerCase()));
 
+  const sendBetaInvites = async () => {
+    const emails = inviteEmails.split(/[\n,;]+/).map(e=>e.trim()).filter(Boolean);
+    if(!emails.length) return;
+    setInviting(true);
+    setInviteResults([]);
+    const results=[];
+    for(const email of emails){
+      try{
+        // Invite user to the app
+        await base44.users.inviteUser(email,"user");
+        // Create a free "Agency" (full-access) beta subscription record
+        await base44.entities.Subscription.create({
+          owner_email: email,
+          plan_name: "Beta Pro",
+          plan_tier: "agency",
+          status: "active",
+          current_period_end: new Date(Date.now()+365*24*60*60*1000).toISOString(),
+        });
+        // Send welcome email
+        await base44.integrations.Core.SendEmail({
+          to: email,
+          subject: "🎉 You're in — Free Beta Access to MARKETER",
+          body: `Hi there!\n\nYou've been personally invited by our team to access MARKETER as a free beta user — with full Agency-tier features unlocked at no cost.\n\n${inviteNote ? `Personal note from our team:\n"${inviteNote}"\n\n` : ""}Get started here: ${window.location.origin}\n\nThis is our way of saying thank you for being an early supporter. Your feedback means everything to us.\n\n— The MARKETER Team`,
+        });
+        results.push({email,status:"success"});
+      } catch(err){
+        results.push({email,status:"error",msg:err.message});
+      }
+    }
+    setInviteResults(results);
+    setInviting(false);
+    qc.invalidateQueries(["admin_subs"]);
+  };
+
   const Stat=({Icon,label,value,color="text-fuchsia-400 bg-fuchsia-500/10"})=>(
     <div className="bg-card border border-border rounded-2xl p-4">
       <div className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center mb-3`}><Icon className={`w-4 h-4 ${color.split(" ")[0]}`}/></div>
@@ -45,7 +86,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="flex gap-2 border-b border-border pb-1">
-        {[{v:"overview",l:"Overview"},{v:"subscribers",l:"Subscribers"},{v:"activity",l:"Activity"}].map(t=>(
+        {[{v:"overview",l:"Overview"},{v:"subscribers",l:"Subscribers"},{v:"activity",l:"Activity"},{v:"beta",l:"🎁 Beta Invites"}].map(t=>(
           <button key={t.v} onClick={()=>setTab(t.v)} className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-all ${tab===t.v?"text-fuchsia-400 border-b-2 border-fuchsia-500":"text-muted-foreground hover:text-foreground"}`}>{t.l}</button>
         ))}
       </div>
@@ -99,6 +140,68 @@ export default function AdminDashboard() {
             </table>
             {filteredSubs.length===0&&<div className="text-center py-8 text-muted-foreground text-sm">No subscribers found</div>}
           </div>
+        </div>
+      )}
+
+      {tab==="beta"&&(
+        <div className="space-y-5 max-w-2xl">
+          <div className="bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-500/20 rounded-2xl p-5 flex gap-3 items-start">
+            <Gift className="w-5 h-5 text-fuchsia-400 mt-0.5 shrink-0"/>
+            <div>
+              <p className="text-sm font-bold text-foreground">Free Beta Invites — Full Agency Access</p>
+              <p className="text-xs text-muted-foreground mt-1">Invite users by email. They'll get a free app login invite + an Agency-tier subscription activated automatically + a welcome email from your platform.</p>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5"><Plus className="w-3.5 h-3.5"/>Email Addresses</label>
+              <textarea
+                value={inviteEmails}
+                onChange={e=>setInviteEmails(e.target.value)}
+                rows={5}
+                placeholder={"user1@example.com\nuser2@example.com\nor comma-separated: a@b.com, c@d.com"}
+                className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none font-mono"
+              />
+              <p className="text-[11px] text-muted-foreground">Enter one email per line, or comma/semicolon separated.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Personal Note (optional)</label>
+              <textarea
+                value={inviteNote}
+                onChange={e=>setInviteNote(e.target.value)}
+                rows={2}
+                placeholder="e.g. We'd love your feedback as an early tester…"
+                className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+              <p className="text-[11px] text-muted-foreground">This note is included in the welcome email sent to each invitee.</p>
+            </div>
+
+            <button
+              onClick={sendBetaInvites}
+              disabled={inviting||!inviteEmails.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-all shadow-lg shadow-fuchsia-500/20">
+              {inviting?<><Loader2 className="w-4 h-4 animate-spin"/>Sending Invites…</>:<><Send className="w-4 h-4"/>Send Beta Invites</>}
+            </button>
+          </div>
+
+          {inviteResults.length>0&&(
+            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-border text-xs font-semibold text-muted-foreground">Invite Results</div>
+              {inviteResults.map((r,i)=>(
+                <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
+                  {r.status==="success"
+                    ?<CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0"/>
+                    :<X className="w-4 h-4 text-red-400 shrink-0"/>}
+                  <span className="text-sm text-foreground flex-1">{r.email}</span>
+                  {r.status==="success"
+                    ?<span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Invited ✓</span>
+                    :<span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full truncate max-w-[200px]">{r.msg}</span>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
