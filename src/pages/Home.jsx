@@ -23,7 +23,7 @@ const PLANS = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Sarah M.", role: "Marketing Director", text: "MARKETER replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
+  { name: "Sarah M.", role: "Marketing Director", text: "media.aevoice.ai replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
   { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
   { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
 ];
@@ -263,7 +263,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={M_LOGO} alt="M" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
-            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">MARKETER</span>
+            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -426,7 +426,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="p-12 rounded-3xl border border-fuchsia-500/20 bg-fuchsia-500/5">
             <h2 className="text-4xl font-black text-white mb-4">Ready to 10x your marketing?</h2>
-            <p className="text-white/50 mb-8">Join thousands of businesses using MARKETER to automate, create and grow.</p>
+            <p className="text-white/50 mb-8">Join thousands of businesses using media.aevoice.ai to automate, create and grow.</p>
             <Link to="/pricing" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-base hover:opacity-90 shadow-2xl shadow-fuchsia-500/30">
               Start Your Free Trial <ArrowRight className="w-5 h-5" />
             </Link>
@@ -440,7 +440,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src={M_LOGO} alt="M" className="w-6 h-6 rounded" onError={(e) => e.target.style.display="none"} />
-            <span className="font-black text-white/80 text-sm">MARKETER</span>
+            <span className="font-black text-white/80 text-sm">media.aevoice.ai</span>
             <span className="text-white/30 text-xs ml-2">by AEVOICE</span>
           </div>
           <p className="text-white/30 text-xs">© 2026 AEVOICE · "The omnichannel AI platform for voice calls, SMS, web chat, WhatsApp, email, and social media." · Part of AEVOICE.AI. All rights reserved · media.aevoice.ai</p>
@@ -452,7 +452,7 @@ export default function Home() {
       <p className="text-center text-xs text-slate-600 mt-4">Part of AEVOICE.AI — The ultimate business technology.</p>
 </footer>
     </div>
-      <SreeFloatBot accentColor="#d946ef" siteName="MARKETER" sysPrompt="You are Sree, AI assistant for MARKETER at media.aevoice.ai. MARKETER is an AI marketing OS — generates blogs, social posts, ads, emails, schedules to 10+ platforms, runs bulk SMS/WhatsApp/email campaigns, builds lead funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 60 words." />
+      <SreeFloatBot accentColor="#d946ef" siteName="media.aevoice.ai" sysPrompt="You are Sree, AI assistant for media.aevoice.ai at media.aevoice.ai. media.aevoice.ai is an AI marketing OS — generates blogs, social posts, ads, emails, schedules to 10+ platforms, runs bulk SMS/WhatsApp/email campaigns, builds lead funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 60 words." />
   </>
   );
 }
