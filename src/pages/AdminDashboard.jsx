@@ -47,64 +47,6 @@ export default function AdminDashboard() {
     setTimeout(()=>setLinkCopied(false),2000);
   };
 
-  // Generate a cryptographically random invite token
-  const generateToken = () => {
-    const arr = new Uint8Array(24);
-    crypto.getRandomValues(arr);
-    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
-  };
-
-  const buildInviteHtml = (inviteUrl, note) => `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#111118;border-radius:24px;border:1px solid #1f1f2e;overflow:hidden;max-width:560px;width:100%;">
-        <!-- Header -->
-        <tr><td style="background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);padding:36px 40px;text-align:center;">
-          <div style="font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px;">MARKETER</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">by AEVOICE</div>
-        </td></tr>
-        <!-- Body -->
-        <tr><td style="padding:40px;">
-          <div style="background:#7c3aed22;border:1px solid #7c3aed44;border-radius:12px;padding:12px 16px;margin-bottom:28px;text-align:center;">
-            <span style="color:#a855f7;font-size:13px;font-weight:600;">🎉 You have a personal beta invitation</span>
-          </div>
-          <h1 style="color:#fff;font-size:24px;font-weight:800;margin:0 0 12px;line-height:1.3;">You're invited to join<br/><span style="background:linear-gradient(90deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">MARKETER Beta</span></h1>
-          <p style="color:#888;font-size:15px;line-height:1.6;margin:0 0 24px;">Our team has personally selected you for exclusive early access to MARKETER — the AI-powered marketing platform built for modern brands and agencies.</p>
-          ${note ? `<div style="background:#1a1a2e;border-left:3px solid #a855f7;border-radius:8px;padding:14px 16px;margin-bottom:24px;"><p style="color:#ccc;font-size:14px;margin:0;font-style:italic;">"${note}"</p><p style="color:#666;font-size:12px;margin:6px 0 0;">— The MARKETER Team</p></div>` : ''}
-          <!-- What's included -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-            <tr><td style="padding:4px 0;color:#ccc;font-size:14px;">✅&nbsp; Full <strong>Agency-tier</strong> access — free for 1 year</td></tr>
-            <tr><td style="padding:4px 0;color:#ccc;font-size:14px;">✅&nbsp; AI Media Studio, Campaigns & Social Scheduling</td></tr>
-            <tr><td style="padding:4px 0;color:#ccc;font-size:14px;">✅&nbsp; Multi-channel: Email · SMS · WhatsApp · Social</td></tr>
-            <tr><td style="padding:4px 0;color:#ccc;font-size:14px;">✅&nbsp; Priority support &amp; direct feedback channel</td></tr>
-          </table>
-          <!-- CTA Button -->
-          <div style="text-align:center;margin-bottom:28px;">
-            <a href="${inviteUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 40px;border-radius:14px;letter-spacing:0.3px;">
-              🚀 Claim My Free Access
-            </a>
-          </div>
-          <!-- Invite link -->
-          <div style="background:#0a0a0a;border:1px solid #1f1f2e;border-radius:10px;padding:14px 16px;margin-bottom:24px;">
-            <p style="color:#666;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.5px;">Your personal invite link</p>
-            <p style="color:#a855f7;font-size:13px;margin:0;word-break:break-all;">${inviteUrl}</p>
-          </div>
-          <p style="color:#555;font-size:13px;margin:0;line-height:1.5;">This link is exclusive to you and expires in <strong style="color:#888;">30 days</strong>. If you have questions, reply to this email or reach us at <a href="mailto:hello@aevoice.ai" style="color:#a855f7;">hello@aevoice.ai</a></p>
-        </td></tr>
-        <!-- Footer -->
-        <tr><td style="background:#0d0d14;padding:20px 40px;border-top:1px solid #1f1f2e;text-align:center;">
-          <p style="color:#444;font-size:12px;margin:0;">© 2026 AEVOICE · <a href="https://media.aevoice.ai" style="color:#666;">media.aevoice.ai</a></p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-
   const sendBetaInvites = async () => {
     const emails = inviteEmails.split(/[\n,;]+/).map(e=>e.trim()).filter(Boolean);
     if(!emails.length) return;
@@ -113,30 +55,16 @@ export default function AdminDashboard() {
     const results=[];
     for(const email of emails){
       try{
-        // Generate unique invite token (30-day expiry)
-        const invToken = generateToken();
-        const expiresAt = new Date(Date.now() + 30*24*60*60*1000).toISOString();
-        await base44.entities.BetaInvite.create({
+        // Use sendBetaInvite backend function — handles token generation,
+        // BetaInvite entity creation, and branded email in one call
+        await base44.functions.invoke("sendBetaInvite", {
           email,
-          token: invToken,
-          invited_by: user?.email || "admin",
           note: inviteNote || "",
-          status: "pending",
-          expires_at: expiresAt,
           source: "manual_invite",
         });
-        const inviteUrl = `${APP_URL}/invite/${invToken}`;
-        const htmlBody = buildInviteHtml(inviteUrl, inviteNote);
-        await base44.functions.invoke("sendEmailFallback", {
-          to: email,
-          subject: "🎉 You're personally invited — Free Beta Access to MARKETER",
-          body: `Hi there!\n\nYou've been personally invited to MARKETER Beta — full Agency-tier access, completely free.\n\n${inviteNote ? `Personal note: "${inviteNote}"\n\n` : ""}👉 Claim your access here:\n${inviteUrl}\n\nThis link is exclusive to you and expires in 30 days.\n\n— The MARKETER Team\nhello@aevoice.ai`,
-          html: htmlBody,
-          from_name: "MARKETER by AEVOICE",
-        });
-        results.push({email,status:"success"});
+        results.push({email, status:"success"});
       } catch(err){
-        results.push({email,status:"error",msg:err.message});
+        results.push({email, status:"error", msg: err.message});
       }
     }
     setInviteResults(results);
@@ -154,28 +82,13 @@ export default function AdminDashboard() {
         status: "active",
         current_period_end: new Date(Date.now()+365*24*60*60*1000).toISOString(),
       });
-      // Generate unique invite token for approved beta request
-      const approveToken = generateToken();
-      const approveExpiry = new Date(Date.now() + 30*24*60*60*1000).toISOString();
-      await base44.entities.BetaInvite.create({
+      // Use sendBetaInvite backend function — handles token, entity, and branded email
+      await base44.functions.invoke("sendBetaInvite", {
         email: req.email,
-        token: approveToken,
-        invited_by: user?.email || "admin",
+        full_name: req.full_name || "",
         note: "",
-        status: "pending",
-        expires_at: approveExpiry,
         source: "beta_request_approved",
       });
-      const approveUrl = `${APP_URL}/invite/${approveToken}`;
-      const approveHtml = buildInviteHtml(approveUrl, "");
-      await base44.functions.invoke("sendEmailFallback", {
-        to: req.email,
-        subject: "🎉 Your Beta Access is Approved — Welcome to MARKETER!",
-        body: `Hi ${req.full_name}!\n\nGreat news — your beta access request has been approved! 🚀\n\nYou now have full Agency-tier access to MARKETER, completely free.\n\n👉 Claim your access here:\n${approveUrl}\n\nThis link is exclusive to you and expires in 30 days.\n\nWelcome aboard!\n— The MARKETER Team`,
-        html: approveHtml,
-        from_name: "MARKETER by AEVOICE",
-      });
-      // Mark as approved
       await base44.entities.BetaRequest.update(req.id, { status: "approved", invite_sent: true });
       refetchBeta();
       qc.invalidateQueries(["admin_subs"]);
