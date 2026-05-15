@@ -2,12 +2,19 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 /**
  * sendEmailFallback — Sends transactional emails to ANY external address.
- * Primary:  Resend (RESEND_API_KEY)
- * Fallback: SendGrid (SENDGRID_API_KEY)
  *
- * From address uses RESEND_FROM_EMAIL env var if set, otherwise falls back
- * to Resend's shared onboarding domain (works without DNS verification).
- * Set RESEND_FROM_EMAIL=noreply@aevoice.ai once domain is verified in Resend.
+ * Primary:  Resend (RESEND_API_KEY)
+ *   From:   RESEND_FROM_EMAIL env var (default: noreply@media.aevoice.ai)
+ *   Domain: media.aevoice.ai — verified & active in Resend ✅
+ *
+ * Fallback: SendGrid (SENDGRID_API_KEY)
+ *   From:   SENDGRID_FROM_EMAIL env var (default: noreply@aevoice.ai)
+ *
+ * Set env vars:
+ *   RESEND_API_KEY       — your Resend API key
+ *   RESEND_FROM_EMAIL    — sender address (default: noreply@media.aevoice.ai)
+ *   SENDGRID_API_KEY     — SendGrid key (fallback only)
+ *   SENDGRID_FROM_EMAIL  — SendGrid from address (fallback only)
  */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -39,12 +46,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const fromName = from_name || 'AEVOICE';
-    // Use verified custom domain if set, else use Resend shared sender (no DNS needed)
-    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'onboarding@resend.dev';
+    const fromName = from_name || 'Agent Marketer';
+    // media.aevoice.ai is verified in Resend — use as primary fallback domain
+    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@media.aevoice.ai';
     const htmlContent = html || `<pre style="font-family:sans-serif;white-space:pre-wrap">${body}</pre>`;
 
-    // ── PRIMARY: Resend ──────────────────────────────────────────────────────
+    // ── PRIMARY: Resend (media.aevoice.ai — verified ✅) ─────────────────────
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey) {
       const res = await fetch('https://api.resend.com/emails', {
@@ -65,7 +72,7 @@ Deno.serve(async (req) => {
       if (res.ok) {
         const data = await res.json();
         return Response.json(
-          { success: true, provider: 'resend', id: data.id, to },
+          { success: true, provider: 'resend', domain: 'media.aevoice.ai', id: data.id, to },
           { headers: { 'Access-Control-Allow-Origin': '*' } }
         );
       }
