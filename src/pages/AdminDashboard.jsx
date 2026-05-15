@@ -38,7 +38,8 @@ export default function AdminDashboard() {
 
   const filteredSubs=subs.filter(s=>!search||(s.owner_email||"").toLowerCase().includes(search.toLowerCase()));
 
-  const betaInviteLink = `${window.location.origin}/beta`;
+  const APP_URL = "https://media.aevoice.ai";
+  const betaInviteLink = `${APP_URL}/beta`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(betaInviteLink);
@@ -66,7 +67,7 @@ export default function AdminDashboard() {
         await base44.integrations.Core.SendEmail({
           to: email,
           subject: "🎉 You're in — Free Beta Access to MARKETER",
-          body: `Hi there!\n\nYou've been personally invited by our team to access MARKETER as a free beta user — with full Agency-tier features unlocked at no cost.\n\n${inviteNote ? `Personal note from our team:\n"${inviteNote}"\n\n` : ""}👉 Sign up & get started here: ${window.location.origin}\n\nJust create a free account using this email address and your Beta Pro access will be waiting.\n\nThis is our way of saying thank you for being an early supporter. Your feedback means everything to us.\n\n— The MARKETER Team`,
+          body: `Hi there!\n\nYou've been personally invited by our team to access MARKETER as a free beta user — with full Agency-tier features unlocked at no cost.\n\n${inviteNote ? `Personal note from our team:\n"${inviteNote}"\n\n` : ""}👉 Sign up & get started here: ${APP_URL}\n\nJust create a free account using this email address and your Beta Pro access will be waiting.\n\nThis is our way of saying thank you for being an early supporter. Your feedback means everything to us.\n\n— The MARKETER Team`,
         });
         results.push({email,status:"success"});
       } catch(err){
@@ -92,7 +93,7 @@ export default function AdminDashboard() {
       await base44.integrations.Core.SendEmail({
         to: req.email,
         subject: "🎉 Your Beta Access is Approved — Welcome to MARKETER!",
-        body: `Hi ${req.full_name}!\n\nGreat news — your beta access request has been approved! 🚀\n\nYou now have full Agency-tier access to MARKETER, completely free.\n\n👉 Sign up here: ${window.location.origin}\n\nJust create an account using this email and your full access will be ready.\n\nWelcome aboard!\n\n— The MARKETER Team`,
+        body: `Hi ${req.full_name}!\n\nGreat news — your beta access request has been approved! 🚀\n\nYou now have full Agency-tier access to MARKETER, completely free.\n\n👉 Sign up here: ${APP_URL}\n\nJust create an account using this email and your full access will be ready.\n\nWelcome aboard!\n\n— The MARKETER Team`,
       });
       // Mark as approved
       await base44.entities.BetaRequest.update(req.id, { status: "approved" });
@@ -195,7 +196,7 @@ export default function AdminDashboard() {
             <p className="text-[11px] text-muted-foreground">Share this link on social media, WhatsApp, email, etc. Interested users fill a form and you approve them from the Pending Requests section below.</p>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-9 px-3 rounded-md border border-input bg-background text-sm text-muted-foreground flex items-center truncate font-mono text-xs">
-                aevoice.app/beta
+                {betaInviteLink}
               </div>
               <button onClick={copyLink} className={`flex items-center gap-1.5 px-3 h-9 rounded-md text-xs font-semibold transition-all border ${linkCopied?"bg-emerald-500/10 text-emerald-400 border-emerald-500/20":"bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20 hover:bg-fuchsia-500/20"}`}>
                 {linkCopied?<><CheckCircle2 className="w-3.5 h-3.5"/>Copied!</>:<><Copy className="w-3.5 h-3.5"/>Copy Link</>}
