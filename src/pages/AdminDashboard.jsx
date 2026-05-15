@@ -195,7 +195,7 @@ export default function AdminDashboard() {
             <p className="text-[11px] text-muted-foreground">Share this link on social media, WhatsApp, email, etc. Interested users fill a form and you approve them from the Pending Requests section below.</p>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-9 px-3 rounded-md border border-input bg-background text-sm text-muted-foreground flex items-center truncate font-mono text-xs">
-                {betaInviteLink}
+                aevoice.app/beta
               </div>
               <button onClick={copyLink} className={`flex items-center gap-1.5 px-3 h-9 rounded-md text-xs font-semibold transition-all border ${linkCopied?"bg-emerald-500/10 text-emerald-400 border-emerald-500/20":"bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20 hover:bg-fuchsia-500/20"}`}>
                 {linkCopied?<><CheckCircle2 className="w-3.5 h-3.5"/>Copied!</>:<><Copy className="w-3.5 h-3.5"/>Copy Link</>}
