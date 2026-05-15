@@ -96,7 +96,7 @@ export default function Pricing() {
         <div className="text-center mb-14">
           <div className="flex items-center justify-center gap-2 mb-4">
             <img src={M_LOGO} alt="" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
-            <span className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">MARKETER</span>
+            <span className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4">Choose your plan</h1>
           <p className="text-white/50 text-lg mb-8">Choose the plan that fits your growth.</p>
