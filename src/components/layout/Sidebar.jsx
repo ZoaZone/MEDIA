@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Users, Megaphone, Share2, Sparkles, PenTool,
   FileText, Search, GitBranch, UserPlus, MailCheck, Image, Globe,
   BarChart3, Settings, CreditCard, ChevronDown, LogOut, Menu, X,
-  Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share
+  Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share,
+  Sun, Moon
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -180,3 +181,5 @@ export default function Sidebar({ userTier = 0, isAdmin = false }) {
     </>
   );
 }
+
+---CHANGED--- True
