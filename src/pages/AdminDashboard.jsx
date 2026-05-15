@@ -64,10 +64,11 @@ export default function AdminDashboard() {
           current_period_end: new Date(Date.now()+365*24*60*60*1000).toISOString(),
         });
         // Send welcome email with login link (user registers themselves)
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke("sendEmailFallback", {
           to: email,
           subject: "🎉 You're in — Free Beta Access to MARKETER",
           body: `Hi there!\n\nYou've been personally invited by our team to access MARKETER as a free beta user — with full Agency-tier features unlocked at no cost.\n\n${inviteNote ? `Personal note from our team:\n"${inviteNote}"\n\n` : ""}👉 Sign up & get started here: ${APP_URL}\n\nJust create a free account using this email address and your Beta Pro access will be waiting.\n\nThis is our way of saying thank you for being an early supporter. Your feedback means everything to us.\n\n— The MARKETER Team`,
+          from_name: "AEVOICE Team",
         });
         results.push({email,status:"success"});
       } catch(err){
@@ -90,10 +91,11 @@ export default function AdminDashboard() {
         current_period_end: new Date(Date.now()+365*24*60*60*1000).toISOString(),
       });
       // Send approval email
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke("sendEmailFallback", {
         to: req.email,
         subject: "🎉 Your Beta Access is Approved — Welcome to MARKETER!",
         body: `Hi ${req.full_name}!\n\nGreat news — your beta access request has been approved! 🚀\n\nYou now have full Agency-tier access to MARKETER, completely free.\n\n👉 Sign up here: ${APP_URL}\n\nJust create an account using this email and your full access will be ready.\n\nWelcome aboard!\n\n— The MARKETER Team`,
+        from_name: "AEVOICE Team",
       });
       // Mark as approved
       await base44.entities.BetaRequest.update(req.id, { status: "approved" });
