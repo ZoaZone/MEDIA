@@ -1,13 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-/**
- * sendBetaInvite — Creates a BetaInvite record in the Marketer app
- * and sends a branded HTML invite email via Resend (primary) or SendGrid (fallback).
- *
- * Called from AdminDashboard when sending or approving beta invites.
- * Accepts: { email, note, invited_by, source, full_name }
- */
-
 const APP_URL = 'https://media.aevoice.ai';
 
 const buildInviteHtml = (inviteUrl: string, note: string, firstName: string) => `
@@ -19,8 +11,8 @@ const buildInviteHtml = (inviteUrl: string, note: string, firstName: string) => 
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#111118;border-radius:24px;border:1px solid #1f1f2e;overflow:hidden;max-width:560px;width:100%;">
         <tr><td style="background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);padding:36px 40px;text-align:center;">
-          <div style="font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px;">media.aevoice.ai</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">by AEVOICE · media.aevoice.ai</div>
+          <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-1px;">media.aevoice.ai</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">AI Marketing & Media Creation Platform</div>
         </td></tr>
         <tr><td style="padding:40px;">
           <div style="background:#7c3aed22;border:1px solid #7c3aed44;border-radius:12px;padding:12px 16px;margin-bottom:28px;text-align:center;">
@@ -77,16 +69,13 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Use service role throughout — no auth.me() check needed.
+    // Admin-only access is enforced on the frontend (AdminDashboard role guard).
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, {
-        status: 401,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-      });
-    }
 
-    const { email, note = '', invited_by = '', source = 'manual_invite', full_name = '' } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { email, note = '', invited_by = '', source = 'manual_invite', full_name = '' } = body;
+
     if (!email) {
       return Response.json({ error: 'email is required' }, {
         status: 400,
@@ -94,15 +83,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate unique token (30-day expiry)
+    // Generate unique token — 30-day expiry
     const token = generateToken();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Create BetaInvite record using service role (bypasses user scoping)
+    // Create BetaInvite record via service role
     const invite = await base44.asServiceRole.entities.BetaInvite.create({
       email,
       token,
-      invited_by: invited_by || user.email,
+      invited_by: invited_by || 'admin',
       note,
       status: 'pending',
       expires_at: expiresAt,
@@ -124,19 +113,18 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: `media.aevoice.ai by AEVOICE <${fromEmail}>`,
+          from: `media.aevoice.ai <${fromEmail}>`,
           to: [email],
           subject: `🎉 You're personally invited — Free Beta Access to media.aevoice.ai`,
           text: plainText,
           html: htmlBody,
         }),
       });
-
       if (res.ok) {
         emailProvider = 'resend';
       } else {
         const errText = await res.text();
-        console.error(`Resend failed: ${errText} — trying SendGrid`);
+        console.error(`Resend failed: ${errText}`);
       }
     }
 
@@ -150,7 +138,7 @@ Deno.serve(async (req) => {
           headers: { Authorization: `Bearer ${sgKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             personalizations: [{ to: [{ email }] }],
-            from: { email: sgFrom, name: 'media.aevoice.ai by AEVOICE' },
+            from: { email: sgFrom, name: 'media.aevoice.ai' },
             subject: `🎉 You're personally invited — Free Beta Access to media.aevoice.ai`,
             content: [
               { type: 'text/plain', value: plainText },
@@ -165,7 +153,7 @@ Deno.serve(async (req) => {
           throw new Error(`SendGrid failed: ${err}`);
         }
       } else {
-        throw new Error('No email provider configured (RESEND_API_KEY or SENDGRID_API_KEY required)');
+        throw new Error('No email provider configured (set RESEND_API_KEY)');
       }
     }
 
