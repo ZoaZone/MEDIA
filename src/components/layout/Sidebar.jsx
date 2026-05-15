@@ -5,21 +5,41 @@ import {
   FileText, Search, GitBranch, UserPlus, MailCheck, Image, Globe,
   BarChart3, Settings, CreditCard, ChevronDown, LogOut, Menu, X,
   Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share,
-  Sun, Moon
+  Sun, Moon, Film
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 function DarkToggle() {
-  const [dark, setDark] = useState(() => localStorage.getItem("marketer_theme") !== "light");
+  const [dark, setDark] = useState(() => {
+    const stored = localStorage.getItem("marketer_theme");
+    // default = dark
+    return stored !== "light";
+  });
+
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
+    if (dark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
     localStorage.setItem("marketer_theme", dark ? "dark" : "light");
   }, [dark]);
+
+  // Apply on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("marketer_theme");
+    if (stored === "light") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
   return (
     <button onClick={() => setDark(d => !d)}
-      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all mb-1">
-      {dark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-      <span>{dark ? "Light mode" : "Dark mode"}</span>
+      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all">
+      {dark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-fuchsia-400" />}
+      <span className="text-sm">{dark ? "Light Mode" : "Dark Mode"}</span>
     </button>
   );
 }
@@ -46,6 +66,7 @@ const NAV_SECTIONS = [
     label: "AI STUDIO",
     items: [
       { to: "/media-studio",    icon: Sparkles, label: "Media Studio" },
+      { to: "/video-editor",    icon: Film,     label: "Video Editor" },
       { to: "/ad-creator",      icon: PenTool,  label: "Ad Creator",   minTier: 2 },
       { to: "/script-writer",   icon: FileText, label: "Script Writer", minTier: 2 },
       { to: "/website-scanner", icon: Search,   label: "Website Scanner", minTier: 2 },
@@ -159,8 +180,9 @@ export default function Sidebar({ userTier = 0, isAdmin = false }) {
         )}
       </nav>
 
-      {/* Logout */}
-      <div className="p-3 border-t border-sidebar-border">
+      {/* Theme + Logout */}
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        <DarkToggle />
         <button onClick={logout} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-red-500/10 hover:text-red-400 transition-all">
           <LogOut className="w-4 h-4" /> Log Out
         </button>

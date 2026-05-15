@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+  /* ── Default = dark ── */
   :root {
     --background: 0 0% 6%;
     --foreground: 0 0% 95%;
@@ -37,6 +38,42 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 14%;
     --sidebar-ring: 292 91% 62%;
+  }
+
+  /* ── Light mode overrides ── */
+  html:not(.dark) {
+    --background: 0 0% 97%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 292 91% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 93%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 44 100% 48%;
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 86%;
+    --input: 0 0% 86%;
+    --ring: 292 91% 50%;
+    --chart-1: 292 91% 50%;
+    --chart-2: 44 100% 48%;
+    --chart-3: 200 80% 45%;
+    --chart-4: 150 60% 40%;
+    --chart-5: 30 90% 50%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 292 91% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 292 30% 92%;
+    --sidebar-accent-foreground: 292 91% 35%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 292 91% 50%;
   }
 }
 

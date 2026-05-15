@@ -14,6 +14,7 @@ import Contacts from './pages/Contacts';
 import Campaigns from './pages/Campaigns';
 import SocialHub from './pages/SocialHub';
 import MediaStudio from './pages/MediaStudio';
+import VideoEditor from './pages/VideoEditor';
 import AdCreator from './pages/AdCreator';
 import ScriptWriter from './pages/ScriptWriter';
 import WebsiteScanner from './pages/WebsiteScanner';
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="/campaigns" element={<Campaigns />} />
         <Route path="/social-hub" element={<SocialHub />} />
         <Route path="/media-studio" element={<MediaStudio />} />
+        <Route path="/video-editor" element={<VideoEditor />} />
         <Route path="/ad-creator" element={<AdCreator />} />
         <Route path="/script-writer" element={<ScriptWriter />} />
         <Route path="/website-scanner" element={<WebsiteScanner />} />
