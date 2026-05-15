@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <ShieldCheck className="w-7 h-7 text-fuchsia-400"/>
-        <div><h1 className="text-2xl font-black text-foreground">Admin Dashboard</h1><p className="text-muted-foreground text-sm">MARKETER platform overview</p></div>
+        <div><h1 className="text-2xl font-black text-foreground">Admin Dashboard</h1><p className="text-muted-foreground text-sm">media.aevoice.ai platform overview</p></div>
       </div>
 
       <div className="flex gap-2 border-b border-border pb-1">
