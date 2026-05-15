@@ -38,7 +38,7 @@ export default function AdminDashboard() {
 
   const filteredSubs=subs.filter(s=>!search||(s.owner_email||"").toLowerCase().includes(search.toLowerCase()));
 
-  const betaInviteLink = `${window.location.origin}/beta`;
+  const betaInviteLink = `https://media.aevoice.ai/beta`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(betaInviteLink);
