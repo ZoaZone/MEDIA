@@ -406,6 +406,14 @@ export default function SettingsPage() {
       {/* ── Profile ── */}
       {tab === "profile" && (
         <div className="space-y-4">
+          {/* Read-only email */}
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-1">Email Address</label>
+            <div className="w-full px-3 py-2.5 rounded-xl bg-muted/40 border border-border text-sm text-muted-foreground select-all">
+              {user?.email || "—"}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">Your login email — managed by your account settings</p>
+          </div>
           {[
             { k: "full_name",      l: "Your Name",     ph: "Jane Smith",               type: "text" },
             { k: "business_name",  l: "Business Name", ph: "Acme Marketing Agency",     type: "text" },

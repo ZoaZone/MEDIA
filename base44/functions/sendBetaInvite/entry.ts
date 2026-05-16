@@ -11,63 +11,95 @@ function generateToken() {
 function buildHtml(inviteUrl, inviteCode, note, firstName) {
   const greeting = firstName ? ('Hi ' + firstName + ',') : 'Hello,';
   const noteBlock = note
-    ? '<div style="background:#1a1030;border-left:3px solid #a855f7;border-radius:8px;padding:14px 16px;margin-bottom:20px;"><p style="color:#ccc;font-size:14px;margin:0;font-style:italic;">"' + note + '"</p><p style="color:#666;font-size:12px;margin:6px 0 0;">— The AEVOICE Team</p></div>'
+    ? '<div style="background:#f5f0ff;border-left:3px solid #a855f7;border-radius:8px;padding:14px 16px;margin-bottom:24px;">' +
+      '<p style="color:#555;font-size:14px;margin:0;font-style:italic;">"' + note + '"</p>' +
+      '<p style="color:#999;font-size:12px;margin:6px 0 0;">— The AEVOICE Team</p></div>'
     : '';
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>' +
-    '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;">' +
-    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">' +
-    '<tr><td align="center">' +
-    '<table width="560" cellpadding="0" cellspacing="0" style="background:#111118;border-radius:20px;border:1px solid #1f1f2e;overflow:hidden;max-width:560px;width:100%;">' +
+  const features = [
+    'Full Agency-tier access — all features unlocked',
+    'AI Media Studio — images, videos, scripts & copy',
+    'Email, SMS, WhatsApp & Social campaigns',
+    'Priority beta support & direct feedback channel',
+  ];
 
-    // Header
-    '<tr><td style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#ec4899 100%);padding:32px 40px;text-align:center;">' +
-    '<div style="font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:8px;">AEVOICE</div>' +
-    '<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">media.aevoice.ai</div>' +
-    '<div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;">AI Marketing & Media Creation Platform</div>' +
+  const featureRows = features.map(f =>
+    '<tr><td style="padding:6px 0;"><table cellpadding="0" cellspacing="0"><tr>' +
+    '<td style="width:24px;vertical-align:top;padding-top:1px;"><div style="width:18px;height:18px;background:#f0e6ff;border-radius:50%;text-align:center;line-height:18px;font-size:11px;">✓</div></td>' +
+    '<td style="color:#444;font-size:14px;padding-left:8px;">' + f + '</td>' +
+    '</tr></table></td></tr>'
+  ).join('');
+
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>' +
+    '<style>@media (prefers-color-scheme:dark){.email-body{background:#111 !important}.email-card{background:#1a1a2a !important;border-color:#2a2a3e !important}.email-text{color:#e0e0e0 !important}.email-sub{color:#aaa !important}.email-code-box{background:#0d0d1a !important;border-color:#3a2a5a !important}.email-code{color:#d8aaff !important}.email-footer{background:#0d0d14 !important;border-color:#2a2a3e !important}.email-footer-text{color:#666 !important}.email-link-box{background:#0a0a15 !important;border-color:#2a2a3a !important}.email-link{color:#a855f7 !important}}</style>' +
+    '</head>' +
+    '<body class="email-body" style="margin:0;padding:0;background:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">' +
+    '<tr><td align="center">' +
+    '<table class="email-card" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;border:1px solid #e8e4f0;overflow:hidden;max-width:560px;width:100%;box-shadow:0 4px 24px rgba(120,60,200,0.08);">' +
+
+    // Header gradient
+    '<tr><td style="background:linear-gradient(135deg,#6d28d9 0%,#a855f7 55%,#ec4899 100%);padding:36px 40px;text-align:center;">' +
+    '<div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:12px;padding:6px 16px;margin-bottom:12px;">' +
+    '<span style="font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,0.9);text-transform:uppercase;">AEVOICE</span>' +
+    '</div>' +
+    '<div style="font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.2;">media.aevoice.ai</div>' +
+    '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:6px;font-weight:400;">AI Marketing & Media Creation Platform</div>' +
     '</td></tr>' +
 
+    // Invite badge
+    '<tr><td style="padding:0 40px;"><div style="background:linear-gradient(135deg,#f3e8ff,#fce7f3);border:1px solid #e9d5ff;border-radius:12px;padding:12px 20px;text-align:center;margin:24px 0 0;">' +
+    '<span style="font-size:13px;font-weight:700;color:#7c3aed;">🎉 You have a personal beta invitation</span>' +
+    '</div></td></tr>' +
+
     // Body
-    '<tr><td style="padding:36px 40px;">' +
-    '<p style="color:#aaa;font-size:15px;margin:0 0 6px;">' + greeting + '</p>' +
-    '<h1 style="color:#fff;font-size:22px;font-weight:800;margin:0 0 16px;line-height:1.3;">' +
-    'You\'ve been approved for<br/><span style="color:#a855f7;">AEVOICE Beta Access</span></h1>' +
-    '<p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 24px;">You\'ve been personally selected for exclusive early access — enjoy full <strong style="color:#ccc;">Agency-tier access, free for 1 year</strong>. Click below to set your password and get started.</p>' +
+    '<tr><td style="padding:28px 40px 8px;">' +
+    '<p class="email-sub" style="color:#666;font-size:15px;margin:0 0 4px;">' + greeting + '</p>' +
+    '<h1 class="email-text" style="color:#1a1a2a;font-size:24px;font-weight:800;margin:0 0 16px;line-height:1.3;">' +
+    "You're invited to join<br/><span style='color:#7c3aed;'>media.aevoice.ai Beta</span></h1>" +
+    '<p class="email-sub" style="color:#555;font-size:14px;line-height:1.8;margin:0 0 20px;">Our team has personally selected you for exclusive early access to ' +
+    '<a href="' + APP_URL + '" style="color:#7c3aed;text-decoration:none;">media.aevoice.ai</a>' +
+    ' — the AI-powered marketing platform for modern brands and agencies.</p>' +
     noteBlock +
 
-    // Feature list
-    '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">' +
-    '<tr><td style="padding:5px 0;color:#bbb;font-size:13px;">✅&nbsp; Full Agency-tier — all features unlocked</td></tr>' +
-    '<tr><td style="padding:5px 0;color:#bbb;font-size:13px;">✅&nbsp; AI Media Studio — images, videos, copy</td></tr>' +
-    '<tr><td style="padding:5px 0;color:#bbb;font-size:13px;">✅&nbsp; Email, SMS, WhatsApp & Social campaigns</td></tr>' +
-    '<tr><td style="padding:5px 0;color:#bbb;font-size:13px;">✅&nbsp; Priority beta support</td></tr>' +
-    '</table>' +
+    // Features
+    '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">' + featureRows + '</table>' +
 
     // CTA Button
     '<div style="text-align:center;margin-bottom:28px;">' +
-    '<a href="' + inviteUrl + '" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:16px 44px;border-radius:12px;letter-spacing:0.2px;">Claim My Free Access →</a>' +
+    '<a href="' + inviteUrl + '" style="display:inline-block;background:linear-gradient(135deg,#6d28d9,#a855f7);color:#fff;text-decoration:none;font-size:16px;font-weight:700;padding:17px 48px;border-radius:14px;box-shadow:0 4px 16px rgba(168,85,247,0.35);">🚀 Claim My Free Access</a>' +
     '</div>' +
 
-    // Invite Code Box
-    '<div style="background:#0d0d14;border:1px solid #2a1f3e;border-radius:12px;padding:18px 20px;margin-bottom:20px;text-align:center;">' +
-    '<p style="color:#666;font-size:11px;margin:0 0 8px;text-transform:uppercase;letter-spacing:1.5px;">Your Invite Code</p>' +
-    '<p style="color:#e0aaff;font-size:26px;font-weight:900;letter-spacing:6px;margin:0 0 8px;font-family:Courier New,monospace;">' + inviteCode + '</p>' +
-    '<p style="color:#555;font-size:11px;margin:0;">Enter this code if prompted during sign-up</p>' +
-    '</div>' +
+    '</td></tr>' +
 
-    // Link fallback
-    '<div style="background:#0a0a0a;border:1px solid #1a1a2a;border-radius:8px;padding:12px 14px;margin-bottom:18px;">' +
-    '<p style="color:#555;font-size:10px;margin:0 0 5px;text-transform:uppercase;letter-spacing:1px;">Or copy this link</p>' +
-    '<p style="color:#7c3aed;font-size:11px;margin:0;word-break:break-all;">' + inviteUrl + '</p>' +
+    // Invite Code — prominent full-width section
+    '<tr><td style="padding:0 40px 24px;">' +
+    '<div class="email-code-box" style="background:#faf5ff;border:2px solid #d8b4fe;border-radius:16px;padding:22px 24px;text-align:center;">' +
+    '<p style="color:#7c3aed;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Your Sign-Up Invite Code</p>' +
+    '<div class="email-code" style="color:#6d28d9;font-size:38px;font-weight:900;letter-spacing:10px;font-family:\'Courier New\',Courier,monospace;line-height:1;margin:0 0 10px;">' + inviteCode + '</div>' +
+    '<p style="color:#9333ea;font-size:12px;margin:0;">Enter this code when prompted during sign-up</p>' +
     '</div>' +
+    '</td></tr>' +
 
-    '<p style="color:#555;font-size:12px;margin:0;">⏰ This invite expires in <strong style="color:#888;">30 days</strong>. If you have questions, reply to this email.</p>' +
+    // Invite link fallback
+    '<tr><td style="padding:0 40px 24px;">' +
+    '<div class="email-link-box" style="background:#fafafa;border:1px solid #ede9f4;border-radius:10px;padding:14px 16px;">' +
+    '<p style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;font-weight:600;">Your Personal Invite Link</p>' +
+    '<a class="email-link" href="' + inviteUrl + '" style="color:#7c3aed;font-size:12px;word-break:break-all;text-decoration:none;">' + inviteUrl + '</a>' +
+    '</div>' +
+    '</td></tr>' +
+
+    // Expiry note
+    '<tr><td style="padding:0 40px 28px;">' +
+    '<p class="email-sub" style="color:#888;font-size:12px;margin:0;text-align:center;">⏰ This invite expires in <strong>30 days</strong>. Questions? Reply to this email.</p>' +
     '</td></tr>' +
 
     // Footer
-    '<tr><td style="background:#0d0d14;padding:18px 40px;border-top:1px solid #1f1f2e;text-align:center;">' +
-    '<p style="color:#333;font-size:11px;margin:0;">© 2026 AEVOICE · <a href="' + APP_URL + '" style="color:#444;text-decoration:none;">media.aevoice.ai</a> · <a href="mailto:hello@aevoice.ai" style="color:#444;text-decoration:none;">hello@aevoice.ai</a></p>' +
-    '</td></tr>' +
+    '<tr><td class="email-footer" style="background:#f8f5ff;padding:18px 40px;border-top:1px solid #ede9f4;text-align:center;">' +
+    '<p class="email-footer-text" style="color:#aaa;font-size:11px;margin:0;">' +
+    '© 2026 AEVOICE · <a href="' + APP_URL + '" style="color:#a855f7;text-decoration:none;">media.aevoice.ai</a> · ' +
+    '<a href="mailto:hello@aevoice.ai" style="color:#a855f7;text-decoration:none;">hello@aevoice.ai</a>' +
+    '</p></td></tr>' +
 
     '</table></td></tr></table></body></html>';
 }
