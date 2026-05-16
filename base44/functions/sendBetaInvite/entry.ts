@@ -78,22 +78,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ── 1. Create BetaInvite record (service role = writes to Marketer app DB) ──
+    // ── 1. Upsert BetaRequest record ──────────────────────────────────────────
     const token = genToken();
+    const inviteCode = token.slice(0, 6).toUpperCase();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    const invite = await base44.asServiceRole.entities.BetaInvite.create({
-      email,
-      token,
-      invited_by,
-      note,
-      status: 'pending',
-      expires_at: expiresAt,
-      source,
-    });
+    const existing = await base44.asServiceRole.entities.BetaRequest.filter({ email });
+    let invite;
+    if (existing && existing.length > 0) {
+      await base44.asServiceRole.entities.BetaRequest.update(existing[0].id, {
+        invite_token: token,
+        invite_expires_at: expiresAt,
+        status: 'approved',
+        invite_sent: true,
+        note: note || existing[0].note || '',
+      });
+      invite = { ...existing[0], id: existing[0].id };
+    } else {
+      invite = await base44.asServiceRole.entities.BetaRequest.create({
+        email,
+        full_name: full_name || '',
+        status: 'approved',
+        note,
+        invite_token: token,
+        invite_expires_at: expiresAt,
+        invite_sent: true,
+      });
+    }
+
+    // Also invite via Base44 auth
+    try {
+      await base44.asServiceRole.users?.inviteUser?.(email, 'user');
+    } catch (e) {
+      console.warn('Base44 inviteUser skipped:', e.message);
+    }
 
     // ── 2. Build email content ────────────────────────────────────────────────
     const inviteUrl = `${APP_URL}/invite/${token}`;
+    // inviteCode already defined above
     const firstName = full_name ? full_name.split(' ')[0] : '';
     const html = buildHtml(inviteUrl, note, firstName);
     const text = `Hi${firstName ? ` ${firstName}` : ''}!\n\nYou're invited to media.aevoice.ai Beta — full Agency-tier access, free.\n\nClaim your access:\n${inviteUrl}\n\nExpires in 30 days.\n\n— The media.aevoice.ai Team`;
@@ -156,7 +178,7 @@ Deno.serve(async (req) => {
     }
 
     return Response.json(
-      { success: true, email, invite_id: invite.id, invite_url: inviteUrl, provider },
+      { success: true, email, invite_id: invite.id, invite_url: inviteUrl, invite_code: inviteCode, provider },
       { headers: { 'Access-Control-Allow-Origin': '*' } }
     );
 
