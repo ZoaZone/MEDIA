@@ -121,36 +121,33 @@ Deno.serve(async (req) => {
     const text = `Hi${firstName ? ` ${firstName}` : ''}!\n\nYou're invited to media.aevoice.ai Beta — full Agency-tier access, free.\n\nClaim your access:\n${inviteUrl}\n\nExpires in 30 days.\n\n— The media.aevoice.ai Team`;
     const subject = `🎉 You're personally invited — Free Beta Access to media.aevoice.ai`;
 
-    // ── 3. Send email: Base44 built-in → Resend → SendGrid ───────────────────
+    // ── 3. Send email: Resend → SendGrid → Base44 built-in ───────────────────
     let provider = 'none';
 
-    // PRIMARY: Base44 built-in (no key needed)
-    try {
-      await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body: text });
-      provider = 'base44';
-    } catch (e) {
-      console.warn('Base44 SendEmail failed:', e.message);
-    }
-
-    // SECONDARY: Resend
-    if (provider === 'none') {
-      const resendKey = Deno.env.get('RESEND_API_KEY');
-      if (resendKey) {
-        const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@media.aevoice.ai';
-        const res = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: `media.aevoice.ai <${fromEmail}>`, to: [email], subject, text, html }),
-        });
-        if (res.ok) {
-          provider = 'resend';
-        } else {
-          console.error('Resend failed:', await res.text());
-        }
+    // PRIMARY: Resend
+    const resendKey = Deno.env.get('RESEND_API_KEY');
+    if (resendKey) {
+      const fromEmail = (Deno.env.get('RESEND_FROM_EMAIL') || 'hello@media.aevoice.ai').trim();
+      // If already contains <>, use as-is; otherwise wrap it
+      const fromField = fromEmail.includes('<') ? fromEmail : `media.aevoice.ai <${fromEmail}>`;
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: fromField, to: [email], subject, text, html }),
+      });
+      const resBody = await res.json().catch(() => ({}));
+      if (res.ok) {
+        provider = 'resend';
+      } else {
+        // Surface the real Resend error in the response for debugging
+        return Response.json(
+          { error: 'Resend email failed', details: resBody, from_used: fromField, invite_url: `${APP_URL}/invite/${token}` },
+          { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
+        );
       }
     }
 
-    // TERTIARY: SendGrid
+    // SECONDARY: SendGrid
     if (provider === 'none') {
       const sgKey = Deno.env.get('SENDGRID_API_KEY');
       if (sgKey) {
@@ -170,6 +167,16 @@ Deno.serve(async (req) => {
         } else {
           console.error('SendGrid failed:', await sgRes.text());
         }
+      }
+    }
+
+    // TERTIARY: Base44 built-in
+    if (provider === 'none') {
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body: text });
+        provider = 'base44';
+      } catch (e) {
+        console.warn('Base44 SendEmail failed:', e.message);
       }
     }
 
