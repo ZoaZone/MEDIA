@@ -100,14 +100,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = () => {
+    // Clear all cached tokens so the next login always prompts fresh credentials
+    localStorage.removeItem("base44_access_token");
+    localStorage.removeItem("base44_refresh_token");
+    sessionStorage.removeItem("base44_access_token");
+    sessionStorage.clear();
     setUser(null);
     setIsAuthenticated(false);
-    if (shouldRedirect) {
-      base44.auth.logout(window.location.href);
-    } else {
-      base44.auth.logout();
-    }
+    base44.auth.logout("/login");
   };
 
   const navigateToLogin = () => {

@@ -99,13 +99,18 @@ const NAV_SECTIONS = [
   },
 ];
 
-export default function Sidebar({ userTier = 0, isAdmin = false }) {
+export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState({});
 
   const toggle = (label) => setCollapsed(p => ({ ...p, [label]: !p[label] }));
-  const logout = () => base44.auth.logout("/");
+  const logout = () => {
+    localStorage.removeItem("base44_access_token");
+    localStorage.removeItem("base44_refresh_token");
+    sessionStorage.clear();
+    base44.auth.logout("/login");
+  };
 
   const navContent = (
     <div className="flex flex-col h-full">
@@ -180,8 +185,19 @@ export default function Sidebar({ userTier = 0, isAdmin = false }) {
         )}
       </nav>
 
-      {/* Theme + Logout */}
+      {/* User info + Theme + Logout */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
+        {user && (
+          <div className="flex items-center gap-2.5 px-3 py-2.5 mb-1 bg-sidebar-accent/50 rounded-xl">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+              {(user.full_name || user.email || "?")[0].toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              {user.full_name && <p className="text-xs font-semibold text-foreground truncate">{user.full_name}</p>}
+              <p className="text-[10px] text-muted-foreground truncate">{user.email || "—"}</p>
+            </div>
+          </div>
+        )}
         <DarkToggle />
         <button onClick={logout} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-red-500/10 hover:text-red-400 transition-all">
           <LogOut className="w-4 h-4" /> Log Out
