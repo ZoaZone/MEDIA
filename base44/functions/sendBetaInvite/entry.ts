@@ -186,64 +186,28 @@ Deno.serve(async (req) => {
     ].join('\n');
 
     const subject = "🎉 You're in — Claim your free AEVOICE Beta access";
-    let provider = 'none';
 
-    // PRIMARY: Base44 built-in
-    try {
-      await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body: plainText, from_name: 'AEVOICE' });
-      provider = 'base44';
-    } catch (e) {
-      console.warn('Base44 SendEmail failed, trying Resend:', e.message);
+    // Send via SendGrid
+    const sgKey = Deno.env.get('SENDGRID_API_KEY');
+    if (!sgKey) throw new Error('SENDGRID_API_KEY is not set.');
+    const sgFrom = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@aevoice.ai';
+    const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + sgKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email }] }],
+        from: { email: sgFrom, name: 'AEVOICE' },
+        subject,
+        content: [{ type: 'text/plain', value: plainText }, { type: 'text/html', value: htmlBody }],
+      }),
+    });
+    if (!sgRes.ok) {
+      const errBody = await sgRes.text();
+      console.error('SendGrid failed:', errBody);
+      throw new Error('SendGrid failed: ' + errBody);
     }
-
-    // SECONDARY: Resend
-    if (provider === 'none') {
-      const resendKey = Deno.env.get('RESEND_API_KEY');
-      if (resendKey) {
-        const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@media.aevoice.ai';
-        const res = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'AEVOICE <' + fromEmail + '>',
-            to: [email],
-            subject,
-            text: plainText,
-            html: htmlBody,
-          }),
-        });
-        if (res.ok) {
-          provider = 'resend';
-        } else {
-          console.error('Resend failed:', await res.text());
-        }
-      }
-    }
-
-    // TERTIARY: SendGrid
-    if (provider === 'none') {
-      const sgKey = Deno.env.get('SENDGRID_API_KEY');
-      if (sgKey) {
-        const sgFrom = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@aevoice.ai';
-        const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + sgKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            personalizations: [{ to: [{ email }] }],
-            from: { email: sgFrom, name: 'AEVOICE' },
-            subject,
-            content: [{ type: 'text/plain', value: plainText }, { type: 'text/html', value: htmlBody }],
-          }),
-        });
-        if (sgRes.ok) {
-          provider = 'sendgrid';
-        } else {
-          throw new Error('SendGrid failed: ' + await sgRes.text());
-        }
-      } else {
-        throw new Error('No email provider available.');
-      }
-    }
+    const provider = 'sendgrid';
+    console.log('Email sent via SendGrid to:', email);
 
     return Response.json(
       { success: true, email, invite_id: invite.id, invite_url: inviteUrl, invite_code: inviteCode, provider },
