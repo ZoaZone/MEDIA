@@ -1,7 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY') || '';
-const APP_URL = 'https://agentmarketer.base44.app';
+const APP_URL = 'https://media.aevoice.ai';
 
 const PLANS: Record<string, { name: string; price_monthly: number; price_yearly: number; tier: string }> = {
   starter: { name: 'Starter', price_monthly: 4900,  price_yearly: 47000, tier: 'starter' },
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': `Agent Marketer ${selectedPlan.name}`,
+      'line_items[0][price_data][product_data][name]': `media.aevoice.ai ${selectedPlan.name}`,
       'line_items[0][price_data][recurring][interval]': billing === 'yearly' ? 'year' : 'month',
       'line_items[0][price_data][unit_amount]': String(amount),
       'line_items[0][quantity]': '1',

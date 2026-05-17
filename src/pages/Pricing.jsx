@@ -66,19 +66,23 @@ export default function Pricing() {
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me().catch(() => null) });
 
   const handleCheckout = async (plan) => {
-    if (!user) { window.location.href = "/"; return; }
+    if (!user) { window.location.href = "/auth"; return; }
     setLoadingPlan(plan.name);
     try {
-      const res = await base44.functions.invoke("stripeCheckoutMarketer", {
-        plan_name: plan.name,
-        price: billing === "yearly" ? plan.price_yearly : plan.price_monthly,
+      const res = await base44.functions.invoke("stripeCheckoutCREAM", {
+        plan: plan.name.toLowerCase(),
         billing,
-        user_email: user.email,
-        success_url: window.location.origin + "/onboarding",
-        cancel_url: window.location.origin + "/pricing",
       });
-      if (res?.data?.url) window.location.href = res.data.url;
-    } catch (e) { alert("Checkout error: " + e.message); }
+      // stripeCheckoutCREAM returns checkout_url or demo success
+      const url = res?.data?.checkout_url;
+      if (url) {
+        window.location.href = url;
+      } else if (res?.data?.demo) {
+        window.location.href = "/onboarding";
+      } else {
+        alert("Checkout error: " + (res?.data?.error || "Unknown error"));
+      }
+    } catch (e) { alert("Checkout error: " + (e?.response?.data?.error || e.message)); }
     setLoadingPlan(null);
   };
 

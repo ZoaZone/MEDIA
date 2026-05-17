@@ -397,9 +397,9 @@ export default function Home() {
             <Link to="/pricing" className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-base hover:opacity-90 transition-opacity shadow-2xl shadow-fuchsia-500/30">
               Start Free Trial <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link to="/dashboard" className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-white/15 text-white/80 font-medium text-base hover:border-white/30 hover:text-white transition-all">
-              <Play className="w-4 h-4" /> See Demo
-            </Link>
+            <a href="#features" className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-white/15 text-white/80 font-medium text-base hover:border-white/30 hover:text-white transition-all">
+              <Play className="w-4 h-4" /> See Features
+            </a>
           </div>
           <p className="text-xs text-white/30 mt-4">No credit card required · 14-day free trial · Cancel anytime</p>
 
