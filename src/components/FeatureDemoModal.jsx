@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { X, Maximize2 } from "lucide-react";
 
-const VIDEO_URL = "https://media.base44.com/videos/public/69c3c2f5acaefc3a7afad5fd/47c76d236_generated_video.mp4";
+const VIDEO_URL = "https://media.base44.com/videos/public/69c3c2f5acaefc3a7afad5fd/913d0aa77_generated_video.mp4";
 
 export default function FeatureDemoModal({ onClose }) {
   const videoRef = useRef(null);

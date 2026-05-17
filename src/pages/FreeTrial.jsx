@@ -1,113 +1,70 @@
 import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, Search, User, MapPin, Briefcase, Lock, Star, ArrowRight, Loader2, X, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Upload, User, MapPin, Briefcase, Globe, Tag, FileText, Lock, ArrowRight, Loader2, CheckCircle2, Sparkles, Image, Video, Mail, GitBranch, Share2, BarChart3, Zap, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
-// Sample match profiles (demo data)
-const DEMO_MATCHES = [
-  {
-    id: 1,
-    name: "Priya Sharma",
-    role: "Digital Marketing Manager",
-    company: "TechBrand India",
-    location: "Mumbai, MH",
-    skills: ["SEO", "Social Media", "Email Campaigns"],
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop",
-    match: 96,
-  },
-  {
-    id: 2,
-    name: "Arjun Mehta",
-    role: "Growth Hacker",
-    company: "StartupXcel",
-    location: "Bengaluru, KA",
-    skills: ["Funnels", "Paid Ads", "Analytics"],
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop",
-    match: 91,
-  },
-  {
-    id: 3,
-    name: "Neha Kapoor",
-    role: "Content Strategist",
-    company: "CreativeHub",
-    location: "Delhi, DL",
-    skills: ["Content", "Influencer Marketing", "Brand Building"],
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop",
-    match: 88,
-  },
-  {
-    id: 4,
-    name: "Rohan Desai",
-    role: "Agency Owner",
-    company: "MediaPro Agency",
-    location: "Pune, MH",
-    skills: ["Agency Management", "Client Relations", "ROI Tracking"],
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop",
-    match: 85,
-  },
-  {
-    id: 5,
-    name: "Kavya Reddy",
-    role: "Social Media Lead",
-    company: "Fashion Forward",
-    location: "Hyderabad, TS",
-    skills: ["Instagram", "TikTok", "Reels", "Stories"],
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop",
-    match: 82,
-  },
-  {
-    id: 6,
-    name: "Vikram Nair",
-    role: "Performance Marketer",
-    company: "AdScale Solutions",
-    location: "Chennai, TN",
-    skills: ["PPC", "Meta Ads", "Google Ads", "CRO"],
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop",
-    match: 79,
-  },
+const LOCKED_FEATURES = [
+  { Icon: Image,    label: "AI Image Generation",     desc: "Create stunning visuals in seconds with AI." },
+  { Icon: Video,    label: "AI Video Creation",        desc: "Generate branded videos and reels automatically." },
+  { Icon: Mail,     label: "Bulk Email / SMS / WhatsApp", desc: "Send thousands of messages with one click." },
+  { Icon: Share2,   label: "Social Post Scheduling",   desc: "Auto-schedule posts across all platforms." },
+  { Icon: GitBranch,label: "Funnel Builder",           desc: "Visual drag-drop funnels with automation." },
+  { Icon: Zap,      label: "Follow-Up Automation",     desc: "Triggered sequences from lead actions." },
+  { Icon: BarChart3,label: "Analytics & ROI",          desc: "Campaign performance and conversion dashboards." },
+  { Icon: Sparkles, label: "AI Script & Ad Creator",   desc: "Generate ad copy, scripts, captions instantly." },
 ];
 
+const INDUSTRIES = ["E-commerce", "Real Estate", "Healthcare", "Education", "Restaurant & Food", "Fashion & Apparel", "Fitness & Wellness", "Technology", "Finance", "Travel & Hospitality", "Agency", "Other"];
+
 export default function FreeTrial() {
-  const navigate = useNavigate();
   const fileRef = useRef(null);
-
-  const [step, setStep] = useState("profile"); // "profile" | "searching" | "matches"
-  const [profile, setProfile] = useState({ name: "", role: "", company: "", location: "", skills: "", avatar: null, avatarUrl: "" });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [lockedModal, setLockedModal] = useState(null);
+  const [step, setStep] = useState("form"); // "form" | "saving" | "done"
   const [uploading, setUploading] = useState(false);
+  const [profile, setProfile] = useState({
+    business_name: "",
+    owner_name: "",
+    email: "",
+    phone: "",
+    industry: "",
+    website: "",
+    description: "",
+    logo_url: "",
+    tagline: "",
+  });
 
-  const handleAvatarUpload = async (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setProfile(p => ({ ...p, avatarUrl: file_url }));
+      setProfile(p => ({ ...p, logo_url: file_url }));
     } catch {
-      // fallback: local preview
-      setProfile(p => ({ ...p, avatarUrl: URL.createObjectURL(file) }));
+      setProfile(p => ({ ...p, logo_url: URL.createObjectURL(file) }));
     }
     setUploading(false);
   };
 
-  const handleSubmitProfile = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!profile.name || !profile.role) return;
-    setStep("searching");
-    setTimeout(() => setStep("matches"), 2200);
+    if (!profile.business_name || !profile.email) return;
+    setStep("saving");
+    // Save as a beta request / lead
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: "care@aevoice.ai",
+        subject: `New Free Trial Profile: ${profile.business_name}`,
+        body: `Business: ${profile.business_name}\nOwner: ${profile.owner_name}\nEmail: ${profile.email}\nPhone: ${profile.phone}\nIndustry: ${profile.industry}\nWebsite: ${profile.website}\nTagline: ${profile.tagline}\nDescription: ${profile.description}`,
+      });
+    } catch {}
+    setTimeout(() => setStep("done"), 1500);
   };
-
-  const filteredMatches = DEMO_MATCHES.filter(m => {
-    const q = searchQuery.toLowerCase();
-    return !q || m.name.toLowerCase().includes(q) || m.role.toLowerCase().includes(q) || m.location.toLowerCase().includes(q) || m.skills.some(s => s.toLowerCase().includes(q));
-  });
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-10">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -115,7 +72,7 @@ export default function FreeTrial() {
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
           <div className="flex items-center gap-2">
-            <img src={M_LOGO} alt="" className="w-7 h-7 rounded-lg" onError={e => e.target.style.display="none"} />
+            <img src={M_LOGO} alt="" className="w-7 h-7 rounded-lg" onError={e => e.target.style.display = "none"} />
             <span className="font-black text-sm bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
           </div>
         </div>
@@ -125,218 +82,206 @@ export default function FreeTrial() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-xs font-medium mb-4">
             ✨ Free Trial — No Credit Card Required
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Find Your Marketing Match</h1>
-          <p className="text-white/50 text-base">Upload your profile and discover collaborators, clients, and partners on our platform.</p>
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Create Your Business Profile</h1>
+          <p className="text-white/50 text-base">Set up your brand profile and explore the platform. Upgrade anytime to unlock all features.</p>
         </div>
 
-        {/* STEP: Profile Form */}
-        {step === "profile" && (
-          <div className="bg-white/3 border border-white/10 rounded-3xl p-8">
-            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2"><User className="w-5 h-5 text-fuchsia-400" /> Your Profile</h2>
-            <form onSubmit={handleSubmitProfile} className="space-y-5">
-              {/* Avatar upload */}
-              <div className="flex flex-col items-center gap-3 mb-4">
-                <div className="w-24 h-24 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden cursor-pointer hover:border-fuchsia-500/50 transition-colors"
-                  onClick={() => fileRef.current?.click()}>
-                  {profile.avatarUrl
-                    ? <img src={profile.avatarUrl} className="w-full h-full object-cover" />
-                    : uploading
-                    ? <Loader2 className="w-6 h-6 text-fuchsia-400 animate-spin" />
-                    : <Upload className="w-6 h-6 text-white/30" />}
+        {/* STEP: Form */}
+        {step === "form" && (
+          <div className="space-y-6">
+            {/* Profile form card */}
+            <div className="bg-white/3 border border-white/10 rounded-3xl p-7">
+              <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
+                <User className="w-4 h-4 text-fuchsia-400" /> Business Profile
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Logo upload */}
+                <div className="flex items-center gap-5 mb-2">
+                  <div
+                    className="w-20 h-20 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden cursor-pointer hover:border-fuchsia-500/50 transition-colors flex-shrink-0"
+                    onClick={() => fileRef.current?.click()}>
+                    {profile.logo_url
+                      ? <img src={profile.logo_url} className="w-full h-full object-cover" alt="logo" />
+                      : uploading
+                      ? <Loader2 className="w-6 h-6 text-fuchsia-400 animate-spin" />
+                      : <Upload className="w-6 h-6 text-white/30" />}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                  <div>
+                    <button type="button" onClick={() => fileRef.current?.click()} className="text-sm text-fuchsia-400 hover:text-fuchsia-300 font-medium">
+                      {profile.logo_url ? "Change logo" : "Upload business logo"}
+                    </button>
+                    <p className="text-xs text-white/30 mt-0.5">PNG, JPG up to 5MB</p>
+                  </div>
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                <button type="button" onClick={() => fileRef.current?.click()} className="text-xs text-fuchsia-400 hover:text-fuchsia-300">
-                  {profile.avatarUrl ? "Change photo" : "Upload profile photo"}
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Business Name *</label>
+                    <input required value={profile.business_name} onChange={e => setProfile(p => ({ ...p, business_name: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                      placeholder="Your brand or business name" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Your Name</label>
+                    <input value={profile.owner_name} onChange={e => setProfile(p => ({ ...p, owner_name: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                      placeholder="Owner / contact person" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Email Address *</label>
+                    <input required type="email" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                      placeholder="you@yourbrand.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Phone / WhatsApp</label>
+                    <input value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                      placeholder="+91 98765 43210" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Industry</label>
+                    <select value={profile.industry} onChange={e => setProfile(p => ({ ...p, industry: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-500/50">
+                      <option value="" className="bg-[#111]">Select industry</option>
+                      {INDUSTRIES.map(i => <option key={i} value={i} className="bg-[#111]">{i}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5">Website</label>
+                    <input value={profile.website} onChange={e => setProfile(p => ({ ...p, website: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                      placeholder="https://yourbrand.com" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">Tagline / One-liner</label>
+                  <input value={profile.tagline} onChange={e => setProfile(p => ({ ...p, tagline: e.target.value }))}
+                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+                    placeholder="e.g. India's fastest growing fintech platform" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">About Your Business</label>
+                  <textarea value={profile.description} onChange={e => setProfile(p => ({ ...p, description: e.target.value }))} rows={3}
+                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50 resize-none"
+                    placeholder="Briefly describe your products, services, and target audience…" />
+                </div>
+
+                <button type="submit"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-500/25 mt-2">
+                  Save Profile & Explore Features <ArrowRight className="w-4 h-4" />
                 </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">Full Name *</label>
-                  <input required value={profile.name} onChange={e => setProfile(p => ({...p, name: e.target.value}))}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
-                    placeholder="Your full name" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">Role / Title *</label>
-                  <input required value={profile.role} onChange={e => setProfile(p => ({...p, role: e.target.value}))}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
-                    placeholder="e.g. Marketing Manager" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">Company / Brand</label>
-                  <input value={profile.company} onChange={e => setProfile(p => ({...p, company: e.target.value}))}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
-                    placeholder="Your company name" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">Location</label>
-                  <input value={profile.location} onChange={e => setProfile(p => ({...p, location: e.target.value}))}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
-                    placeholder="City, State" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5">Skills / Expertise (comma separated)</label>
-                <input value={profile.skills} onChange={e => setProfile(p => ({...p, skills: e.target.value}))}
-                  className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
-                  placeholder="e.g. SEO, Social Media, Email Campaigns" />
-              </div>
-              <button type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-500/25">
-                Find My Matches <Search className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* STEP: Searching */}
-        {step === "searching" && (
-          <div className="flex flex-col items-center justify-center py-32 gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/20 flex items-center justify-center">
-              <Search className="w-9 h-9 text-fuchsia-400 animate-pulse" />
+              </form>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-white mb-1">Finding your best matches…</p>
-              <p className="text-sm text-white/40">AI is analysing profiles across the platform</p>
-            </div>
-            <div className="flex gap-1.5">
-              {[0,1,2].map(i => (
-                <div key={i} className="w-2 h-2 rounded-full bg-fuchsia-500 animate-bounce" style={{ animationDelay: i*0.15+"s" }} />
-              ))}
+
+            {/* Locked features preview */}
+            <div className="bg-white/3 border border-white/8 rounded-3xl p-7">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-400" /> Features Included in Paid Plans
+                </h2>
+                <Link to="/pricing" className="text-xs text-fuchsia-400 hover:text-fuchsia-300 font-medium">View Plans →</Link>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {LOCKED_FEATURES.map(f => (
+                  <div key={f.label} className="flex items-start gap-3 p-3.5 rounded-xl border border-white/6 bg-white/2">
+                    <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                      <f.Icon className="w-4 h-4 text-fuchsia-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white/80">{f.label}</p>
+                      <p className="text-xs text-white/40 mt-0.5">{f.desc}</p>
+                    </div>
+                    <Lock className="w-3.5 h-3.5 text-white/20 flex-shrink-0 mt-1 ml-auto" />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 pt-5 border-t border-white/8 text-center">
+                <p className="text-sm text-white/50 mb-3">Unlock everything from <span className="text-fuchsia-400 font-bold">$49/month</span></p>
+                <Link to="/pricing"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-sm hover:opacity-90 shadow-lg shadow-fuchsia-500/20">
+                  Upgrade Now <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           </div>
         )}
 
-        {/* STEP: Matches */}
-        {step === "matches" && (
-          <div>
-            {/* Search bar */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/40"
-                  placeholder="Search by name, role, location, skill…" />
+        {/* STEP: Saving */}
+        {step === "saving" && (
+          <div className="flex flex-col items-center justify-center py-32 gap-5">
+            <Loader2 className="w-10 h-10 text-fuchsia-400 animate-spin" />
+            <p className="text-white font-bold">Saving your profile…</p>
+          </div>
+        )}
+
+        {/* STEP: Done */}
+        {step === "done" && (
+          <div className="space-y-6">
+            {/* Success banner */}
+            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-6 text-center">
+              <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+              <h2 className="text-xl font-black text-white mb-1">Profile Created! 🎉</h2>
+              <p className="text-white/60 text-sm">Your free trial profile for <span className="text-white font-semibold">{profile.business_name}</span> is live. Explore the features below — upgrade to unlock and use them all.</p>
+            </div>
+
+            {/* Platform features tour */}
+            <div className="bg-white/3 border border-white/8 rounded-3xl p-7">
+              <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-fuchsia-400" /> Platform Features (Preview Only)
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {LOCKED_FEATURES.map(f => (
+                  <div key={f.label} className="flex items-start gap-3 p-3.5 rounded-xl border border-white/8 bg-white/3 relative overflow-hidden">
+                    <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                      <f.Icon className="w-4 h-4 text-fuchsia-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white/80">{f.label}</p>
+                      <p className="text-xs text-white/40 mt-0.5">{f.desc}</p>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-xl">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 border border-white/10">
+                        <Lock className="w-3 h-3 text-amber-400" />
+                        <span className="text-[10px] text-white/70 font-medium">Upgrade to use</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <button onClick={() => setStep("profile")} className="text-xs text-white/40 hover:text-white border border-white/10 px-4 py-2.5 rounded-xl transition-colors">
-                Edit Profile
-              </button>
             </div>
 
             {/* Profile summary */}
-            <div className="mb-6 p-4 rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl overflow-hidden bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
-                {profile.avatarUrl
-                  ? <img src={profile.avatarUrl} className="w-full h-full object-cover" />
-                  : <User className="w-6 h-6 text-fuchsia-400" />}
+            <div className="bg-white/3 border border-white/8 rounded-2xl p-5 flex items-center gap-4">
+              {profile.logo_url
+                ? <img src={profile.logo_url} className="w-14 h-14 rounded-xl object-cover border border-white/10 flex-shrink-0" alt="logo" />
+                : <div className="w-14 h-14 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-7 h-7 text-fuchsia-400" />
+                  </div>}
+              <div>
+                <p className="font-bold text-white">{profile.business_name}</p>
+                <p className="text-xs text-white/50">{profile.industry}{profile.industry && profile.email ? " · " : ""}{profile.email}</p>
+                {profile.tagline && <p className="text-xs text-fuchsia-300/70 italic mt-0.5">"{profile.tagline}"</p>}
               </div>
-              <div className="flex-1">
-                <p className="font-bold text-white text-sm">{profile.name}</p>
-                <p className="text-white/50 text-xs">{profile.role}{profile.company ? ` · ${profile.company}` : ""}{profile.location ? ` · ${profile.location}` : ""}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-fuchsia-400 font-bold text-sm">{filteredMatches.length}</p>
-                <p className="text-white/40 text-xs">matches found</p>
-              </div>
-            </div>
-
-            {/* Match grid */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {filteredMatches.map((match, idx) => {
-                const isLocked = idx >= 2; // first 2 visible, rest locked
-                return (
-                  <div key={match.id} className={`relative rounded-2xl border p-5 transition-all ${isLocked ? "border-white/8 bg-white/2" : "border-white/12 bg-white/4 hover:border-white/20"}`}>
-                    {/* Match % badge */}
-                    <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-500/30">
-                      <Star className="w-3 h-3 text-fuchsia-400 fill-fuchsia-400" />
-                      <span className="text-xs font-bold text-fuchsia-300">{match.match}% match</span>
-                    </div>
-
-                    <div className="flex items-start gap-4 mb-4">
-                      <img src={match.avatar} alt={match.name}
-                        className={`w-14 h-14 rounded-xl object-cover flex-shrink-0 ${isLocked ? "blur-sm opacity-50 grayscale" : ""}`}
-                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${match.name}&background=7c3aed&color=fff`; }} />
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-bold text-sm mb-0.5 ${isLocked ? "blur-sm select-none" : "text-white"}`}>{match.name}</p>
-                        <p className="text-fuchsia-300 text-xs font-medium mb-1 flex items-center gap-1">
-                          <Briefcase className="w-3 h-3" /> {match.role}
-                        </p>
-                        <p className="text-white/40 text-xs flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> {match.company} · {match.location}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {match.skills.map(s => (
-                        <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-white/8 text-white/50 border border-white/10">{s}</span>
-                      ))}
-                    </div>
-
-                    {isLocked ? (
-                      <button onClick={() => setLockedModal(match)}
-                        className="w-full py-2.5 rounded-xl border border-white/15 text-white/50 text-xs font-semibold flex items-center justify-center gap-2 hover:border-fuchsia-500/40 hover:text-fuchsia-300 transition-all">
-                        <Lock className="w-3.5 h-3.5" /> Upgrade to Contact
-                      </button>
-                    ) : (
-                      <button onClick={() => setLockedModal(match)}
-                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-md shadow-fuchsia-500/20">
-                        Contact {match.name.split(" ")[0]} <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
             </div>
 
             {/* Upgrade CTA */}
-            <div className="mt-10 p-6 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/5 text-center">
-              <Lock className="w-7 h-7 text-fuchsia-400 mx-auto mb-3" />
-              <h3 className="font-bold text-white text-lg mb-1">Unlock All Matches & Contact Anyone</h3>
-              <p className="text-white/50 text-sm mb-5">Upgrade to a paid plan to message all matches, access analytics, AI tools, and more.</p>
+            <div className="p-6 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/5 text-center">
+              <h3 className="font-black text-white text-xl mb-2">Ready to start marketing?</h3>
+              <p className="text-white/50 text-sm mb-5">Pick a plan to unlock AI image/video creation, bulk messaging, social scheduling, funnels, and more.</p>
               <Link to="/pricing"
                 className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-sm hover:opacity-90 shadow-lg shadow-fuchsia-500/25">
                 View Plans & Upgrade <ArrowRight className="w-4 h-4" />
               </Link>
+              <p className="text-xs text-white/30 mt-3">Plans from $49/mo · Cancel anytime</p>
             </div>
           </div>
         )}
 
       </div>
-
-      {/* Upgrade / Contact Modal */}
-      {lockedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.8)" }}
-          onClick={() => setLockedModal(null)}>
-          <div className="bg-[#111118] border border-white/10 rounded-2xl p-7 max-w-sm w-full shadow-2xl"
-            onClick={e => e.stopPropagation()}>
-            <button onClick={() => setLockedModal(null)} className="absolute top-4 right-4 text-white/40 hover:text-white"><X className="w-4 h-4" /></button>
-            <div className="text-center mb-5">
-              <img src={lockedModal.avatar} alt={lockedModal.name}
-                className="w-16 h-16 rounded-2xl object-cover mx-auto mb-3 border border-white/10"
-                onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${lockedModal.name}&background=7c3aed&color=fff`; }} />
-              <h3 className="font-bold text-white">{lockedModal.name}</h3>
-              <p className="text-white/50 text-xs">{lockedModal.role} · {lockedModal.company}</p>
-            </div>
-            <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-4 mb-5 text-center">
-              <Lock className="w-5 h-5 text-fuchsia-400 mx-auto mb-2" />
-              <p className="text-sm text-white/80 font-medium">Upgrade to contact {lockedModal.name.split(" ")[0]}</p>
-              <p className="text-xs text-white/40 mt-1">Plans start from $49/month. Unlock messaging, AI tools, and more.</p>
-            </div>
-            <div className="space-y-3">
-              <Link to="/pricing"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-sm hover:opacity-90">
-                Upgrade Now <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button onClick={() => setLockedModal(null)}
-                className="w-full py-3 rounded-xl border border-white/10 text-white/50 text-sm hover:text-white transition-colors">
-                Continue Browsing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
