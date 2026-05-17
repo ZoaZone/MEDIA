@@ -139,11 +139,7 @@ Deno.serve(async (req) => {
       if (res.ok) {
         provider = 'resend';
       } else {
-        // Surface the real Resend error in the response for debugging
-        return Response.json(
-          { error: 'Resend email failed', details: resBody, from_used: fromField, invite_url: `${APP_URL}/invite/${token}` },
-          { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-        );
+        console.warn('Resend failed, falling back:', JSON.stringify(resBody));
       }
     }
 
