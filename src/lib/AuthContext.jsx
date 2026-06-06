@@ -113,6 +113,12 @@ export const AuthProvider = ({ children }) => {
 
   // BUG-001 FIX: Guard against redirect loop — don't redirect if already on login/auth
   const navigateToLogin = () => {
+    const _now = Date.now();
+    const _last = Number(sessionStorage.getItem('__nav_login_ts') || 0);
+    if (_now - _last < 2500) return; // debounce — don't redirect if called within 2.5s
+    sessionStorage.setItem('__nav_login_ts', String(_now));
+    const _cur = window.location.pathname;
+    if (_cur === '/login' || _cur === '/Login') return; // already on login
     const p = window.location.pathname.toLowerCase();
     if (p === '/login' || p === '/auth') return; // already there, do nothing
     window.location.href = '/auth';
