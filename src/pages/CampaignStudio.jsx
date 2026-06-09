@@ -15,7 +15,6 @@ const STEPS = [
   { id:"accounts", label:"Accounts",     icon:Share2,     desc:"Link social accounts" },
   { id:"content",  label:"Script/Copy",  icon:FileText,   desc:"AI-generated content" },
   { id:"media",    label:"Media",        icon:Image,      desc:"Upload or generate visuals" },
-  { id:"format",   label:"Format",       icon:Layers,     desc:"Platform & format" },
   { id:"schedule", label:"Schedule",     icon:Calendar,   desc:"Set dates & topics" },
   { id:"publish",  label:"Publish",      icon:Send,       desc:"Review & go live" },
 ];
@@ -103,7 +102,7 @@ export default function CampaignStudio() {
     queryFn: () => base44.entities.CampaignPost.list("-created_date", 50),
   });
 
-  // Read prefill from ScriptWriter or other sources
+  // Read prefill from ScriptWriter or media imports
   useEffect(() => {
     const prefill = sessionStorage.getItem("campaignStudio_prefill");
     if (prefill) {
@@ -112,6 +111,16 @@ export default function CampaignStudio() {
         setCampaign(p => ({ ...p, ...data }));
         if (data.ai_output) setStep(2);
         sessionStorage.removeItem("campaignStudio_prefill");
+      } catch (_) {}
+    }
+    // Pick up media imported from Media Studio
+    const mediaImport = sessionStorage.getItem("campaign_media_import");
+    if (mediaImport) {
+      try {
+        const urls = JSON.parse(mediaImport);
+        setCampaign(p => ({ ...p, media_urls: [...new Set([...p.media_urls, ...urls])] }));
+        setStep(3); // jump to media step to show the imported media
+        sessionStorage.removeItem("campaign_media_import");
       } catch (_) {}
     }
   }, []);
@@ -135,15 +144,28 @@ export default function CampaignStudio() {
     const brandContext = brand
       ? `\n\nBrand: ${brand.name}. Voice: ${brand.brand_voice || "Professional"}. Audience: ${brand.target_audience || "general audience"}. Industry: ${brand.industry || ""}. Tagline: ${brand.tagline || ""}.`
       : "";
+    const isCaption = ["caption","ad_copy","whatsapp"].includes(campaign.content_type);
+    const promptText = isCaption
+      ? `Write a ${campaign.tone} ${campaign.content_type.replace(/_/g," ")} for ${campaign.platforms[0] || "Instagram"}.\n\nTopic: ${campaign.ai_prompt}${brandContext}\n\nFormat your response EXACTLY like this:\nCAPTION:\n[Write the caption here with correct grammar and spelling. No markdown headers like ### — just clean text.]\n\nHASHTAGS:\n[20 relevant hashtags starting with #]`
+      : `${campaign.ai_prompt}${brandContext}`;
     try {
       const res = await base44.functions.invoke("generateMediaContent", {
         type: campaign.content_type,
         platform: campaign.platforms[0] || "Instagram",
         tone: campaign.tone,
-        prompt: `${campaign.ai_prompt}${brandContext}`,
+        prompt: promptText,
       });
-      const text = res?.content || res?.data?.content || res?.text || res?.data?.text || "";
-      setCampaign(p => ({ ...p, ai_output: typeof text === "string" ? text : JSON.stringify(text) }));
+      const raw = res?.content || res?.data?.content || res?.text || res?.data?.text || "";
+      const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+      if (isCaption) {
+        const captionMatch = text.match(/CAPTION:\s*([\s\S]*?)(?=HASHTAGS:|$)/i);
+        const hashMatch = text.match(/HASHTAGS:\s*([\s\S]*?)$/i);
+        const cleanCaption = captionMatch ? captionMatch[1].replace(/###.*?\n?/g, "").trim() : text;
+        const cleanHash = hashMatch ? hashMatch[1].trim() : "";
+        setCampaign(p => ({ ...p, ai_output: cleanCaption, hashtags: cleanHash || p.hashtags }));
+      } else {
+        setCampaign(p => ({ ...p, ai_output: text }));
+      }
     } catch (e) { alert("Generation failed: " + e.message); }
     setGenerating(false);
   };
@@ -276,28 +298,35 @@ export default function CampaignStudio() {
   };
 
   const publishCampaign = async () => {
+    if (campaign.schedules.filter(s => s.date).length === 0) { alert("Please add at least one scheduled date"); return; }
     setSaving(true);
+    const fullCaption = [campaign.ai_output || campaign.caption, campaign.hashtags].filter(Boolean).join("\n\n");
     try {
       for (const sch of campaign.schedules) {
         if (!sch.date) continue;
-        await base44.entities.CampaignPost.create({
-          brand_id: campaign.brand_id,
-          campaign_name: campaign.campaign_name || "Campaign",
-          content_type: campaign.content_type,
-          ai_prompt: campaign.ai_prompt,
-          ai_output: campaign.ai_output,
-          caption: campaign.ai_output?.slice(0, 500) || "",
-          platforms: campaign.platforms,
-          media_urls: campaign.media_urls,
-          reference_images: campaign.ref_images,
-          reference_consent: campaign.ref_consent || allConsentGiven,
-          media_type: campaign.media_type || "image",
-          scheduled_at: `${sch.date}T${sch.time}:00`,
-          status: "scheduled",
-          owner_id: user?.id,
-        });
+        // Save one ScheduledPost per platform account
+        const targetAccounts = campaign.selected_accounts.length > 0
+          ? allAccounts.filter(a => campaign.selected_accounts.includes(a.id))
+          : [{ id: "", platform: campaign.platforms[0] || "instagram" }];
+
+        for (const acct of targetAccounts) {
+          await base44.entities.ScheduledPost.create({
+            social_account_id: acct.id || "",
+            platform: acct.platform || campaign.platforms[0] || "instagram",
+            caption: fullCaption,
+            media_url: campaign.media_urls[0] || "",
+            media_type: campaign.media_type || "image",
+            scheduled_at: `${sch.date}T${sch.time}:00`,
+            status: "scheduled",
+            description: [
+              campaign.campaign_name,
+              sch.topic ? `Topic: ${sch.topic}` : "",
+              campaign.media_urls.length > 1 ? `Media: ${campaign.media_urls.join(", ")}` : "",
+            ].filter(Boolean).join(" | "),
+          });
+        }
       }
-      qc.invalidateQueries(["campaign_posts"]);
+      qc.invalidateQueries(["scheduled_posts"]);
       setSaved(true);
     } catch (e) { alert("Publish failed: " + e.message); }
     setSaving(false);
@@ -594,6 +623,13 @@ export default function CampaignStudio() {
                   <p className="text-xs mt-0.5 text-muted-foreground">{t.desc}</p>
                 </button>
               ))}
+              {/* Import from Media Studio */}
+              <button onClick={() => { sessionStorage.setItem("mediaStudio_returnTo","campaign-studio"); navigate("/media-studio"); }}
+                className="p-4 rounded-xl border border-dashed border-fuchsia-500/40 text-center text-sm text-fuchsia-400 hover:bg-fuchsia-500/5 transition">
+                <span className="text-2xl block mb-2">🔗</span>
+                <p className="font-bold text-xs">Media Studio</p>
+                <p className="text-xs mt-0.5 text-muted-foreground">Generate then import</p>
+              </button>
             </div>
 
             {/* Upload section */}
@@ -643,68 +679,109 @@ export default function CampaignStudio() {
               </div>
             )}
 
-            {/* All generated/uploaded media preview */}
+            {/* All generated/uploaded media preview — with edit/remove */}
             {(campaign.media_urls.length > 0 || generatedMedia.length > 0) && (
               <div>
-                <label className={lbl}>All Media ({campaign.media_urls.length} files)</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={lbl}>All Media ({campaign.media_urls.length} files)</label>
+                  <div className="flex gap-2">
+                    <button onClick={() => mediaRef.current?.click()} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/15 transition">
+                      <Upload className="w-3 h-3" /> Add More
+                    </button>
+                    <button onClick={() => navigate("/media-studio")} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-fuchsia-600/20 text-fuchsia-400 hover:bg-fuchsia-600/30 transition">
+                      <Image className="w-3 h-3" /> Open Media Studio
+                    </button>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {campaign.media_urls.map((url, i) => {
                     const isVideo = url.includes("mp4") || url.includes("mov") || url.includes("webm") || generatedMedia.find(m => m.url === url)?.type === "video";
                     return (
-                      <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden border border-white/10 group">
+                      <div key={i} className="relative w-28 h-28 rounded-xl overflow-hidden border border-white/10 group flex-shrink-0">
                         {isVideo
                           ? <video src={url} className="w-full h-full object-cover" />
                           : <img src={url} alt="" className="w-full h-full object-cover" />
                         }
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-                          <a href={url} target="_blank" rel="noreferrer" className="p-1.5 bg-white/20 rounded-lg hover:bg-white/30 text-white"><Eye className="w-3 h-3" /></a>
-                          <a href={url} download className="p-1.5 bg-white/20 rounded-lg hover:bg-white/30 text-white"><Download className="w-3 h-3" /></a>
-                          <button onClick={() => setCampaign(p => ({ ...p, media_urls: p.media_urls.filter((_, j) => j !== i) }))}
-                            className="p-1.5 bg-red-500/30 rounded-lg hover:bg-red-500/50 text-white"><X className="w-3 h-3" /></button>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-1.5">
+                          <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-2 py-1 bg-white/20 rounded text-white text-xs hover:bg-white/30"><Eye className="w-3 h-3" /> View</a>
+                          <a href={url} download className="flex items-center gap-1 px-2 py-1 bg-white/20 rounded text-white text-xs hover:bg-white/30"><Download className="w-3 h-3" /> Save</a>
+                          <button onClick={() => { const updated = [...campaign.media_urls]; updated.splice(i,1); setCampaign(p=>({...p,media_urls:updated})); }}
+                            className="flex items-center gap-1 px-2 py-1 bg-red-500/40 rounded text-white text-xs hover:bg-red-500/60"><X className="w-3 h-3" /> Remove</button>
                         </div>
-                        {isVideo && <div className="absolute bottom-1 left-1 bg-black/60 rounded px-1 text-xs text-white">VIDEO</div>}
+                        {isVideo && <div className="absolute top-1 left-1 bg-black/70 rounded px-1.5 py-0.5 text-xs text-white font-bold">VIDEO</div>}
+                        <div className="absolute bottom-1 right-1 bg-black/50 rounded px-1 text-xs text-white">{i+1}</div>
                       </div>
                     );
                   })}
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* ── STEP 4: FORMAT ── */}
-        {step === 4 && (
-          <div className="space-y-5">
-            <h2 className="text-lg font-bold text-foreground mb-1">Platform & Format</h2>
-            <div>
-              <label className={lbl}>Target Platforms</label>
-              <div className="grid grid-cols-4 gap-2">
-                {PLATFORMS.map(p => (
-                  <button key={p.id} onClick={() => setCampaign(prev => ({
-                    ...prev,
-                    platforms: prev.platforms.includes(p.id) ? prev.platforms.filter(x => x !== p.id) : [...prev.platforms, p.id]
-                  }))}
-                    className={`p-3 rounded-xl border text-xs font-bold transition ${campaign.platforms.includes(p.id) ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-border text-muted-foreground hover:border-fuchsia-500/30"}`}>
-                    {p.label}
+            {/* ── Platform + Caption + Hashtags (merged from Format step) ── */}
+            <div className="border-t border-white/10 pt-5 space-y-4">
+              <h3 className="font-bold text-foreground">Caption & Hashtags</h3>
+              <div>
+                <label className={lbl}>Target Platforms</label>
+                <div className="flex flex-wrap gap-2">
+                  {PLATFORMS.map(p => (
+                    <button key={p.id} onClick={() => setCampaign(prev => ({
+                      ...prev,
+                      platforms: prev.platforms.includes(p.id) ? prev.platforms.filter(x => x !== p.id) : [...prev.platforms, p.id]
+                    }))}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-bold transition ${campaign.platforms.includes(p.id) ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-border text-muted-foreground hover:border-fuchsia-500/30"}`}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className={lbl}>Caption</label>
+                  <button onClick={generateContent} disabled={generating || !campaign.ai_prompt}
+                    className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg bg-fuchsia-600/20 text-fuchsia-400 hover:bg-fuchsia-600/30 disabled:opacity-40 transition">
+                    {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Re-generate
                   </button>
-                ))}
+                </div>
+                <textarea value={campaign.ai_output || campaign.caption}
+                  onChange={e => setCampaign(p => ({ ...p, caption: e.target.value, ai_output: e.target.value }))} rows={6}
+                  placeholder="Your caption will appear here after generation..."
+                  className={inp + " resize-none"} />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className={lbl}>Hashtags</label>
+                  <button onClick={async () => {
+                    if (!campaign.ai_prompt && !selectedBrand) return;
+                    setGenerating(true);
+                    try {
+                      const res = await base44.functions.invoke("generateMediaContent", {
+                        type: "hashtag_set",
+                        platform: campaign.platforms[0] || "instagram",
+                        tone: campaign.tone,
+                        prompt: `Generate 25 highly relevant hashtags for: "${campaign.ai_prompt || selectedBrand?.name}". Brand: ${selectedBrand?.name || ""}. Industry: ${selectedBrand?.industry || ""}. Output ONLY hashtags starting with # separated by spaces.`,
+                      });
+                      const raw = res?.content || res?.data?.content || res?.text || res?.data?.text || "";
+                      const text = typeof raw === "string" ? raw : "";
+                      setCampaign(p => ({ ...p, hashtags: text.trim() }));
+                    } catch(e) { alert(e.message); }
+                    setGenerating(false);
+                  }} disabled={generating}
+                    className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg bg-fuchsia-600/20 text-fuchsia-400 hover:bg-fuchsia-600/30 disabled:opacity-40 transition">
+                    {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Hash className="w-3 h-3" />} AI Hashtags
+                  </button>
+                </div>
+                <textarea value={campaign.hashtags} onChange={e => setCampaign(p => ({ ...p, hashtags: e.target.value }))}
+                  rows={3} placeholder="#yourbrand #marketing #trending — or click AI Hashtags"
+                  className={inp + " resize-none text-fuchsia-300"} />
               </div>
             </div>
-            <div>
-              <label className={lbl}>Caption (final — edit as needed)</label>
-              <textarea value={campaign.ai_output?.slice(0, 2200) || campaign.caption}
-                onChange={e => setCampaign(p => ({ ...p, caption: e.target.value, ai_output: e.target.value }))} rows={8}
-                className={inp + " resize-none"} />
-            </div>
-            <div>
-              <label className={lbl}>Hashtags</label>
-              <input value={campaign.hashtags} onChange={e => setCampaign(p => ({ ...p, hashtags: e.target.value }))} placeholder="#yourbrand #marketing ..." className={inp} />
-            </div>
           </div>
         )}
 
-        {/* ── STEP 5: SCHEDULE ── */}
-        {step === 5 && (
+        {/* Format step merged into Media step */}
+
+        {/* ── STEP 4: SCHEDULE ── */}
+        {step === 4 && (
           <div className="space-y-5">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
@@ -753,8 +830,8 @@ export default function CampaignStudio() {
           </div>
         )}
 
-        {/* ── STEP 6: REVIEW & PUBLISH ── */}
-        {step === 6 && (
+        {/* ── STEP 5: REVIEW & PUBLISH ── */}
+        {step === 5 && (
           <div className="space-y-5">
             <h2 className="text-lg font-bold text-foreground mb-1">Review & Publish</h2>
             {saved ? (
@@ -784,13 +861,19 @@ export default function CampaignStudio() {
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Content</p>
                     <p className="font-bold text-foreground capitalize">{campaign.content_type.replace(/_/g, " ")}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{campaign.ai_output?.slice(0, 100) || "No content yet"}</p>
+                    <p className="text-xs text-foreground/80 line-clamp-3">{(campaign.ai_output || campaign.caption)?.slice(0, 150) || "No content yet"}</p>
+                    {campaign.hashtags && <p className="text-xs text-fuchsia-400 line-clamp-1">{campaign.hashtags.slice(0, 80)}</p>}
                   </div>
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Media</p>
                     <p className="font-bold text-foreground">{campaign.media_urls.length} file(s)</p>
-                    <div className="flex gap-1 flex-wrap">
-                      {campaign.media_urls.slice(0,4).map((u,i) => <img key={i} src={u} alt="" className="w-8 h-8 rounded object-cover" />)}
+                    <div className="flex gap-1.5 flex-wrap">
+                      {campaign.media_urls.map((u,i) => {
+                        const isVid = u.includes("mp4")||u.includes("mov")||u.includes("webm");
+                        return isVid
+                          ? <div key={i} className="w-10 h-10 rounded bg-black/50 border border-white/10 flex items-center justify-center text-xs text-white">🎬</div>
+                          : <img key={i} src={u} alt="" className="w-10 h-10 rounded object-cover border border-white/10" />;
+                      })}
                     </div>
                   </div>
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
