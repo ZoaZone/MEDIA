@@ -58,8 +58,10 @@ const NAV_SECTIONS = [
   {
     label: "CAMPAIGNS",
     items: [
-      { to: "/campaigns",  icon: Megaphone, label: "Campaigns" },
-      { to: "/social-hub", icon: Share2,    label: "Social Hub" },
+      { to: "/campaign-studio", icon: Sparkles,  label: "Campaign Studio", badge: "NEW" },
+      { to: "/brands",          icon: Building2, label: "Brand Manager" },
+      { to: "/campaigns",       icon: Megaphone, label: "Campaigns" },
+      { to: "/social-hub",      icon: Share2,    label: "Social Hub" },
     ],
   },
   {
