@@ -41,6 +41,9 @@ import BetaOnboarding from './pages/BetaOnboarding';
 import AgentProgram from './pages/AgentProgram';
 import AgencyEnquiry from './pages/AgencyEnquiry';
 import FreeTrial from './pages/FreeTrial';
+import BrandManager from './pages/BrandManager';
+import CampaignStudio from './pages/CampaignStudio';
+
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -85,7 +88,9 @@ const AuthenticatedApp = () => {
       <Route path="/invite" element={<BetaOnboarding />} />
       <Route path="/agent-program" element={<AgentProgram />} />
       <Route path="/agency-enquiry" element={<AgencyEnquiry />} />
-      <Route path="/free-trial" element={<FreeTrial />} />
+                    <Route path="/brands" element={<AppLayout><BrandManager /></AppLayout>} />
+              <Route path="/campaign-studio" element={<AppLayout><CampaignStudio /></AppLayout>} />
+              <Route path="/free-trial" element={<FreeTrial />} />
 
       <Route element={<AppLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
