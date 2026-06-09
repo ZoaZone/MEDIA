@@ -112,6 +112,7 @@ function buildPrompt(type, form) {
 export default function MediaStudio() {
   const { user } = useOutletContext() || {};
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   // Read prefill from ScriptWriter
   useEffect(() => {
@@ -365,8 +366,19 @@ export default function MediaStudio() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const returnToCampaign = sessionStorage.getItem("mediaStudio_returnTo");
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {returnToCampaign && (
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/20 text-sm">
+          <span className="text-fuchsia-400 font-medium">📎 You came from Campaign Studio — generate media then click "Use in Campaign" to send it back.</span>
+          <button onClick={() => { sessionStorage.removeItem("mediaStudio_returnTo"); navigate("/campaign-studio"); }}
+            className="ml-auto text-xs px-3 py-1.5 rounded-lg bg-fuchsia-600/20 text-fuchsia-400 hover:bg-fuchsia-600/30 transition whitespace-nowrap flex-shrink-0">
+            ← Back to Campaign
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div>
@@ -682,6 +694,29 @@ export default function MediaStudio() {
                   }`}>
                   {saved ? <><CheckCircle2 className="w-3.5 h-3.5" /> Saved!</> : "Save to Library"}
                 </button>
+                {result?.url && (
+                  <>
+                    <button onClick={() => {
+                      // Pass generated media URL back to campaign studio
+                      const existing = JSON.parse(sessionStorage.getItem("campaign_media_import") || "[]");
+                      existing.push(result.url);
+                      sessionStorage.setItem("campaign_media_import", JSON.stringify(existing));
+                      const returnTo = sessionStorage.getItem("mediaStudio_returnTo");
+                      if (returnTo) { sessionStorage.removeItem("mediaStudio_returnTo"); navigate("/" + returnTo); }
+                      else navigate("/campaign-studio");
+                    }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-fuchsia-500/10 text-fuchsia-400 hover:bg-fuchsia-500/20 transition">
+                      Use in Campaign
+                    </button>
+                    <button onClick={() => {
+                      sessionStorage.setItem("socialHub_media_url", result.url);
+                      navigate("/social-hub");
+                    }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">
+                      Post to Social
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
