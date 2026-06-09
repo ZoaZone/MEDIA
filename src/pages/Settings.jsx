@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Settings, Key, Bell, Save, CheckCircle2, Loader2, Eye, EyeOff,
-  Zap, User, Share2, Plus, Trash2, AlertCircle, ExternalLink
+  Zap, User, Share2, Plus, Trash2, AlertCircle, Eye, EyeOff, ExternalLink
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
