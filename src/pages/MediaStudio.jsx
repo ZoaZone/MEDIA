@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@api/base44Client";
+import { useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Video,
@@ -16,6 +14,7 @@ import {
 } from "lucide-react";
 
 export default function MediaStudio() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [project, setProject] = useState(null);
   const [uploadedBrandFiles, setUploadedBrandFiles] = useState([]);
@@ -48,7 +47,6 @@ export default function MediaStudio() {
     setFormData({ ...formData, selectedPlatforms: current });
   };
 
-  // 1. REPAIRED BRAND LOGO INGESTION HANDLER
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -61,7 +59,6 @@ export default function MediaStudio() {
     setUploadedBrandFiles([...uploadedBrandFiles, mockFileObj]);
   };
 
-  // 2. IN-APP SOCIAL CREDENTIALS LINK VERIFICATION
   const verifySocialAccount = (platform) => {
     setSocialAccounts(prev => ({
       ...prev,
@@ -69,7 +66,6 @@ export default function MediaStudio() {
     }));
   };
 
-  // 3. COMPLETE SYNCHRONIZED RUNTIME ENGINE
   const handleExecutePipeline = () => {
     setLoading(true);
     
@@ -88,7 +84,7 @@ export default function MediaStudio() {
       } else if (formData.captionStyle === "minimal") {
         finalCaption = `This shifts everything on auto-pilot. Watch below! 👇`;
         finalTags = ["shorts"];
-      } // If 'none' option is selected, strings and arrays stay entirely blank
+      }
 
       const targetBundle = {
         id: "proj_" + Date.now(),
@@ -176,7 +172,7 @@ export default function MediaStudio() {
             </div>
           </div>
 
-          <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)'" }}>
+          <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
             <h3 style={{ marginTop: 0, borderBottom: "1px solid #eee", paddingBottom: "8px", fontSize: "16px", display: "flex", alignItems: "center", gap: "8px" }}><Sparkles size={18}/> 3. Target Sync Verification</h3>
             {["instagram", "youtube", "tiktok"].map((platform) => (
               <div key={platform} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
@@ -240,15 +236,15 @@ export default function MediaStudio() {
                 {/* COPYWRITING CONTAINER */}
                 <div style={{ border: "1px solid #e0e0e0", padding: "16px", borderRadius: "8px", gridColumn: "span 2", background: "#fff" }}>
                   <h4 style={{ margin: "0 0 12px 0", borderBottom: "1px solid #eee", paddingBottom: "6px", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}><FileText size={16}/> Connected Campaign Text Strategy</h4>
-                  <p style={{ fontSize: '13px', lineHeight: "1.4" }}><strong><FileText size={12} style={{ inlineSize: "max-content", display: "inline", marginRight: "4px" }}/> Script Blueprint:</strong> {project.script}</p>
-                  <p style={{ fontSize: '13px', lineHeight: "1.4" }}><strong><Megaphone size={12} style={{ inlineSize: "max-content", display: "inline", marginRight: "4px" }}/> Ad Copy Layout:</strong> {project.adCopy}</p>
+                  <p style={{ fontSize: '13px', margin: "0 0 8px 0" }}><strong>Script Blueprint:</strong> {project.script}</p>
+                  <p style={{ fontSize: '13px', margin: "0 0 8px 0" }}><strong>Ad Copy Layout:</strong> {project.adCopy}</p>
                   
                   {project.captionStyle === "none" ? (
                     <p style={{ color: "#ff9900", fontStyle: "italic", fontSize: "13px", margin: "10px 0 0 0" }}>⚠️ Parameter Alert: Configured to [No Caption Mode] — Social fields systematically bypassed.</p>
                   ) : (
                     <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #eee" }}>
-                      <p style={{ fontSize: "13px", lineHeight: "1.4", margin: "0 0 8px 0" }}><strong>Live Social Caption:</strong> {project.caption}</p>
-                      <p style={{ fontSize: "13px", margin: 0 }}><strong><Hash size={12} style={{ inlineSize: "max-content", display: "inline", marginRight: "2px" }}/> Hashtags:</strong> {project.hashtags.map(t => `#${t}`).join(" ")}</p>
+                      <p style={{ fontSize: "13px", margin: "0 0 8px 0" }}><strong>Live Social Caption:</strong> {project.caption}</p>
+                      <p style={{ fontSize: "13px", margin: 0 }}><strong>Hashtags:</strong> {project.hashtags?.map(t => `#${t}`).join(" ")}</p>
                     </div>
                   )}
                 </div>
