@@ -109,37 +109,35 @@ export default function MediaStudio() {
       setLoading(false);
     }, 1200);
   };
-     const handleExecutePipeline = async () => {
-  setLoading(true);
-
-  // Re-define these inside the async scope to ensure latest form state
-  const logoContext = uploadedBrandFiles.length > 0 ? `[Using Logo Asset: ${uploadedBrandFiles[0].fileName}]` : "";
-  const websiteContext = formData.scannedWebsite ? `[Scanned Structure from: ${formData.scannedWebsite}]` : "";
-  const masterScript = `[Script - ${formData.durationSeconds}s Length] ${logoContext} ${websiteContext} Vision Context: ${formData.creativeVision}.`;
-
-  const payload = {
-    script: masterScript,
-    vision: formData.creativeVision,
-    format: formData.format,
-    duration: formData.durationSeconds,
-    platforms: formData.selectedPlatforms
-  };
-
-  try {
-    console.log("Attempting to trigger function with payload:", payload);
-    // This matches the verified function name 'generateMediaContent'
-    const result = await base44.functions.invoke("generateMediaContent", payload);
+  const handleExecutePipeline = async () => {
+    setLoading(true);
     
-    console.log("Success! Backend returned:", result);
-    setProject(result);
-    setVaultItems(prev => [result, ...prev]);
-  } catch (error) {
-    console.error("CRITICAL: Pipeline request failed:", error);
-    alert("Pipeline Error: " + error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    // Construct values from latest form state
+    const logoContext = uploadedBrandFiles.length > 0 ? `[Using Logo: ${uploadedBrandFiles[0].fileName}]` : "";
+    const websiteContext = formData.scannedWebsite ? `[Site: ${formData.scannedWebsite}]` : "";
+    const masterScript = `[Script - ${formData.durationSeconds}s] ${logoContext} ${websiteContext} Vision: ${formData.creativeVision}.`;
+
+    const payload = {
+      script: masterScript,
+      vision: formData.creativeVision,
+      format: formData.format,
+      duration: formData.durationSeconds,
+      platforms: formData.selectedPlatforms
+    };
+
+    try {
+      console.log("Triggering backend pipeline...");
+      const result = await base44.functions.invoke("generateMediaContent", payload);
+      
+      setProject(result);
+      setVaultItems(prev => [result, ...prev]);
+    } catch (error) {
+      console.error("Pipeline request failed:", error);
+      alert("Pipeline Error: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 return (
     <div style={{ padding: "30px", maxWidth: "1440px", margin: "0 auto", fontFamily: "system-ui, sans-serif", backgroundColor: "#fafafa", color: "#222" }}>
       
