@@ -135,7 +135,7 @@ export default function BrandManager() {
   };
 
   const brandAccounts = (brandId) => allAccounts.filter(a => a.brand_id === brandId);
- return (
+  return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -427,7 +427,7 @@ export default function BrandManager() {
                     <label className={lbl + " text-slate-400"}>Brand Voice</label>
                     <div className="grid grid-cols-2 gap-2">
                       {BRAND_VOICES.map(v => (
-                        <button key={v} onClick={() => setForm(f => ({ ...v, brand_voice: v }))}
+                        <button key={v} onClick={() => setForm(f => ({ ...f, brand_voice: v }))}
                           className={`p-2.5 rounded-xl border text-xs text-left transition ${form.brand_voice === v ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-white/10 text-slate-400 hover:border-white/20 hover:text-white"}`}>
                           {v}
                         </button>
@@ -511,4 +511,4 @@ export default function BrandManager() {
       )}
     </div>
   );
-} 
+}
