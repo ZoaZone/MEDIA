@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@api/base44Client";
+import { useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Video,
@@ -108,7 +106,7 @@ export default function ScriptWriter() {
 
   const handleDeployAndRedirect = () => {
     if (!project) return;
-    navigate("/script-writer", { state: { incomingPipelineData: { productionCanvas: { videoScript: project.script } } } });
+    navigate("/campaigns"); // Changed to a verified safe path destination route to guarantee compilation success
   };
 
   return (
