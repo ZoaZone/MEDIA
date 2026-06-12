@@ -10,15 +10,14 @@ export default function MediaStudio() {
 
   const handleExecutePipeline = async () => {
     setLoading(true);
-    console.log("Pipeline initiated with vision:", formData.creativeVision);
-    
     try {
-      const payload = { script: formData.creativeVision, format: formData.format, duration: formData.durationSeconds };
+      const payload = { 
+        script: formData.creativeVision, 
+        format: formData.format, 
+        duration: formData.durationSeconds 
+      };
       
-      // The invocation that is currently failing
       const result = await base44.functions.invoke("generateMediaContent", payload);
-      
-      console.log("AI Backend Response:", result);
       setProject(result);
     } catch (error) {
       console.error("PIPELINE ERROR:", error);
@@ -29,18 +28,34 @@ export default function MediaStudio() {
   };
 
   return (
-    <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
+    <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto", fontFamily: "sans-serif" }}>
       <h1>Automated Brand Studio</h1>
-      <textarea name="creativeVision" value={formData.creativeVision} onChange={handleInputChange} style={{ width: "100%", height: "100px" }} />
-      <button onClick={handleExecutePipeline} disabled={loading} style={{ marginTop: "20px", padding: "10px 20px" }}>
+      
+      <div style={{ marginTop: "20px" }}>
+        <label style={{ display: "block", marginBottom: "8px" }}>Creative Brand Vision</label>
+        <textarea 
+          name="creativeVision" 
+          value={formData.creativeVision} 
+          onChange={handleInputChange} 
+          style={{ width: "100%", height: "150px", padding: "12px", borderRadius: "8px" }} 
+        />
+      </div>
+
+      <button 
+        onClick={handleExecutePipeline} 
+        disabled={loading} 
+        style={{ marginTop: "20px", padding: "12px 24px", background: "#7f00ff", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}
+      >
         {loading ? "Generating..." : "Execute Pipeline"}
       </button>
 
       <div style={{ marginTop: "30px" }}>
         {project ? (
-          <video src={project.videoUrl} controls style={{ width: "100%" }} />
+          <video src={project.videoUrl} controls style={{ width: "100%", borderRadius: "8px" }} />
         ) : (
-          <p>{loading ? "AI is working... (Check Console if this takes > 10s)" : "Ready to generate."}</p>
+          <p style={{ color: "#666" }}>
+            {loading ? "AI is working... (Check Console if this takes > 10s)" : "Ready to generate."}
+          </p>
         )}
       </div>
     </div>
