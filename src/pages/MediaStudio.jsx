@@ -91,7 +91,8 @@ function buildPrompt(type, form) {
       return `Write a WhatsApp broadcast message. ${base} Use line breaks and a few relevant emojis. Max 300 chars. Include CTA and opt-out line.`;
     case "blog_post":
       return `Write a complete SEO-optimized blog post. ${base}\nInclude:\n- SEO Title\n- Meta Description (155 chars)\n- H1, H2, H3 headings\n- 600-900 word body\n- Internal link placeholders\n- [...]
-    case "video_script": return `Write a full video script for a ${form.videoStyle || "short-form"} video (${form.videoDuration || "60 seconds"}). ${base}`;
+    case "video_script":
+      return `Write a full video script for a ${form.videoStyle || "short-form"} video (${form.videoDuration || "60 seconds"}). ${base}`;
   }
 }
 
