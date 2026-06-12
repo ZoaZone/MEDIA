@@ -135,7 +135,7 @@ export default function BrandManager() {
   };
 
   const brandAccounts = (brandId) => allAccounts.filter(a => a.brand_id === brandId);
-  return (
+ return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -175,6 +175,8 @@ export default function BrandManager() {
           {brands.map(b => {
             const accs = brandAccounts(b.id);
             const isExpanded = expandedId === b.id;
+            const currentBrandId = b.id;
+            
             return (
               <div key={b.id} className="bg-card border border-border rounded-2xl overflow-hidden">
                 <div className="flex items-center gap-4 p-5">
@@ -284,9 +286,9 @@ export default function BrandManager() {
                         {newAccount.connection_method === "credentials" && (
                           <div className="relative">
                             <label className={lbl}>Password</label>
-                            <input type={showPassword[b.id] ? "text" : "password"} value={newAccount.password} onChange={e => setNewAccount(a => ({ ...a, password: e.target.value }))} placeholder="Account password" className={inp + " pr-10"} />
-                            <button type="button" onClick={() => setShowPassword(p => ({ ...p, [b.id]: !p[b.id] }))} className="absolute right-3 bottom-2.5 text-muted-foreground">
-                              {showPassword[b.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <input type={showPassword[currentBrandId] ? "text" : "password"} value={newAccount.password} onChange={e => setNewAccount(a => ({ ...a, password: e.target.value }))} placeholder="Account password" className={inp + " pr-10"} />
+                            <button type="button" onClick={() => setShowPassword(p => ({ ...p, [currentBrandId]: !p[currentBrandId] }))} className="absolute right-3 bottom-2.5 text-muted-foreground">
+                              {showPassword[currentBrandId] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
                         )}
@@ -298,7 +300,7 @@ export default function BrandManager() {
                         )}
                         <div className="flex gap-2 justify-end">
                           <button onClick={() => setAddingAccount(false)} className="px-3 py-2 rounded-xl bg-white/5 text-muted-foreground text-xs hover:bg-white/10">Cancel</button>
-                          <button onClick={() => saveAccount(b.id)} disabled={savingAccount}
+                          <button onClick={() => saveAccount(currentBrandId)} disabled={savingAccount}
                             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold hover:opacity-90 disabled:opacity-50">
                             {savingAccount ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Save Account
                           </button>
@@ -425,7 +427,7 @@ export default function BrandManager() {
                     <label className={lbl + " text-slate-400"}>Brand Voice</label>
                     <div className="grid grid-cols-2 gap-2">
                       {BRAND_VOICES.map(v => (
-                        <button key={v} onClick={() => setForm(f => ({ ...f, brand_voice: v }))}
+                        <button key={v} onClick={() => setForm(f => ({ ...v, brand_voice: v }))}
                           className={`p-2.5 rounded-xl border text-xs text-left transition ${form.brand_voice === v ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-white/10 text-slate-400 hover:border-white/20 hover:text-white"}`}>
                           {v}
                         </button>
@@ -509,4 +511,4 @@ export default function BrandManager() {
       )}
     </div>
   );
-}
+} 
