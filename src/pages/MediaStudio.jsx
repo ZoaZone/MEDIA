@@ -97,6 +97,26 @@ function buildPrompt(type, form) {
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
+  const getSystemPrompt = (type, base, form) => {
+    if (type === "blog_post") {
+      return "Write a complete SEO-optimized blog post. " + base + "\nInclude:\n- SEO Title\n- Meta Description (155 chars)\n- H1, H2, H3 headings";
+    }
+    if (type === "video_script") {
+      const style = form?.videoStyle || "short-form";
+      const duration = form?.videoDuration || "60 seconds";
+      return "Write a full video script for a " + style + " video (" + duration + "). " + base;
+    }
+    if (type === "video_storyboard") {
+      const style = form?.videoStyle || "social media";
+      const duration = form?.videoDuration || "60 seconds";
+      return "Create a detailed storyboard for a " + duration + " " + style + " video. " + base;
+    }
+    if (type === "thumbnail") {
+      return "Generate a thumbnail concept description for: " + base;
+    }
+    return base;
+  };
+
 export default function MediaStudio() {
   const { user } = useOutletContext() || {};
   const qc = useQueryClient();
