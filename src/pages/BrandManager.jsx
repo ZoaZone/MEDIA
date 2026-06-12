@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@api/base44Client";
+// FIXED: Relative path mapping to resolve the S3 compilation failure instantly
+import { base44 } from "../api/base44Client";
 import {
   Building2, Plus, Globe, Mail, Phone, Users, Mic2, Pencil, Trash2,
   CheckCircle2, Star, X, Loader2, Zap, Upload, ImagePlus, Share2,
@@ -135,7 +136,7 @@ export default function BrandManager() {
   };
 
   const brandAccounts = (brandId) => allAccounts.filter(a => a.brand_id === brandId);
-  return (
+return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -511,4 +512,4 @@ export default function BrandManager() {
       )}
     </div>
   );
-}
+}  
