@@ -29,8 +29,8 @@ export default function MediaStudio() {
   const [formData, setFormData] = useState({
     creativeVision: "",
     scannedWebsite: "",
-    format: "9:16",
-    durationSeconds: 30,
+    format: "16:9",
+    durationSeconds: 60,
     captionStyle: "complete",
     selectedPlatforms: []
   });
@@ -47,7 +47,6 @@ export default function MediaStudio() {
     setFormData({ ...formData, selectedPlatforms: current });
   };
 
-  // SUCCESSFUL UPLOAD RESOLUTION: Processes file targets and creates clean browser object streams
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -59,7 +58,7 @@ export default function MediaStudio() {
         fileName: file.name,
         fileUrl: localObjectURL
       };
-      setUploadedBrandFiles([newFileObj]); // Saves object reference securely to local component state
+      setUploadedBrandFiles([newFileObj]);
     } catch (error) {
       console.error("Local file processing layer failure:", error);
     }
@@ -100,10 +99,9 @@ export default function MediaStudio() {
         adCopy: `Ad Creative Copy Layout generated directly from unified master blueprint: ${masterScript}`,
         caption: finalCaption,
         hashtags: finalTags,
-        // Uses local uploaded asset layout if it exists, otherwise falls back to standard placeholder canvas vectors
         thumbnailUrl: uploadedBrandFiles[0]?.fileUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600",
-        // VIDEO RESOLUTION LAYER: Uses a fast rendering, high-availability public clip source that guarantees video pipeline loading
-        videoUrl: "https://html5demos.com/assets/dizzy.mp4"
+        // FIXED: Replaced dead dizzy.mp4 link with a high-availability, working open-source stream link
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
       };
 
       setProject(targetBundle);
@@ -111,8 +109,7 @@ export default function MediaStudio() {
       setLoading(false);
     }, 1200);
   };
-
-  return (
+return (
     <div style={{ padding: "30px", maxWidth: "1440px", margin: "0 auto", fontFamily: "system-ui, sans-serif", backgroundColor: "#fafafa", color: "#222" }}>
       
       <header style={{ marginBottom: "30px", borderBottom: "2px solid #eaeaea", paddingBottom: "15px" }}>
@@ -148,7 +145,7 @@ export default function MediaStudio() {
 
             <div>
               <label style={{ display: "block", fontWeight: "bold", marginBottom: "6px", fontSize: "13px", color: "#555" }}>Creative Brand Vision Context</label>
-              <textarea name="creativeVision" placeholder="Outline specific launch milestones or asset generation directives..." value={formData.creativeVision} onChange={handleInputChange} style={{ width: "100%", height: "80px", padding: "10px", boxSizing: "border-box", borderRadius: "6px", border: "1px solid #ccc", resize: "none" }} />
+              <textarea name="creativeVision" placeholder="Outline specific launch milestones..." value={formData.creativeVision} onChange={handleInputChange} style={{ width: "100%", height: "80px", padding: "10px", boxSizing: "border-box", borderRadius: "6px", border: "1px solid #ccc", resize: "none" }} />
             </div>
           </div>
 
@@ -158,8 +155,8 @@ export default function MediaStudio() {
             <div style={{ marginBottom: "15px" }}>
               <label style={{ display: "block", fontWeight: "bold", marginBottom: "6px", fontSize: "13px", color: "#555" }}>Target Frame Ratio Viewport</label>
               <select name="format" value={formData.format} onChange={handleInputChange} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff" }}>
-                <option value="9:16">9:16 Vertical Timeline (TikTok/Reels)</option>
                 <option value="16:9">16:9 Landscape Video (Widescreen Player)</option>
+                <option value="9:16">9:16 Vertical Timeline (TikTok/Reels)</option>
                 <option value="1:1">1:1 Square Ratio Format (Feed Posts)</option>
               </select>
             </div>
@@ -167,18 +164,18 @@ export default function MediaStudio() {
             <div style={{ marginBottom: "15px" }}>
               <label style={{ display: "block", fontWeight: "bold", marginBottom: "6px", fontSize: "13px", color: "#555" }}>Target Output Run Length</label>
               <select name="durationSeconds" value={formData.durationSeconds} onChange={handleInputChange} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff" }}>
+                <option value={60}>60 Seconds Maximum</option>
                 <option value={15}>15 Seconds Maximum</option>
                 <option value={30}>30 Seconds Maximum</option>
-                <option value={60}>60 Seconds Maximum</option>
               </select>
             </div>
 
             <div>
               <label style={{ display: "block", fontWeight: "bold", marginBottom: "6px", fontSize: "13px", color: "#555" }}>Copywriting & Distribution Strategy</label>
               <select name="captionStyle" value={formData.captionStyle} onChange={handleInputChange} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff" }}>
+                <option value="complete">Comprehensive Layout Copy + System Hashtags</option>
                 <option value="none">Isolate Media Assets (Omit Accompanying Copy)</option>
                 <option value="minimal">Direct High-Impact Headline Only</option>
-                <option value="complete">Comprehensive Layout Copy + System Hashtags</option>
               </select>
             </div>
           </div>
@@ -253,8 +250,8 @@ export default function MediaStudio() {
                 <div style={{ border: "1px solid #e0e0e0", padding: "16px", borderRadius: "10px", gridColumn: "span 2", background: "#fff" }}>
                   <h4 style={{ margin: "0 0 12px 0", borderBottom: "1px solid #eee", paddingBottom: "8px", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px", color: "#333" }}><FileText size={16}/> Calculated Campaign Strategy Logs</h4>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <p style={{ fontSize: "13px", margin: 0, color: "#444" }}><strong>Master Prompt Structure:</strong> {project.script}</p>
-                    <p style={{ fontSize: "13px", margin: 0, color: "#444" }}><strong>Marketing Copy Distribution Schema:</strong> {project.adCopy}</p>
+                    <p style={{ fontSize: "13px", margin: 0, color: "#444", whiteSpace: "pre-wrap" }}><strong>Master Prompt Structure:</strong> {project.script}</p>
+                    <p style={{ fontSize: "13px", margin: 0, color: "#444", whiteSpace: "pre-wrap" }}><strong>Marketing Copy Distribution Schema:</strong> {project.adCopy}</p>
                   </div>
                   
                   {project.captionStyle === "none" ? (
@@ -295,4 +292,4 @@ export default function MediaStudio() {
       </div>
     </div>
   );
-}
+}  
