@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import {
@@ -9,7 +9,7 @@ import {
   Clapperboard, Volume2, Music, AlignLeft, Upload, X, ImagePlus
 } from "lucide-react";
 
-// ── Creative Types ──────────────────────────────────────────────────────────
+// ── Creative Types ─────────────────────────────────────────────────────────[...]
 const TYPES = [
   // Video Generation
   { id: "ai_video",      label: "AI Video",       Icon: Clapperboard, desc: "Generate real video with audio",  color: "from-rose-500 to-red-600",        category: "video" },
@@ -90,19 +90,19 @@ function buildPrompt(type, form) {
     case "whatsapp":
       return `Write a WhatsApp broadcast message. ${base} Use line breaks and a few relevant emojis. Max 300 chars. Include CTA and opt-out line.`;
     case "blog_post":
-      return `Write a complete SEO-optimized blog post. ${base}\nInclude:\n- SEO Title\n- Meta Description (155 chars)\n- H1, H2, H3 headings\n- 600-900 word body\n- Internal link placeholders\n- Conclusion + CTA`;
+      return `Write a complete SEO-optimized blog post. ${base}\nInclude:\n- SEO Title\n- Meta Description (155 chars)\n- H1, H2, H3 headings\n- 600-900 word body\n- Internal link placeholders\n- [...]
     case "video_script":
-      return `Write a full video script for a ${form.videoStyle || "short-form"} video (${form.videoDuration || "60 seconds"}). ${base}\nFormat as:\nHOOK (0-3s): ...\nINTRO (3-8s): ...\n[Scene-by-scene with timecodes]\nOUTRO + CTA: ...\nCAPTION OVERLAY TEXT: ...`;
+      return `Write a full video script for a ${form.videoStyle || "short-form"} video (${form.videoDuration || "60 seconds"}). ${base}\nFormat as:\nHOOK (0-3s): ...\nINTRO (3-8s): ...\n[Scene-by-[...]
     case "video_storyboard":
-      return `Create a detailed storyboard for a ${form.videoDuration || "60 seconds"} ${form.videoStyle || "social media"} video. ${base}\nFor each shot provide:\nSHOT [N]: [angle]\nVISUAL: [what's on screen]\nAUDIO/VO: [voiceover or music note]\nTEXT OVERLAY: [on-screen text]\nDURATION: [seconds]\n\nInclude 6-10 shots.`;
+      return `Create a detailed storyboard for a ${form.videoDuration || "60 seconds"} ${form.videoStyle || "social media"} video. ${base}\nFor each shot provide:\nSHOT [N]: [angle]\nVISUAL: [what[...]
     case "thumbnail":
-      return `Design directions for a ${form.platform} video thumbnail. ${base}\nProvide:\nCONCEPT: ...\nBACKGROUND: ...\nTEXT OVERLAY: ...\nCOLOR PALETTE: ...\nEMOTION/EXPRESSION: ...\nFONT STYLE: ...`;
+      return `Design directions for a ${form.platform} video thumbnail. ${base}\nProvide:\nCONCEPT: ...\nBACKGROUND: ...\nTEXT OVERLAY: ...\nCOLOR PALETTE: ...\nEMOTION/EXPRESSION: ...\nFONT STYLE[...]
     case "brand_voice":
-      return `Create a brand voice guide for: "${form.prompt}".\nInclude:\n- Brand Personality (3-5 adjectives)\n- Tone of Voice\n- Words We Use / Words We Avoid\n- Sample Taglines (5)\n- Sample Social Bio\n- Sample Caption\n- Competitor Differentiation`;
+      return `Create a brand voice guide for: "${form.prompt}".\nInclude:\n- Brand Personality (3-5 adjectives)\n- Tone of Voice\n- Words We Use / Words We Avoid\n- Sample Taglines (5)\n- Sample [...]
     case "brand_bio":
-      return `Write platform bios for "${form.prompt}". Tone: ${form.tone}.\nProvide:\nINSTAGRAM BIO (150 chars): ...\nTWITTER/X BIO (160 chars): ...\nLINKEDIN SUMMARY (300 chars): ...\nTIKTOK BIO (80 chars): ...\nYOUTUBE ABOUT (500 chars): ...`;
+      return `Write platform bios for "${form.prompt}". Tone: ${form.tone}.\nProvide:\nINSTAGRAM BIO (150 chars): ...\nTWITTER/X BIO (160 chars): ...\nLINKEDIN SUMMARY (300 chars): ...\nTIKTOK BI[...]
     case "press_release":
-      return `Write a professional press release. ${base}\nFormat as:\nFOR IMMEDIATE RELEASE\n\nHEADLINE: ...\nSUBHEADLINE: ...\nCITY, DATE — [opening paragraph - who, what, when, where, why]\n[Body: 3-4 paragraphs]\nQUOTE: "..." — [Name, Title]\nABOUT [COMPANY]: ...\nCONTACT: ...`;
+      return `Write a professional press release. ${base}\nFormat as:\nFOR IMMEDIATE RELEASE\n\nHEADLINE: ...\nSUBHEADLINE: ...\nCITY, DATE — [opening paragraph - who, what, when, where, why]\n[...]
     default:
       return `Generate ${type} content. ${base}`;
   }
@@ -276,7 +276,7 @@ export default function MediaStudio() {
         for (let i = 0; i < numClips; i++) {
           const sceneHint = numClips > 1 ? ` Scene ${i + 1} of ${numClips}.` : "";
           const safePrompt = sanitizeVideoPrompt(form.prompt);
-          const videoPrompt = `${safePrompt}.${sceneHint} Platform: ${form.platform}. Tone: ${form.tone}. Style: cinematic, high quality, professional marketing video. Seamlessly continues the same visual story.${audioHint}${refHint}`;
+          const videoPrompt = `${safePrompt}.${sceneHint} Platform: ${form.platform}. Tone: ${form.tone}. Style: cinematic, high quality, professional marketing video. Seamlessly continues the sa[...]
           // Pass uploaded reference images to video generation for subject replication
           const clipRefUrls = uploadedFiles
             .filter(f => f.type?.startsWith("image/") && f.url && !f.uploadFailed)
@@ -292,7 +292,7 @@ export default function MediaStudio() {
 
         // Generate captions using LLM
         const totalSec = clipSec * numClips;
-        const captionPrompt = `Generate ${form.captionStyle === "full" ? "full sentence" : "short punchy"} captions/subtitles for a ${totalSec}-second video about: "${form.prompt}". Platform: ${form.platform}. Format as timestamped lines:\n[0:00] caption text\n[0:02] next caption\n...`;
+        const captionPrompt = `Generate ${form.captionStyle === "full" ? "full sentence" : "short punchy"} captions/subtitles for a ${totalSec}-second video about: "${form.prompt}". Platform: ${f[...]
         const captionRes = await base44.functions.invoke("generateMediaContent", {
           type: "caption", platform: form.platform, tone: form.tone, prompt: captionPrompt,
         });
@@ -579,7 +579,7 @@ export default function MediaStudio() {
               <ImagePlus className="w-3.5 h-3.5" />
               Reference Media <span className="text-muted-foreground/50">(optional)</span>
             </label>
-            <label className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl py-4 px-3 cursor-pointer transition-all ${uploading ? "border-fuchsia-500/40 bg-fuchsia-500/5" : "border-border hover:border-fuchsia-500/40 hover:bg-fuchsia-500/5"}`}>
+            <label className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl py-4 px-3 cursor-pointer transition-all ${uploading ? "border-fuchsia-500/40 bg-f[...]
               <input
                 type="file"
                 multiple
@@ -590,7 +590,7 @@ export default function MediaStudio() {
               />
               {uploading
                 ? <><Loader2 className="w-4 h-4 animate-spin text-fuchsia-400 mb-1" /><span className="text-xs text-fuchsia-400">Uploading…</span></>
-                : <><Upload className="w-4 h-4 text-muted-foreground mb-1" /><span className="text-xs text-muted-foreground">Click to upload images or videos</span><span className="text-[10px] text-muted-foreground/50 mt-0.5">JPG, PNG, MP4, MOV • multiple files OK</span></>
+                : <><Upload className="w-4 h-4 text-muted-foreground mb-1" /><span className="text-xs text-muted-foreground">Click to upload images or videos</span><span className="text-[10px] te[...]
               }
             </label>
             {uploadedFiles.length > 0 && (
@@ -607,7 +607,7 @@ export default function MediaStudio() {
                     )}
                     <button
                       onClick={() => removeUploadedFile(i)}
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"[...]
                       <X className="w-2.5 h-2.5" />
                     </button>
                   </div>
@@ -619,7 +619,7 @@ export default function MediaStudio() {
                 {isVisual
                   ? "AI will replicate the person(s) and style from your reference images"
                   : isAiVideo
-                  ? "Note: AI Video (Veo) cannot directly use reference images for face replication — use Image generation for that. Your prompt will be cleaned to pass Vertex AI's content guidelines."
+                  ? "Note: AI Video (Veo) cannot directly use reference images for face replication — use Image generation for that. Your prompt will be cleaned to pass Vertex AI's content guid[...]
                   : "Uploaded files will inform the AI context"}
               </p>
             )}
@@ -629,7 +629,7 @@ export default function MediaStudio() {
           <button
             onClick={generate}
             disabled={loading || !form.prompt.trim()}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-500/20 transition-all">
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-cente[...]
             {loading
               ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
               : <><Wand2 className="w-4 h-4" /> Generate {activeTypeObj?.label}</>
@@ -811,7 +811,7 @@ export default function MediaStudio() {
                 <div className="flex flex-col items-center justify-center flex-1 min-h-52 text-center bg-red-500/5 rounded-xl border border-red-500/20">
                   <p className="text-red-400 text-sm font-medium">Video generation failed</p>
                   <p className="text-muted-foreground text-xs mt-1">Try again or adjust your prompt</p>
-                  <button onClick={generate} className="mt-3 px-4 py-2 rounded-lg bg-fuchsia-500/10 text-fuchsia-400 text-xs font-medium hover:bg-fuchsia-500/20 transition-colors">Try Again</button>
+                  <button onClick={generate} className="mt-3 px-4 py-2 rounded-lg bg-fuchsia-500/10 text-fuchsia-400 text-xs font-medium hover:bg-fuchsia-500/20 transition-colors">Try Again</butt[...]
                 </div>
               ) : result.type === "image" && result.url ? (
                 <>
@@ -863,7 +863,7 @@ export default function MediaStudio() {
           <div>
             <p className="text-sm font-semibold text-foreground">AI Video Script & Storyboard</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Generate production-ready scripts and shot-by-shot storyboards. Take them to Runway ML, Pika, Kling, or any AI video tool to render the actual video. Save to Media Library for your video team.
+              Generate production-ready scripts and shot-by-shot storyboards. Take them to Runway ML, Pika, Kling, or any AI video tool to render the actual video. Save to Media Library for your [...]
             </p>
           </div>
         </div>
