@@ -300,7 +300,7 @@ export default function MediaStudio() {
 
         // Generate captions using LLM
         const totalSec = clipSec * numClips;
-        const captionPrompt = `Generate ${form.captionStyle === "full" ? "full sentence" : "short punchy"} captions/subtitles for a ${totalSec}-second video about: "${form.prompt}". Platform: ${form.platform}.`;
+                const captionPrompt = "Generate " + (form.captionStyle === "full" ? "full sentence" : "short punchy") + " captions/subtitles for a " + totalSec + "-second video about: \"" + form.prompt + "\". Platform: " + form.platform + ".";
         const captionRes = await base44.functions.invoke("generateMediaContent", {
           type: "caption", platform: form.platform, tone: form.tone, prompt: captionPrompt,
         });
