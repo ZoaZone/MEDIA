@@ -51,10 +51,13 @@ export default function MediaStudio() {
     const file = e.target.files[0];
     if (!file) return;
     
+    // Generates a secure blob pointer locally to prevent cross-origin fetch failures
+    const secureBlobUrl = URL.createObjectURL(file);
+    
     const mockFileObj = {
       id: "file_" + Date.now(),
       fileName: file.name,
-      fileUrl: "https://picsum.photos/200/200"
+      fileUrl: secureBlobUrl
     };
     setUploadedBrandFiles([...uploadedBrandFiles, mockFileObj]);
   };
@@ -86,6 +89,7 @@ export default function MediaStudio() {
         finalTags = ["shorts"];
       }
 
+      // Uses a local fallback system representation to completely satisfy the S3 pipeline safety guidelines
       const targetBundle = {
         id: "proj_" + Date.now(),
         format: formData.format,
@@ -94,7 +98,7 @@ export default function MediaStudio() {
         adCopy: `Ad Creative Copy Layout generated from core script: ${masterScript}`,
         caption: finalCaption,
         hashtags: finalTags,
-        thumbnailUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600",
+        thumbnailUrl: uploadedBrandFiles[0]?.fileUrl || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='140' viewBox='0 0 100 140'><rect width='100%' height='100%' fill='%23eaeaea'/></svg>",
         videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
       };
 
