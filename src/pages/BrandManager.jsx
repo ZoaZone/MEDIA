@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-// FIXED: Relative path mapping to resolve the S3 compilation failure instantly
 import { base44 } from "../api/base44Client";
 import {
   Building2, Plus, Globe, Mail, Phone, Users, Mic2, Pencil, Trash2,
@@ -34,7 +33,6 @@ const PLATFORMS = [
 ];
 
 const TIER_LIMITS = { starter: 1, pro: 3, agency: 10 };
-
 const STEPS = ["Details", "Colors & Voice", "Social Accounts", "Review"];
 
 const inp = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-fuchsia-500/70 transition";
@@ -87,13 +85,19 @@ export default function BrandManager() {
     setFormStep(0); setShowForm(true);
   };
 
+  // FIXED: Explicit structural destructuring with URL fallback checks to bypass upload failures
   const uploadLogo = async (file) => {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await base44.storage.uploadFile(file);
-      setForm(f => ({ ...f, logo_file_url: url, logo_url: url }));
-    } catch (e) { alert("Logo upload failed: " + e.message); }
+      const res = await base44.storage.uploadFile(file);
+      const targetUrl = typeof res === "string" ? res : res?.url || res?.file_url || "";
+      if (!targetUrl) throw new Error("Invalid asset response structure payload.");
+      
+      setForm(f => ({ ...f, logo_file_url: targetUrl, logo_url: targetUrl }));
+    } catch (e) { 
+      alert("Logo upload failed: " + e.message); 
+    }
     setUploading(false);
   };
 
