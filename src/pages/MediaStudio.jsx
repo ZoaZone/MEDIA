@@ -47,19 +47,22 @@ export default function MediaStudio() {
     setFormData({ ...formData, selectedPlatforms: current });
   };
 
+  // FIXED: Handles local file uploading correctly and creates an accessible preview URL
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Generates a secure blob pointer locally to prevent cross-origin fetch failures
-    const secureBlobUrl = URL.createObjectURL(file);
-    
-    const mockFileObj = {
-      id: "file_" + Date.now(),
-      fileName: file.name,
-      fileUrl: secureBlobUrl
-    };
-    setUploadedBrandFiles([...uploadedBrandFiles, mockFileObj]);
+    try {
+      const localPreviewUrl = URL.createObjectURL(file);
+      const newFileObj = {
+        id: "file_" + Date.now(),
+        fileName: file.name,
+        fileUrl: localPreviewUrl
+      };
+      setUploadedBrandFiles([...uploadedBrandFiles, newFileObj]);
+    } catch (error) {
+      console.error("Local preview generation failed:", error);
+    }
   };
 
   const verifySocialAccount = (platform) => {
@@ -89,7 +92,6 @@ export default function MediaStudio() {
         finalTags = ["shorts"];
       }
 
-      // Uses a local fallback system representation to completely satisfy the S3 pipeline safety guidelines
       const targetBundle = {
         id: "proj_" + Date.now(),
         format: formData.format,
@@ -98,8 +100,10 @@ export default function MediaStudio() {
         adCopy: `Ad Creative Copy Layout generated from core script: ${masterScript}`,
         caption: finalCaption,
         hashtags: finalTags,
-        thumbnailUrl: uploadedBrandFiles[0]?.fileUrl || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='140' viewBox='0 0 100 140'><rect width='100%' height='100%' fill='%23eaeaea'/></svg>",
-        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+        // Uses the uploaded brand asset preview if available
+        thumbnailUrl: uploadedBrandFiles[0]?.fileUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600",
+        // FIXED: Using a reliable, public domain test stream video file that won't show up blank
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4"
       };
 
       setProject(targetBundle);
@@ -179,7 +183,7 @@ export default function MediaStudio() {
           <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
             <h3 style={{ marginTop: 0, borderBottom: "1px solid #eee", paddingBottom: "8px", fontSize: "16px", display: "flex", alignItems: "center", gap: "8px" }}><Sparkles size={18}/> 3. Target Sync Verification</h3>
             {["instagram", "youtube", "tiktok"].map((platform) => (
-              <div key={platform} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+              <div key={platform} style={{ display: "flex", alignItems: "center", justifyBetween: "space-between", marginBottom: "12px" }}>
                 <label style={{ textTransform: "capitalize", fontSize: "13px", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}>
                   <input type="checkbox" checked={formData.selectedPlatforms.includes(platform)} onChange={() => togglePlatformSelection(platform)} />
                   {platform}
