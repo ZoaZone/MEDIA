@@ -137,7 +137,6 @@ export default function BrandManager() {
   const brandAccounts = (brandId) => allAccounts.filter(a => a.brand_id === brandId);
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
@@ -160,7 +159,6 @@ export default function BrandManager() {
         </div>
       )}
 
-      {/* Brand list */}
       {isLoading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-fuchsia-400" /></div>
       ) : brands.length === 0 ? (
@@ -315,7 +313,6 @@ export default function BrandManager() {
         </div>
       )}
 
-      {/* MODAL WORKSPACE FORM */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl my-4">
