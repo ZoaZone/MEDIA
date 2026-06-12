@@ -243,14 +243,14 @@ export default function ScriptWriter() {
                 {/* COPYWRITING CONTAINER */}
                 <div style={{ border: "1px solid #e0e0e0", padding: "16px", borderRadius: "8px", gridColumn: "span 2", background: "#fff" }}>
                   <h4 style={{ margin: "0 0 12px 0", borderBottom: "1px solid #eee", paddingBottom: "6px", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}><FileText size={16}/> Connected Campaign Text Strategy</h4>
-                  <p style={{ fontSize: '13px', lineHeight: "1.4" }}><strong>Script Blueprint:</strong> {project.script}</p>
-                  <p style={{ fontSize: '13px', lineHeight: "1.4" }}><strong>Ad Copy Layout:</strong> {project.adCopy}</p>
+                  <p style={{ fontSize: '13px', margin: "0 0 8px 0" }}><strong>Script Blueprint:</strong> {project.script}</p>
+                  <p style={{ fontSize: '13px', margin: "0 0 8px 0" }}><strong>Ad Copy Layout:</strong> {project.adCopy}</p>
                   
                   {project.captionStyle === "none" ? (
                     <p style={{ color: "#ff9900", fontStyle: "italic", fontSize: "13px", margin: "10px 0 0 0" }}>⚠️ Parameter Alert: Configured to [No Caption Mode] — Social fields systematically bypassed.</p>
                   ) : (
                     <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #eee" }}>
-                      <p style={{ fontSize: "13px", lineHeight: "1.4", margin: "0 0 8px 0" }}><strong>Live Social Caption:</strong> {project.caption}</p>
+                      <p style={{ fontSize: "13px", margin: "0 0 8px 0" }}><strong>Live Social Caption:</strong> {project.caption}</p>
                       <p style={{ fontSize: "13px", margin: 0 }}><strong>Hashtags:</strong> {project.hashtags?.map(t => `#${t}`).join(" ")}</p>
                     </div>
                   )}
