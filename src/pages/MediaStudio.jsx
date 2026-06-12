@@ -101,7 +101,7 @@ export default function MediaStudio() {
         hashtags: finalTags,
         thumbnailUrl: uploadedBrandFiles[0]?.fileUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600",
         // FIXED: Replaced dead dizzy.mp4 link with a high-availability, working open-source stream link
-        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4"
       };
 
       setProject(targetBundle);
