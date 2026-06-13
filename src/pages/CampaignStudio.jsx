@@ -47,7 +47,9 @@ export default function CampaignStudio() {
         if (data.ai_output) setStep(2);
         sessionStorage.removeItem("campaignStudio_prefill");
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
 
     try {
       const mediaImport = sessionStorage.getItem("mediaImportData");
@@ -57,7 +59,9 @@ export default function CampaignStudio() {
         setStep(3);
         sessionStorage.removeItem("mediaImportData");
       }
-    } catch (e) { console.error(e); }
+    } catch (error) {
+      console.error("Failed to parse imported media:", error);
+    }
   }, []);
 
   const selectedBrand = brands.find(b => b.id === campaign.brand_id);
