@@ -95,10 +95,12 @@ export default function CampaignStudio() {
       } catch (_) {}
     }
     // Pick up media imported from Media Studio
-      try {
-        const urls = JSON.parse(mediaImport);
-        setCampaign(p => ({ ...p, media_urls: [...new Set([...p.media_urls, ...urls])] }));
-        setStep(3); // jump to media step to show the imported media
+    try {
+      const urls = JSON.parse(mediaImport);
+      setCampaign(p => ({ ...p, media_urls: [...new Set([...p.media_urls, ...urls])] }));
+      setStep(3); // jump to media step to show the imported media
+    } catch (error) {
+      console.error("Failed to parse imported media:", error);
     }
   }, []);
 
