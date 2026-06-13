@@ -192,6 +192,7 @@ export default function Home() {
   }, []);
 
   return (
+  <>
     <div className="min-h-screen bg-[#050505] text-white selection:bg-fuchsia-500/30">
 
       {/* NAV */}
@@ -419,5 +420,6 @@ export default function Home() {
 
     </div>
     <SreeFloatBot accentColor="#d946ef" />
+    </>
   );
 }
