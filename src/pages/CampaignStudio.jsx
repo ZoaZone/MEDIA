@@ -84,8 +84,8 @@ export default function CampaignStudio() {
     queryFn: () => base44.entities.CampaignPost.list("-created_date", 50),
   });
 
-  // Read prefill from ScriptWriter or media imports
   useEffect(() => {
+    // Read prefill from ScriptWriter or media imports
     const prefill = sessionStorage.getItem("campaignStudio_prefill");
     if (prefill) {
       try {
@@ -94,6 +94,15 @@ export default function CampaignStudio() {
         if (data.ai_output) setStep(2);
         sessionStorage.removeItem("campaignStudio_prefill");
       } catch (_) {}
+    }
+
+    // Pick up media imported from Media Studio
+    try {
+      const urls = JSON.parse(mediaImport);
+      setCampaign(p => ({ ...p, media_urls: [...new Set([...p.media_urls, ...urls])] }));
+      setStep(3); // jump to media step to show the imported media
+    } catch (error) {
+      console.error("Failed to parse imported media:", error);
     }
   }, []);
 
