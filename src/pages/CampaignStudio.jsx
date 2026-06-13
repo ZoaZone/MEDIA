@@ -119,22 +119,56 @@ export default function CampaignStudio() {
   // Step 6: Review & publish
 
   const generateContent = async () => {
-    if (!campaign.ai_prompt.trim()) { alert("Enter a topic or brief"); return; }
+    if (!campaign.ai_prompt.trim()) {
+      alert("Enter a topic or brief");
+      return;
+    }
     setGenerating(true);
+    
     const brand = selectedBrand;
     const brandContext = brand
       ? `\n\nBrand: ${brand.name}. Voice: ${brand.brand_voice || "Professional"}. Audience: ${brand.target_audience || "general audience"}. Industry: ${brand.industry || ""}. Tagline: ${brand.tagline || ""}.`
       : "";
-    const isCaption = ["caption","ad_copy","whatsapp"].includes(campaign.content_type);
+      
+    const isCaption = ["caption", "ad_copy", "whatsapp"].includes(campaign.content_type);
     const promptText = isCaption
-      ? `Write a ${campaign.tone} ${campaign.content_type.replace(/_/g," ")} for ${campaign.platforms[0] || "Instagram"}.\n\nTopic: ${campaign.ai_prompt}${brandContext}\n\nFormat your response EXACTLY like this:\nCAPTION:\n[Write the caption here with correct grammar and spelling. No markdown headers like ### — just clean text.]\n\nHASHTAGS:\n[20 relevant hashtags starting with #]`
+      ? `Write a ${campaign.tone} ${campaign.content_type.replace(/_/g, " ")} for ${campaign.platforms[0] || "Instagram"}.\n\nTopic: ${campaign.ai_prompt}${brandContext}\n\nFormat your response EXACTLY like this:\nCAPTION:\n[Write the caption here with correct grammar and spelling. No markdown headers like ### — just clean text.]\n\nHASHTAGS:\n[20 relevant hashtags starting with #]`
       : `${campaign.ai_prompt}${brandContext}`;
+
     try {
-        type: campaign.content_type,
-        platform: campaign.platforms[0] || "Instagram",
-        tone: campaign.tone,
-        prompt: promptText,
-      });
+      // Reconstructed API call that was sliced in half
+      const res = await fetch("/api/functions/generateMediaContent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: campaign.content_type,
+          platform: campaign.platforms[0] || "Instagram",
+          tone: campaign.tone,
+          prompt: promptText,
+        })
+      }).then(r => r.json());
+
+      const raw = res?.content || res?.data?.content || res?.text || res?.data?.text || "";
+      const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+      
+      if (isCaption) {
+        const captionMatch = text.match(/CAPTION:\s*([\s\S]*?)(?=HASHTAGS:|$)/i);
+        const hashMatch = text.match(/HASHTAGS:\s*([\s\S]*?)$/i);
+        
+        setCampaign(p => ({
+          ...p,
+          generated_content: captionMatch ? captionMatch[1].trim() : text,
+          hashtags: hashMatch ? hashMatch[1].trim() : ""
+        }));
+      } else {
+        setCampaign(p => ({ ...p, generated_content: text }));
+      }
+    } catch (error) {
+      console.error("Content generation failed:", error);
+      alert("Failed to generate content.");
+    }
+    setGenerating(false);
+  };
 
   const runAutoPipeline = async () => {
     setGenerating(true);
