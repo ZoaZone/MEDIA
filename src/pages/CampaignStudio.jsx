@@ -347,7 +347,28 @@ export default function CampaignStudio() {
             <Sparkles className="w-6 h-6 text-fuchsia-400" /> Campaign Studio
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Full campaign creation workflow — brand to publish</p>
+          
+          {/* New Auto Pipeline Button */}
+          <button 
+            onClick={async () => {
+              setGenerating(true);
+              try {
+                await generateContent();
+                await generateImage();
+                generateScheduleDates();
+                alert("Pipeline complete! Content and Media are generated and scheduled.");
+              } catch (e) {
+                alert("Pipeline Error: " + e.message);
+              }
+              setGenerating(false);
+            }}
+            className="mt-3 flex items-center gap-2 px-4 py-2 bg-fuchsia-600 text-white rounded-xl hover:bg-fuchsia-700 transition text-sm"
+          >
+            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+            Run Auto Pipeline
+          </button>
         </div>
+
         {campaign.campaign_name && (
           <span className="px-3 py-1 rounded-full bg-fuchsia-500/10 text-fuchsia-400 text-sm font-medium">{campaign.campaign_name}</span>
         )}
