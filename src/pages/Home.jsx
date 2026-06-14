@@ -1,57 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
-import FeatureDemoModal from "@/components/FeatureDemoModal";
 import { 
-  Sparkles, 
-  Megaphone, 
-  Share2, 
-  GitBranch, 
-  UserPlus, 
-  Globe, 
-  BarChart3, 
-  Zap, 
-  ArrowRight, 
-  Check, 
-  Star, 
-  Play, 
-  Bot, 
-  Image, 
-  FileText, 
-  Mail, 
-  Phone, 
-  Instagram, 
-  Youtube, 
-  Menu, 
-  X, 
-  Send, 
-  Loader2, 
-  MessageSquare, 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  MessageCircle,
-  Video
+  Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe, 
+  BarChart3, Zap, ArrowRight, Check, Star, PlayCircle, Bot, 
+  Menu, X, Send, Loader2, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2
 } from "lucide-react";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
 const FEATURES = [
-  { Icon: Sparkles,  title: "AI Media Creation",    desc: "Generate images, videos, scripts, ad creatives, captions and brand kits with AI in seconds.", color: "from-fuchsia-500 to-purple-600" },
-  { Icon: Megaphone, title: "Bulk Messaging",        desc: "Send thousands of SMS, WhatsApp & Email campaigns with one click. Real-time delivery tracking.", color: "from-pink-500 to-rose-600" },
-  { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube. AI-writes captions. Visual content calendar.", color: "from-violet-500 to-indigo-600" },
-  { Icon: GitBranch, title: "Funnel Builder",        desc: "Drag-drop visual funnels. Automated follow-up sequences triggered by lead behavior.", color: "from-amber-500 to-orange-600" },
-  { Icon: UserPlus,  title: "Lead Capture",          desc: "QR codes, forms, social leads. Score, tag, and nurture with AI-suggested follow-ups.", color: "from-emerald-500 to-teal-600" },
-  { Icon: Globe,     title: "Web & App Projects",    desc: "Manage client website and app builds. Brief → design → launch, all tracked in one place.", color: "from-blue-500 to-cyan-600" },
-  { Icon: BarChart3, title: "Analytics & ROI",       desc: "Campaign performance, funnel conversion rates, lead source breakdown, revenue attribution.", color: "from-red-500 to-rose-600" },
-  { Icon: Zap,       title: "Automation Engine",     desc: "Trigger sequences from form fills, link clicks, no-replies or stage changes. Fully automated.", color: "from-yellow-500 to-amber-600" },
+  { Icon: Wand2,     title: "AI Media Creation",    desc: "Generate images, videos, scripts, ad creatives, and brand kits with AI in seconds.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
+  { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
+  { Icon: GitBranch, title: "Funnel Builder",        desc: "Drag-drop visual funnels. Automated follow-up sequences.", colSpan: "md:col-span-1", color: "from-amber-500 to-orange-600" },
+  { Icon: Megaphone, title: "Bulk Messaging",        desc: "Send thousands of SMS, WhatsApp & Email campaigns with real-time tracking.", colSpan: "md:col-span-2", color: "from-pink-500 to-rose-600" },
+  { Icon: UserPlus,  title: "Lead Capture",          desc: "QR codes, forms, social leads. Score and nurture automatically.", colSpan: "md:col-span-1", color: "from-emerald-500 to-teal-600" },
+  { Icon: BarChart3, title: "Analytics & ROI",       desc: "Track campaign performance, conversion rates, and revenue.", colSpan: "md:col-span-1", color: "from-red-500 to-rose-600" },
+  { Icon: Zap,       title: "Automation Engine",     desc: "Trigger sequences from form fills or stage changes. Fully automated.", colSpan: "md:col-span-1", color: "from-yellow-500 to-amber-600" },
 ];
 
 const PLANS = [
-  { name: "Starter", price: 49, desc: "Small businesses", features: ["1 Client", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"], popular: false },
-  { name: "Growth",  price: 149, desc: "Growing teams",   features: ["5 Clients", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"], popular: true },
-  { name: "Agency",  price: 399, desc: "Full agencies",   features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "White-label", "API access", "Dedicated manager"], popular: false },
+  { name: "Starter", price: 49, desc: "Small businesses", features: ["1 Client Workspace", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"], popular: false },
+  { name: "Growth",  price: 149, desc: "Growing teams",   features: ["5 Client Workspaces", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"], popular: true },
+  { name: "Agency",  price: 399, desc: "Full agencies",   features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "White-label reports", "API access"], popular: false },
 ];
 
 const TESTIMONIALS = [
@@ -62,65 +32,20 @@ const TESTIMONIALS = [
 
 const SITE_KNOWLEDGE = `
 You are Sree, the AI assistant for media.aevoice.ai — an AI-powered marketing OS platform.
-
-PLATFORM OVERVIEW:
-media.aevoice.ai is an all-in-one AI marketing platform for agencies, brands, and marketers.
-
-KEY FEATURES:
-- AI Media Studio: Generate images, videos, ad copy, captions, hashtags, email/SMS templates, blog posts, brand kits using AI
-- Video Editor: AI-powered video creation and editing
-- Ad Creator: AI-generated ad creatives for Facebook, Instagram, Google, TikTok
-- Script Writer: AI scripts for video, ads, email sequences, cold outreach
-- Website Scanner: AI analysis of any website for SEO, content, competitor insights
-- Social Hub: Schedule and publish to Instagram, Facebook, TikTok, LinkedIn, YouTube, Twitter/X, Pinterest
-- Campaigns: Bulk email, SMS, WhatsApp campaigns with analytics (open rate, click rate, replies)
-- Funnel Builder: Visual drag-and-drop funnel creation with stages and automation
-- Lead Capture: Capture leads from any source with forms, QR codes, and UTM tracking
-- Follow-Up Automation: Multi-step sequences via email, SMS, WhatsApp triggered by lead actions
-- Analytics: Full marketing performance dashboard — leads, campaigns, conversions, social reach
-- Media Library: Store all AI-generated and uploaded assets in one place
-- Web & App Projects: Track web and mobile app development projects
-- Agency Portal: Multi-client agency management with sub-accounts
-
-PRICING PLANS:
-- Starter: $49/month — 1 brand, 1,000 contacts, 5,000 messages/month, AI content, social scheduling
-- Growth: $149/month — 5 brands, 10,000 contacts, 50,000 messages/month, advanced AI, funnels
-- Agency: $399/month — Unlimited brands/clients, 100,000+ messages, white-label, priority support, API access
-- All plans: 14-day free trial, no credit card required, cancel anytime
-
-BETA ACCESS:
-Currently in beta — users can request early access at /beta. Approved users get full Agency-tier free for 1 year.
-
-INTEGRATIONS:
-Email (SendGrid, Resend), SMS (Twilio), WhatsApp (Meta BSP), Stripe payments, all major social platforms.
-
-CONTACT & SUPPORT:
-- Email: care@aevoice.ai | hello@aevoice.ai
-- Website: https://media.aevoice.ai
-- Parent company: AEVOICE.AI
-
-QUICK NAVIGATION:
-- /dashboard — Main dashboard
-- /media-studio — AI content creation
-- /campaigns — Email/SMS/WhatsApp campaigns
-- /social-hub — Social scheduling
-- /funnel-builder — Build marketing funnels
-- /analytics — Performance analytics
-- /pricing — View and upgrade plans
-- /beta — Request beta access
-
-Always be helpful, concise (under 80 words), and guide users to relevant features or pages. If asked about pricing, always mention the free trial.
+PLATFORM OVERVIEW: media.aevoice.ai is an all-in-one AI marketing platform.
+PRICING: Starter ($49/mo), Growth ($149/mo), Agency ($399/mo). 14-day free trial available.
+Always be helpful, concise (under 80 words). If asked about pricing, always mention the free trial.
 `;
 
 function SreeFloatBot({ accentColor }) {
-  const [open, setOpen]         = React.useState(false);
-  const [msgs, setMsgs]         = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with media.aevoice.ai. Ask me about features, pricing, or how to get started!" }]);
-  const [input, setInput]       = React.useState("");
-  const [loading, setLoading]   = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [msgs, setMsgs] = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with media.aevoice.ai. Ask me about features, pricing, or how to get started!" }]);
+  const [input, setInput] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const [listening, setListening] = React.useState(false);
   const [speakerOn, setSpeakerOn] = React.useState(true);
-  const [unread, setUnread]     = React.useState(0);
-  const endRef   = React.useRef(null);
+  const [unread, setUnread] = React.useState(0);
+  const endRef = React.useRef(null);
   const recogRef = React.useRef(null);
   const ac = accentColor;
 
@@ -174,168 +99,83 @@ function SreeFloatBot({ accentColor }) {
     const r = new SR();
     recogRef.current = r;
     r.lang = "en-IN"; r.continuous = false; r.interimResults = false;
-    r.onstart  = () => setListening(true);
-    r.onresult = (e) => { const t = e.results[0][0].transcript; setListening(false); sendMsg(t); };
-    r.onerror  = () => setListening(false);
-    r.onend    = () => setListening(false);
+    r.onstart = () => setListening(true);
+    r.onresult = (e) => { setListening(false); sendMsg(e.results[0][0].transcript); };
+    r.onerror = () => setListening(false);
+    r.onend = () => setListening(false);
     r.start();
   };
 
-  const QUICK = ["What features do you offer?", "Tell me about pricing", "How do I get beta access?", "How does AI content work?"];
+  const QUICK = ["What features do you offer?", "Tell me about pricing", "How does AI content work?"];
+  const btnBase = { border: "none", cursor: "pointer", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, flexShrink: 0, transition: "opacity 0.2s" };
 
-  const btnBase = {
-    border: "none", cursor: "pointer", borderRadius: 10,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    width: 36, height: 36, flexShrink: 0, transition: "opacity 0.2s",
-  };
+  return (
+    <>
+      <style>{`
+        @keyframes sree-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+        @keyframes sree-pulse-ring{0%{transform:scale(1);opacity:0.8}100%{transform:scale(1.6);opacity:0}}
+        .sree-mic-pulse::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:${ac}55;animation:sree-pulse-ring 1s ease-out infinite;}
+        .glass-panel { background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      `}</style>
 
-  return React.createElement(React.Fragment, null,
-    React.createElement("style", null,
-      `@keyframes sree-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-       @keyframes sree-pulse-ring{0%{transform:scale(1);opacity:0.8}100%{transform:scale(1.6);opacity:0}}
-       .sree-mic-pulse::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:${ac}55;animation:sree-pulse-ring 1s ease-out infinite;}`
-    ),
+      <button onClick={() => setOpen(o => !o)} className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_6px_28px_rgba(217,70,239,0.3)]" style={{ background: `linear-gradient(135deg, ${ac}, ${ac}bb)` }}>
+        {open ? <X size={22} color="white" /> : <MessageCircle size={24} color="white" />}
+        {!open && unread > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">{unread}</span>}
+      </button>
 
-    React.createElement("button", {
-      onClick: () => setOpen(o => !o),
-      style: {
-        position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-        width: 56, height: 56, borderRadius: "50%", border: "none",
-        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-        background: `linear-gradient(135deg, ${ac}, ${ac}bb)`,
-        boxShadow: `0 6px 28px ${ac}55, 0 2px 8px rgba(0,0,0,0.4)`,
-        transition: "transform 0.2s",
-      },
-      onMouseEnter: e => { e.currentTarget.style.transform = "scale(1.1)"; },
-      onMouseLeave: e => { e.currentTarget.style.transform = "scale(1)"; },
-    },
-      React.createElement(MessageCircle, { size: 24, color: "white", style: open ? { display: "none" } : {} }),
-      open && React.createElement(X, { size: 22, color: "white" }),
-      !open && unread > 0 && React.createElement("span", {
-        style: {
-          position: "absolute", top: -3, right: -3,
-          width: 20, height: 20, borderRadius: "50%",
-          background: "#ef4444", color: "white",
-          fontSize: 10, fontWeight: 800,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }
-      }, unread)
-    ),
+      {open && (
+        <div className="fixed bottom-[90px] right-6 z-[9998] w-[360px] max-h-[520px] h-[80vh] rounded-2xl flex flex-col glass-panel shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center gap-3 p-3 border-b border-white/10 bg-white/5 shrink-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}99)` }}><Bot size={18} color="white" /></div>
+            <div className="flex-1">
+              <p className="m-0 text-[13px] font-bold text-white">Sree AI</p>
+              <p className="m-0 text-[10px] text-emerald-400">● media.aevoice.ai · Online</p>
+            </div>
+            <button onClick={toggleSpeaker} style={{ ...btnBase, width: 30, height: 30, background: speakerOn ? `${ac}22` : "rgba(255,255,255,0.07)" }}>
+              {speakerOn ? <Volume2 size={14} color={ac} /> : <VolumeX size={14} color="#666" />}
+            </button>
+          </div>
 
-    open && React.createElement("div", {
-      style: {
-        position: "fixed", bottom: 92, right: 24, zIndex: 9998,
-        width: 360, maxHeight: 520,
-        borderRadius: 20, overflow: "hidden",
-        display: "flex", flexDirection: "column",
-        background: "rgba(5,10,22,0.97)",
-        border: `1px solid ${ac}33`,
-        boxShadow: `0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px ${ac}22`,
-        backdropFilter: "blur(20px)",
-        fontFamily: "Inter, system-ui, sans-serif",
-      }
-    },
-      React.createElement("div", {
-        style: {
-          display: "flex", alignItems: "center", gap: 10,
-          padding: "12px 14px",
-          background: `linear-gradient(135deg, ${ac}22, transparent)`,
-          borderBottom: `1px solid ${ac}22`, flexShrink: 0,
-        }
-      },
-        React.createElement("div", {
-          style: { width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg,${ac},${ac}99)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }
-        }, React.createElement(Bot, { size: 18, color: "white" })),
-        React.createElement("div", { style: { flex: 1 } },
-          React.createElement("p", { style: { margin: 0, fontSize: 13, fontWeight: 700, color: "white" } }, "Sree AI"),
-          React.createElement("p", { style: { margin: 0, fontSize: 10, color: "#10b981" } }, "● media.aevoice.ai · Online")
-        ),
-        React.createElement("button", {
-          onClick: toggleSpeaker,
-          title: speakerOn ? "Mute speaker" : "Unmute speaker",
-          style: { ...btnBase, width: 30, height: 30, background: speakerOn ? `${ac}22` : "rgba(255,255,255,0.07)", border: `1px solid ${speakerOn ? ac+'44' : 'rgba(255,255,255,0.1)'}` },
-        }, speakerOn
-          ? React.createElement(Volume2, { size: 14, color: ac })
-          : React.createElement(VolumeX, { size: 14, color: "#666" })
-        ),
-      ),
+          <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2 min-h-0">
+            {msgs.map((m, i) => (
+              <div key={i} className={`flex gap-2 items-end ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                {m.role === "assistant" && <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}88)` }}><Bot size={12} color="white" /></div>}
+                <div className={`max-w-[82%] p-3 text-[13px] leading-relaxed ${m.role === "user" ? "rounded-[14px_14px_3px_14px] text-white" : "rounded-[3px_14px_14px_14px] bg-white/10 text-slate-200"}`} style={m.role === "user" ? { background: `linear-gradient(135deg,${ac},${ac}bb)` } : {}}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex gap-2 items-end">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}88)` }}><Bot size={12} color="white" /></div>
+                <div className="p-3 rounded-[3px_14px_14px_14px] bg-white/10 flex gap-1 items-center">
+                  {[0,1,2].map(j => <span key={j} className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block animate-pulse" style={{ animationDelay: `${j*0.15}s` }} />)}
+                </div>
+              </div>
+            )}
+            {msgs.length === 1 && (
+              <div className="flex flex-col gap-1.5 mt-1">
+                {QUICK.map(q => <button key={q} onClick={() => sendMsg(q)} className="p-2 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-[11px] text-left hover:bg-white/10 transition-colors">{q}</button>)}
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
 
-      React.createElement("div", {
-        style: { flex: 1, overflowY: "auto", padding: "12px 10px", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }
-      },
-        msgs.map((m, i) =>
-          React.createElement("div", {
-            key: i,
-            style: { display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", gap: 6, alignItems: "flex-end" }
-          },
-            m.role === "assistant" && React.createElement("div", {
-              style: { width: 22, height: 22, borderRadius: "50%", background: `linear-gradient(135deg,${ac},${ac}88)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }
-            }, React.createElement(Bot, { size: 12, color: "white" })),
-            React.createElement("div", {
-              style: {
-                maxWidth: "82%", padding: "8px 12px", fontSize: 12.5, lineHeight: 1.55,
-                borderRadius: m.role === "user" ? "14px 14px 3px 14px" : "3px 14px 14px 14px",
-                background: m.role === "user" ? `linear-gradient(135deg,${ac},${ac}bb)` : "rgba(255,255,255,0.06)",
-                color: m.role === "user" ? "white" : "#d1d9e8",
-              }
-            }, m.content)
-          )
-        ),
-        loading && React.createElement("div", { style: { display: "flex", gap: 6, alignItems: "flex-end" } },
-          React.createElement("div", { style: { width: 22, height: 22, borderRadius: "50%", background: `linear-gradient(135deg,${ac},${ac}88)`, display: "flex", alignItems: "center", justifyContent: "center" } },
-            React.createElement(Bot, { size: 12, color: "white" })
-          ),
-          React.createElement("div", { style: { padding: "8px 12px", borderRadius: "3px 14px 14px 14px", background: "rgba(255,255,255,0.06)", display: "flex", gap: 3, alignItems: "center" } },
-            [0,1,2].map(j => React.createElement("span", { key: j, style: { width: 5, height: 5, borderRadius: "50%", background: "#475569", display: "inline-block", animation: "sree-bounce 1s ease-in-out infinite", animationDelay: j*0.15+"s" } }))
-          )
-        ),
-        msgs.length === 1 && React.createElement("div", {
-          style: { display: "flex", flexDirection: "column", gap: 5, marginTop: 4 }
-        },
-          QUICK.map(q => React.createElement("button", {
-            key: q, onClick: () => sendMsg(q),
-            style: { padding: "6px 10px", borderRadius: 10, border: `1px solid ${ac}25`, background: `${ac}0d`, color: "#9ca3af", fontSize: 11, cursor: "pointer", textAlign: "left" }
-          }, q))
-        ),
-        React.createElement("div", { ref: endRef })
-      ),
-
-      React.createElement("div", {
-        style: { padding: "8px 10px 12px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }
-      },
-        React.createElement("div", { style: { position: "relative", flexShrink: 0 } },
-          listening && React.createElement("span", { className: "sree-mic-pulse" }),
-          React.createElement("button", {
-            onClick: startVoice,
-            title: listening ? "Stop listening" : "Click to speak",
-            style: {
-              ...btnBase, position: "relative",
-              background: listening ? "linear-gradient(135deg,#ef4444,#dc2626)" : `linear-gradient(135deg,${ac},${ac}bb)`,
-              boxShadow: listening ? "0 0 12px rgba(239,68,68,0.5)" : `0 0 10px ${ac}44`,
-            }
-          }, listening
-            ? React.createElement(MicOff, { size: 16, color: "white" })
-            : React.createElement(Mic, { size: 16, color: "white" })
-          )
-        ),
-        React.createElement("input", {
-          value: input,
-          onChange: e => setInput(e.target.value),
-          onKeyDown: e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } },
-          placeholder: listening ? "Listening..." : "Type or tap mic to speak...",
-          disabled: loading,
-          style: {
-            flex: 1, background: "rgba(255,255,255,0.06)", border: `1px solid ${listening ? ac+'44' : 'rgba(255,255,255,0.09)'}`,
-            borderRadius: 10, padding: "8px 10px", color: "white", fontSize: 12, outline: "none", fontFamily: "inherit",
-          }
-        }),
-        React.createElement("button", {
-          onClick: () => sendMsg(),
-          disabled: !input.trim() || loading,
-          style: { ...btnBase, background: `linear-gradient(135deg,${ac},${ac}bb)`, opacity: (!input.trim() || loading) ? 0.4 : 1 }
-        }, React.createElement(Send, { size: 15, color: "white" }))
-      )
-    )
+          <div className="p-3 border-t border-white/10 flex gap-2 shrink-0 items-center bg-black/20">
+            <div className="relative shrink-0">
+              {listening && <span className="sree-mic-pulse" />}
+              <button onClick={startVoice} style={{ ...btnBase, background: listening ? "linear-gradient(135deg,#ef4444,#dc2626)" : `linear-gradient(135deg,${ac},${ac}bb)` }}>
+                {listening ? <MicOff size={16} color="white" /> : <Mic size={16} color="white" />}
+              </button>
+            </div>
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } }} placeholder={listening ? "Listening..." : "Type or speak..."} disabled={loading} className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-[13px] outline-none focus:border-fuchsia-500/50 transition-colors" />
+            <button onClick={() => sendMsg()} disabled={!input.trim() || loading} style={{ ...btnBase, background: `linear-gradient(135deg,${ac},${ac}bb)`, opacity: (!input.trim() || loading) ? 0.4 : 1 }}>
+              <Send size={15} color="white" />
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -344,7 +184,6 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
-  const videoRef = useRef(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -352,138 +191,105 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const handlePlayDemo = () => {
-    setShowDemo(true);
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        videoRef.current.play().catch(err => console.log("Autoplay context blocked:", err));
-      }
-    }, 150);
-  };
-
   return (
-    <>
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
+  <>
+    <div className="min-h-screen bg-[#050505] text-white selection:bg-fuchsia-500/30">
 
       {/* NAV */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "border-b border-white/10 bg-[#0a0a0a]/90 backdrop-blur-xl" : ""}`}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${scrolled ? "border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl" : "bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={M_LOGO} alt="M" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
+            <img src={M_LOGO} alt="M" className="w-9 h-9 rounded-xl shadow-lg shadow-fuchsia-500/20" onError={(e) => e.target.style.display="none"} />
             <span className="text-xl font-black tracking-tight bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
             <a href="#testimonials" className="hover:text-white transition-colors">Reviews</a>
           </div>
-          <div className="hidden md:flex items-center gap-3">
-            <Link to="/dashboard" className="text-sm text-white/70 hover:text-white transition-colors px-4 py-2">Sign In</Link>
-            <Link to="/free-trial" className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:opacity-90 transition-opacity shadow-lg shadow-fuchsia-500/25">
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/login" className="text-sm font-bold text-white/80 hover:text-white transition-colors">Sign In</Link>
+            <Link to="/free-trial" className="text-sm font-bold px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Start Free Trial
             </Link>
           </div>
-          <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          <button className="md:hidden p-2 text-white/70 hover:text-white" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
+        
         {mobileOpen && (
-          <div className="md:hidden bg-[#0a0a0a] border-t border-white/10 px-6 py-4 space-y-3">
+          <div className="md:hidden bg-[#0a0a0a] border-b border-white/10 px-6 py-6 space-y-4 absolute w-full animate-in slide-in-from-top-4">
             {["features","pricing","testimonials"].map(s => (
-              <a key={s} href={`#${s}`} className="block text-sm text-white/70 py-2 capitalize" onClick={() => setMobileOpen(false)}>{s}</a>
+              <a key={s} href={`#${s}`} className="block text-base font-medium text-white/80 py-2 capitalize" onClick={() => setMobileOpen(false)}>{s}</a>
             ))}
-            <Link to="/free-trial" className="block text-center text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 mt-2">
-              Start Free Trial
-            </Link>
+            <div className="pt-4 flex flex-col gap-3">
+              <Link to="/login" className="block text-center py-3 rounded-xl border border-white/10 font-bold">Sign In</Link>
+              <Link to="/free-trial" className="block text-center py-3 rounded-xl bg-white text-black font-bold">Start Free Trial</Link>
+            </div>
           </div>
         )}
       </nav>
 
       {/* HERO */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-12">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-fuchsia-500/8 rounded-full blur-[120px]" />
-          <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-purple-500/6 rounded-full blur-[80px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-pink-500/6 rounded-full blur-[80px]" />
-        </div>
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-32 pb-20 overflow-hidden">
+        {/* Glow Effects */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
         
-        <div className="relative max-w-5xl mx-auto text-center z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-xs font-medium mb-8">
-            <Sparkles className="w-3.5 h-3.5" /> AI-Powered Marketing OS — media.aevoice.ai
+        <div className="relative max-w-5xl mx-auto text-center z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-xs font-bold mb-8 uppercase tracking-widest">
+            <Sparkles className="w-3.5 h-3.5" /> The AI Marketing Engine
           </div>
-          <h1 className="text-5xl md:text-7xl font-black leading-tight mb-6">
-            <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
-              Your entire marketing<br />
-            </span>
-            <span className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tight mb-8">
+            <span className="text-white">Your entire marketing</span><br />
+            <span className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
               team in one app.
             </span>
           </h1>
-          <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI media creation, bulk SMS/WhatsApp/email, social scheduling, funnel builder, lead capture, and follow-up automation — all in one platform.
+          
+          <p className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            AI media creation, bulk messaging, social scheduling, visual funnels, and automated follow-ups. Stop juggling tools and start scaling.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Link to="/free-trial" className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-base hover:opacity-90 transition-opacity shadow-2xl shadow-fuchsia-500/30">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <Link to="/free-trial" className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white text-black font-black text-base hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.15)]">
               Start Free Trial <ArrowRight className="w-5 h-5" />
             </Link>
-            <button onClick={handlePlayDemo} className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-white/15 text-white/80 font-medium text-base hover:border-white/30 hover:text-white transition-all">
-              <Play className="w-4 h-4" /> Watch Demo
+            <button onClick={() => setShowDemo(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-neutral-700 bg-neutral-900/50 text-white font-bold text-base hover:bg-neutral-800 transition-colors">
+              <PlayCircle className="w-5 h-5 text-fuchsia-400" /> Watch Demo
             </button>
           </div>
           
-          <p className="text-xs text-white/30 mt-4">No credit card required · 14-day free trial · Cancel anytime</p>
-
-          {/* DYNAMIC HIGH-PERFORMANCE MARKETING DEMO PLAYER */}
-          {showDemo && (
-            <div className="mt-12 max-w-4xl mx-auto p-3 bg-white/5 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
-              <div className="relative rounded-xl overflow-hidden bg-black aspect-video border border-white/5">
-                <video 
-                  ref={videoRef}
-                  controls 
-                  playsInline
-                  className="w-full h-full object-cover"
-                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
-                >
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-              <div className="p-4 text-center">
-                <h4 className="text-white font-bold text-base flex items-center justify-center gap-2">
-                  <Video className="w-4 h-4 text-fuchsia-400" /> Auto-Pilot Social Console Walkthrough
-                </h4>
-                <p className="text-white/60 text-xs mt-1 max-w-xl mx-auto">
-                  See how the Unified Engine processes brand logo ingestions, analyzes websites, applies "No Caption" rules, and renders instantly.
-                </p>
-              </div>
+          <div className="pt-10 border-t border-white/5">
+            <p className="text-xs text-neutral-500 font-medium uppercase tracking-widest mb-6">Replaces your entire stack</p>
+            <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+              {["Instagram", "TikTok", "LinkedIn", "YouTube", "Mailchimp", "Twilio"].map(p => (
+                <span key={p} className="text-sm md:text-base font-bold text-white">{p}</span>
+              ))}
             </div>
-          )}
-
-          {/* Platform logos */}
-          <div className="mt-16 flex items-center justify-center gap-6 flex-wrap opacity-40">
-            {["Instagram", "TikTok", "LinkedIn", "YouTube", "Facebook", "WhatsApp", "Gmail", "Twilio"].map(p => (
-              <span key={p} className="text-xs text-white/60 font-medium px-3 py-1.5 border border-white/10 rounded-full">{p}</span>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">Everything you need.<br /><span className="text-white/40">Nothing you don't.</span></h2>
-            <p className="text-white/50 text-lg max-w-xl mx-auto">Replace your entire marketing stack with one intelligent platform.</p>
+      {/* BENTO BOX FEATURES */}
+      <section id="features" className="py-32 px-6 bg-neutral-950">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6">The ultimate <span className="text-fuchsia-400">Marketing OS.</span></h2>
+            <p className="text-neutral-400 text-lg max-w-2xl mx-auto">Everything you need to capture leads, generate content, and close deals.</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="p-5 rounded-2xl border border-white/8 bg-white/3 hover:border-white/15 hover:bg-white/5 transition-all group">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg`}>
-                  <f.Icon className="w-5 h-5 text-white" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {FEATURES.map((f, i) => (
+              <div key={f.title} className={`${f.colSpan} p-8 rounded-3xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent hover:border-white/10 transition-colors group relative overflow-hidden`}>
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${f.color} opacity-10 blur-3xl group-hover:opacity-20 transition-opacity`} />
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-6 shadow-lg`}>
+                  <f.Icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-bold text-white mb-1.5">{f.title}</h3>
-                <p className="text-sm text-white/45 leading-relaxed">{f.desc}</p>
+                <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
+                <p className="text-neutral-400 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -491,42 +297,45 @@ export default function Home() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white mb-4">Simple pricing.<br /><span className="text-white/40">Powerful results.</span></h2>
+      <section id="pricing" className="py-32 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Simple pricing.<br /><span className="text-neutral-500">Unfair advantage.</span></h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          
+          <div className="grid md:grid-cols-3 gap-8 items-center">
             {PLANS.map((plan) => (
-              <div key={plan.name} className={`relative rounded-2xl p-6 border ${
+              <div key={plan.name} className={`relative rounded-3xl p-8 border backdrop-blur-xl transition-transform hover:-translate-y-2 ${
                 plan.popular
-                  ? "border-fuchsia-500/50 bg-fuchsia-500/8 shadow-2xl shadow-fuchsia-500/20"
-                  : "border-white/10 bg-white/3"
+                  ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-[0_0_40px_rgba(217,70,239,0.15)] md:scale-105 z-10"
+                  : "border-white/10 bg-white/5"
               }`}>
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg tracking-wide uppercase">
                     Most Popular
                   </div>
                 )}
-                <p className="text-white/50 text-sm mb-1">{plan.desc}</p>
-                <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
-                <div className="flex items-end gap-1 mb-6">
-                  <span className="text-4xl font-black text-white">${plan.price}</span>
-                  <span className="text-white/40 text-sm mb-1">/month</span>
+                <div className="mb-8">
+                  <h3 className="text-2xl font-black text-white mb-2">{plan.name}</h3>
+                  <p className="text-neutral-400 text-sm">{plan.desc}</p>
                 </div>
-                <div className="space-y-2.5 mb-8">
+                <div className="flex items-baseline gap-1 mb-8">
+                  <span className="text-5xl font-black text-white">${plan.price}</span>
+                  <span className="text-neutral-500 font-medium">/mo</span>
+                </div>
+                <div className="space-y-4 mb-10">
                   {plan.features.map(f => (
-                    <div key={f} className="flex items-center gap-2.5 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-fuchsia-400 flex-shrink-0" /> {f}
+                    <div key={f} className="flex items-start gap-3 text-sm text-neutral-300 font-medium">
+                      <Check className={`w-5 h-5 shrink-0 ${plan.popular ? "text-fuchsia-400" : "text-neutral-500"}`} /> {f}
                     </div>
                   ))}
                 </div>
-                <Link to="/pricing" className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all ${
+                <Link to="/pricing" className={`block text-center py-4 rounded-xl font-bold transition-all ${
                   plan.popular
-                    ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white hover:opacity-90 shadow-lg"
-                    : "border border-white/15 text-white/80 hover:border-white/30"
+                    ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg"
+                    : "bg-white/10 hover:bg-white/20 text-white"
                 }`}>
-                  Get Started
+                  Start 14-Day Trial
                 </Link>
               </div>
             ))}
@@ -534,61 +343,81 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section id="testimonials" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white mb-4">Loved by marketers.</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="p-6 rounded-2xl border border-white/8 bg-white/3">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(t.rating)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-white/70 text-sm leading-relaxed mb-4">"{t.text}"</p>
-                <div>
-                  <p className="text-white font-semibold text-sm">{t.name}</p>
-                  <p className="text-white/40 text-xs">{t.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="p-12 rounded-3xl border border-fuchsia-500/20 bg-fuchsia-500/5">
-            <h2 className="text-4xl font-black text-white mb-4">Ready to 10x your marketing?</h2>
-            <p className="text-white/50 mb-8">Join thousands of businesses using media.aevoice.ai to automate, create and grow.</p>
-            <Link to="/pricing" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-base hover:opacity-90 shadow-2xl shadow-fuchsia-500/30">
-              Start Your Free Trial <ArrowRight className="w-5 h-5" />
+      <section className="py-32 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="p-12 md:p-20 rounded-[3rem] border border-fuchsia-500/20 bg-gradient-to-b from-fuchsia-500/10 to-transparent relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[100px] pointer-events-none" />
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 relative z-10 tracking-tight">Ready to 10x your output?</h2>
+            <p className="text-neutral-400 text-lg md:text-xl mb-10 relative z-10 max-w-2xl mx-auto">Join the smartest businesses using media.aevoice.ai to automate their marketing and scale revenue.</p>
+            <Link to="/free-trial" className="relative z-10 inline-flex items-center gap-2 px-10 py-5 rounded-full bg-white text-black font-black text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+              Start Free Trial <ArrowRight className="w-6 h-6" />
             </Link>
-            <p className="text-xs text-white/30 mt-4">14-day free trial · No credit card required · Cancel anytime</p>
+            <p className="text-sm text-neutral-500 mt-6 relative z-10 font-medium">14-day free trial · Cancel anytime</p>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/8 py-10 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <img src={M_LOGO} alt="M" className="w-6 h-6 rounded" onError={(e) => e.target.style.display="none"} />
-            <span className="font-black text-white/80 text-sm">media.aevoice.ai</span>
-            <span className="text-white/30 text-xs ml-2">by AEVOICE</span>
+      <footer className="border-t border-white/10 py-12 px-6 bg-neutral-950">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img src={M_LOGO} alt="M" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
+            <span className="font-black text-white text-lg tracking-tight">media.aevoice.ai</span>
           </div>
-          <p className="text-white/30 text-xs">© 2026 AEVOICE · "The omnichannel AI platform for voice calls, SMS, web chat, WhatsApp, email, and social media." · Part of AEVOICE.AI. All rights reserved · media.aevoice.ai</p>
-          <div className="flex flex-wrap gap-4 text-xs text-white/40 items-center">
-            <a href="mailto:care@aevoice.ai" className="hover:text-white/70">care@aevoice.ai</a>
-            <a href="https://aevoice.ai" className="hover:text-white/70">aevoice.ai</a>
-            <Link to="/agent-program" className="hover:text-fuchsia-400 font-semibold text-white/50 transition-colors">🤝 Agent Program — Earn 50%</Link>
-            <Link to="/agency-enquiry" className="hover:text-purple-400 font-semibold text-white/50 transition-colors">🏢 Agency Enquiry</Link>
+          <div className="flex flex-wrap gap-6 text-sm font-medium items-center justify-center">
+            <a href="mailto:care@aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">care@aevoice.ai</a>
+            <a href="https://aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">aevoice.ai</a>
+            <Link to="/agent-program" className="text-fuchsia-400 hover:text-fuchsia-300 transition-colors">🤝 Agent Program</Link>
           </div>
         </div>
-        <p className="text-center text-xs text-slate-600 mt-4">Part of AEVOICE.AI — The ultimate business technology.</p>
+        <div className="max-w-7xl mx-auto mt-8 text-center md:text-left text-neutral-600 text-xs font-medium border-t border-white/5 pt-8">
+          © 2026 AEVOICE.AI. The omnichannel AI platform for voice, SMS, web chat, email, and social media.
+        </div>
       </footer>
+
+      {/* CINEMATIC WATCH DEMO MODAL */}
+      {showDemo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-6xl overflow-hidden shadow-[0_0_100px_rgba(217,70,239,0.15)] relative flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md absolute top-0 w-full z-10">
+              <h3 className="font-bold text-white flex items-center gap-3 text-lg">
+                <Sparkles className="w-5 h-5 text-fuchsia-500" /> Aevoice Marketing OS
+              </h3>
+              <button 
+                onClick={() => setShowDemo(false)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white backdrop-blur-md">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Video Container */}
+            <div className="aspect-video w-full bg-black relative pt-[72px]">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=1&loop=1&playlist=5qap5aO4i9A&controls=0&showinfo=0" 
+                title="Conceptual App Demo" 
+                className="w-full h-full object-cover pointer-events-none"
+                frameBorder="0" 
+                allow="autoplay; encrypted-media" 
+                allowFullScreen>
+              </iframe>
+              
+              {/* Overlay Text */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent flex items-end p-8 md:p-12 pointer-events-none">
+                <div className="max-w-2xl animate-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
+                  <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">Automate your entire growth engine.</h2>
+                  <p className="text-fuchsia-400 font-medium mt-4 text-lg md:text-xl">AI content generation, seamless scheduling, and data-driven insights.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
     <SreeFloatBot accentColor="#d946ef" />
     </>
