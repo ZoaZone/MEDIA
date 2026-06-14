@@ -155,3 +155,11 @@
 .animate-border-glow {
   animation: borderGlow 3s ease-in-out infinite;
 }
+
+/* Native date/time pickers (icon, calendar/clock popovers) render
+   near-invisible on this app's dark background — use the dark UA scheme. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}

@@ -66,14 +66,22 @@ function wrapText(ctx, text, maxWidth) {
 
 function drawCaption(ctx, text, W, H, opts = {}) {
   if (!text) return;
-  const { accent = "#e040fb", subtitleStyle = "bottom" } = opts;
-  const fontSize = Math.round(W * 0.05);
+  const { accent = "#e040fb", subtitleStyle = "bottom", maxLines = 3 } = opts;
+  const fontSize = Math.round(W * 0.038);
   ctx.font = `700 ${fontSize}px Arial, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
   const maxWidth = W * 0.86;
-  const lines = wrapText(ctx, text, maxWidth);
+  let lines = wrapText(ctx, text, maxWidth);
+  if (lines.length > maxLines) {
+    lines = lines.slice(0, maxLines);
+    let last = lines[maxLines - 1];
+    while (last.length > 1 && ctx.measureText(`${last}…`).width > maxWidth) {
+      last = last.slice(0, -1).trimEnd();
+    }
+    lines[maxLines - 1] = `${last}…`;
+  }
   const lineHeight = fontSize * 1.25;
   const blockH = lines.length * lineHeight;
 
@@ -117,13 +125,15 @@ function drawLogo(ctx, logoImg, W, H) {
 /**
  * Assemble a video.
  * @param {Object} cfg
- * @param {Array<{imageUrl?:string, text?:string}>} cfg.scenes
+ * @param {Array<{imageUrl?:string, text?:string, caption?:string}>} cfg.scenes
+ *   `text` is used for narration; `caption` (if shorter) is what's drawn on screen
  * @param {string} [cfg.ratio="9:16"]
  * @param {number} [cfg.sceneSeconds=3]
  * @param {string} [cfg.accent="#e040fb"]
  * @param {string} [cfg.subtitleStyle="bottom"]  "bottom" | "center" | "none"
  * @param {string} [cfg.logoUrl]
- * @param {Blob|string} [cfg.audio]  voiceover/music Blob or URL
+ * @param {Blob|string} [cfg.audio]  voiceover Blob or URL
+ * @param {string} [cfg.musicUrl]  background music URL, mixed under the voiceover
  * @param {(p:number)=>void} [cfg.onProgress]  0..1 progress callback
  * @returns {Promise<{url:string, blob:Blob}>}
  */
@@ -136,6 +146,7 @@ export async function assembleVideo(cfg = {}) {
     subtitleStyle = "bottom",
     logoUrl = "",
     audio = null,
+    musicUrl = "",
     onProgress = () => {},
   } = cfg;
 
@@ -158,21 +169,42 @@ export async function assembleVideo(cfg = {}) {
   const fps = 30;
   const stream = canvas.captureStream(fps);
 
+  // Mix voiceover (`audio`) and background music (`musicUrl`) into one stream.
+  // Music is ducked under the voiceover so narration stays intelligible.
   let audioEl = null;
+  let musicEl = null;
   let audioCtx = null;
-  if (audio) {
+  if (audio || musicUrl) {
     try {
-      const audioUrl = audio instanceof Blob ? URL.createObjectURL(audio) : audio;
-      audioEl = new Audio(audioUrl);
-      audioEl.crossOrigin = "anonymous";
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const srcNode = audioCtx.createMediaElementSource(audioEl);
       const dest = audioCtx.createMediaStreamDestination();
-      srcNode.connect(dest);
-      srcNode.connect(audioCtx.destination);
+
+      if (audio) {
+        const audioUrl = audio instanceof Blob ? URL.createObjectURL(audio) : audio;
+        audioEl = new Audio(audioUrl);
+        audioEl.crossOrigin = "anonymous";
+        const voiceGain = audioCtx.createGain();
+        voiceGain.gain.value = 1.0;
+        audioCtx.createMediaElementSource(audioEl).connect(voiceGain);
+        voiceGain.connect(dest);
+        voiceGain.connect(audioCtx.destination);
+      }
+
+      if (musicUrl) {
+        musicEl = new Audio(musicUrl);
+        musicEl.crossOrigin = "anonymous";
+        musicEl.loop = true;
+        const musicGain = audioCtx.createGain();
+        musicGain.gain.value = audio ? 0.25 : 0.6; // duck under voiceover when both present
+        audioCtx.createMediaElementSource(musicEl).connect(musicGain);
+        musicGain.connect(dest);
+        musicGain.connect(audioCtx.destination);
+      }
+
       dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
     } catch (_e) {
-      audioEl = null; // continue silently
+      audioEl = null;
+      musicEl = null; // continue silently
     }
   }
 
@@ -189,6 +221,7 @@ export async function assembleVideo(cfg = {}) {
 
   recorder.start();
   if (audioEl) audioEl.play().catch(() => {});
+  if (musicEl) musicEl.play().catch(() => {});
 
   const totalMs = scenes.length * sceneSeconds * 1000;
   const start = performance.now();
@@ -219,7 +252,7 @@ export async function assembleVideo(cfg = {}) {
       }
 
       if (subtitleStyle !== "none") {
-        drawCaption(ctx, scenes[sceneIdx].text, W, H, { accent, subtitleStyle });
+        drawCaption(ctx, scenes[sceneIdx].caption || scenes[sceneIdx].text, W, H, { accent, subtitleStyle });
       }
       drawLogo(ctx, logoImg, W, H);
 
@@ -231,6 +264,7 @@ export async function assembleVideo(cfg = {}) {
 
   recorder.stop();
   if (audioEl) { audioEl.pause(); }
+  if (musicEl) { musicEl.pause(); }
   const blob = await done;
   try { audioCtx && audioCtx.close(); } catch (_e) {}
   onProgress(1);

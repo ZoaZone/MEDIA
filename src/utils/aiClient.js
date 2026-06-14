@@ -60,6 +60,16 @@ export async function generateVoiceover(text) {
 }
 
 /**
+ * Shorten a scene's narration text down to a short on-screen caption
+ * (a subtitle, not a paragraph) so it doesn't cover the frame.
+ */
+export function shortenCaption(text, maxWords = 12) {
+  const words = (text || "").trim().split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return words.join(" ");
+  return `${words.slice(0, maxWords).join(" ")}…`;
+}
+
+/**
  * Split an AI-written video script into `sceneCount` scenes, each with
  * narration/caption text and a derived image prompt. Handles structured
  * "SCENE 1: ..." output as well as plain paragraphs.
