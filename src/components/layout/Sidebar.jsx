@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, Share2, Sparkles, PenTool,
-  FileText, Search, GitBranch, UserPlus, MailCheck, Image, Globe,
+  Search, GitBranch, UserPlus, MailCheck, Image, Globe,
   BarChart3, Settings, CreditCard, ChevronDown, LogOut, Menu, X,
   Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share,
-  Sun, Moon, Film
+  Sun, Moon
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -58,7 +58,7 @@ const NAV_SECTIONS = [
   {
     label: "CAMPAIGNS",
     items: [
-      { to: "/campaign-studio", icon: Sparkles,  label: "Campaign Studio", badge: "NEW" },
+      { to: "/campaign-studio", icon: Sparkles,  label: "Studio", badge: "NEW" },
       { to: "/brands",          icon: Building2, label: "Brand Manager" },
       { to: "/campaigns",       icon: Megaphone, label: "Campaigns" },
       { to: "/social-hub",      icon: Share2,    label: "Social Hub" },
@@ -67,10 +67,7 @@ const NAV_SECTIONS = [
   {
     label: "AI STUDIO",
     items: [
-      { to: "/media-studio",    icon: Sparkles, label: "Media Studio" },
-      { to: "/video-editor",    icon: Film,     label: "Video Editor" },
       { to: "/ad-creator",      icon: PenTool,  label: "Ad Creator",   minTier: 2 },
-      { to: "/script-writer",   icon: FileText, label: "Script Writer", minTier: 2 },
       { to: "/website-scanner", icon: Search,   label: "Website Scanner", minTier: 2 },
       { to: "/media-library",   icon: Image,    label: "Media Library" },
     ],

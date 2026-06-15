@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const QUICK_LINKS = [
     { label: "New Campaign", to: "/campaigns", Icon: Megaphone, color: "bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-400" },
-    { label: "AI Media", to: "/media-studio", Icon: Sparkles, color: "bg-purple-500/10 border-purple-500/30 text-purple-400" },
+    { label: "AI Media", to: "/campaign-studio", Icon: Sparkles, color: "bg-purple-500/10 border-purple-500/30 text-purple-400" },
     { label: "Schedule Post", to: "/social-hub", Icon: Share2, color: "bg-pink-500/10 border-pink-500/30 text-pink-400" },
     { label: "Add Lead", to: "/lead-capture", Icon: Plus, color: "bg-amber-500/10 border-amber-500/30 text-amber-400" },
     { label: "Build Funnel", to: "/funnel-builder", Icon: GitBranch, color: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" },

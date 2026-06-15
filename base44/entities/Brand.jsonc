@@ -10,6 +10,7 @@
     "primary_color":    { "type": "string", "default": "#7c3aed" },
     "secondary_color":  { "type": "string", "default": "#a855f7" },
     "accent_color":     { "type": "string", "default": "#ec4899" },
+    "font_family":      { "type": "string", "enum": ["Arial","Inter","Poppins","Montserrat","Playfair Display","Roboto"], "default": "Arial" },
     "brand_voice":      { "type": "string" },
     "target_audience":  { "type": "string" },
     "website":          { "type": "string" },

@@ -8,6 +8,11 @@ import {
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
+// Set this to a real, embeddable demo video URL (e.g. an unlisted YouTube link
+// with embedding enabled, or an MP4) once one is recorded. Leave empty to show
+// the in-app feature tour instead of a broken/placeholder embed.
+const DEMO_VIDEO_URL = "";
+
 const FEATURES = [
   { Icon: Wand2,     title: "AI Media Creation",    desc: "Generate images, videos, scripts, ad creatives, and brand kits with AI in seconds.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
   { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
@@ -394,26 +399,45 @@ export default function Home() {
             </div>
 
             {/* Video Container */}
-            <div className="aspect-video w-full bg-black relative pt-[72px]">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=1&loop=1&playlist=5qap5aO4i9A&controls=0&showinfo=0" 
-                title="Conceptual App Demo" 
-                className="w-full h-full object-cover pointer-events-none"
-                frameBorder="0" 
-                allow="autoplay; encrypted-media" 
-                allowFullScreen>
-              </iframe>
-              
-              {/* Overlay Text */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent flex items-end p-8 md:p-12 pointer-events-none">
-                <div className="max-w-2xl animate-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
-                  <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">Automate your entire growth engine.</h2>
-                  <p className="text-fuchsia-400 font-medium mt-4 text-lg md:text-xl">AI content generation, seamless scheduling, and data-driven insights.</p>
+            {DEMO_VIDEO_URL ? (
+              <div className="aspect-video w-full bg-black relative pt-[72px]">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={DEMO_VIDEO_URL}
+                  title="Aevoice Marketing OS Demo"
+                  className="w-full h-full object-cover"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen>
+                </iframe>
+              </div>
+            ) : (
+              /* Fallback product tour — shown until a real recorded demo video is added above */
+              <div className="w-full bg-neutral-950 relative pt-[88px] pb-8 px-6 md:px-12 max-h-[80vh] overflow-y-auto">
+                <div className="max-w-2xl mb-10 animate-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
+                  <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">Automate your entire growth engine.</h2>
+                  <p className="text-fuchsia-400 font-medium mt-4 text-base md:text-xl">AI content generation, seamless scheduling, and data-driven insights — all in one place.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  {FEATURES.map((f) => (
+                    <div key={f.title} className={`${f.colSpan} p-6 rounded-2xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent relative overflow-hidden`}>
+                      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${f.color} opacity-10 blur-3xl`} />
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg`}>
+                        <f.Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
+                      <p className="text-neutral-400 text-sm leading-relaxed">{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-10 text-center">
+                  <Link to="/free-trial" onClick={() => setShowDemo(false)} className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white text-black font-black text-base hover:scale-105 transition-transform">
+                    Start Free Trial <ArrowRight className="w-5 h-5" />
+                  </Link>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

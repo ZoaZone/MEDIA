@@ -313,7 +313,7 @@ HASHTAGS:
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
-            <Share2 className="w-6 h-6 text-fuchsia-400" /> Marketing Hub
+            <Share2 className="w-6 h-6 text-fuchsia-400" /> Social Hub
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             Create, schedule & publish across all channels

@@ -33,6 +33,8 @@ const PLATFORMS = [
   { id:"pinterest", label:"Pinterest", color:"from-rose-600 to-red-700" },
 ];
 
+const FONTS = ["Arial", "Inter", "Poppins", "Montserrat", "Playfair Display", "Roboto"];
+
 const TIER_LIMITS = { starter: 1, pro: 3, agency: 10 };
 const STEPS = ["Details", "Colors & Voice", "Social Accounts", "Review"];
 
@@ -54,7 +56,7 @@ export default function BrandManager() {
 
   const emptyForm = {
     name:"", tagline:"", industry:"", logo_url:"", logo_file_url:"",
-    primary_color:"#7c3aed", secondary_color:"#a855f7", accent_color:"#ec4899",
+    primary_color:"#7c3aed", secondary_color:"#a855f7", accent_color:"#ec4899", font_family:"Arial",
     brand_voice:"", target_audience:"", website:"", email:"", phone:""
   };
   const [form, setForm] = useState(emptyForm);
@@ -82,7 +84,7 @@ export default function BrandManager() {
 
   const openEdit = (b) => {
     setEditing(b.id);
-    setForm({ name:b.name||"", tagline:b.tagline||"", industry:b.industry||"", logo_url:b.logo_url||"", logo_file_url:b.logo_file_url||"", primary_color:b.primary_color||"#7c3aed", secondary_color:b.secondary_color||"#a855f7", accent_color:b.accent_color||"#ec4899", brand_voice:b.brand_voice||"", target_audience:b.target_audience||"", website:b.website||"", email:b.email||"", phone:b.phone||"" });
+    setForm({ name:b.name||"", tagline:b.tagline||"", industry:b.industry||"", logo_url:b.logo_url||"", logo_file_url:b.logo_file_url||"", primary_color:b.primary_color||"#7c3aed", secondary_color:b.secondary_color||"#a855f7", accent_color:b.accent_color||"#ec4899", font_family:b.font_family||"Arial", brand_voice:b.brand_voice||"", target_audience:b.target_audience||"", website:b.website||"", email:b.email||"", phone:b.phone||"" });
     setFormStep(0); setShowForm(true);
   };
 
@@ -429,6 +431,13 @@ export default function BrandManager() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                  <div>
+                    <label className={lbl + " text-slate-400"}>Caption Font</label>
+                    <select value={form.font_family} onChange={e => setForm(f => ({ ...f, font_family: e.target.value }))} className={inp}>
+                      {FONTS.map(f => <option key={f}>{f}</option>)}
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">Used for on-screen captions in AI-generated videos for this brand.</p>
                   </div>
                   <div>
                     <label className={lbl + " text-slate-400"}>Brand Voice</label>

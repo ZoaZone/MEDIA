@@ -66,9 +66,9 @@ function wrapText(ctx, text, maxWidth) {
 
 function drawCaption(ctx, text, W, H, opts = {}) {
   if (!text) return;
-  const { accent = "#e040fb", subtitleStyle = "bottom", maxLines = 3 } = opts;
+  const { accent = "#e040fb", subtitleStyle = "bottom", maxLines = 3, fontFamily = "Arial" } = opts;
   const fontSize = Math.round(W * 0.038);
-  ctx.font = `700 ${fontSize}px Arial, sans-serif`;
+  ctx.font = `700 ${fontSize}px ${fontFamily}, Arial, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
@@ -128,9 +128,11 @@ function drawLogo(ctx, logoImg, W, H) {
  * @param {Array<{imageUrl?:string, text?:string, caption?:string}>} cfg.scenes
  *   `text` is used for narration; `caption` (if shorter) is what's drawn on screen
  * @param {string} [cfg.ratio="9:16"]
- * @param {number} [cfg.sceneSeconds=3]
+ * @param {number} [cfg.sceneSeconds=3]  fallback per-scene duration, used when `sceneDurations` isn't provided
+ * @param {number[]} [cfg.sceneDurations]  per-scene duration in seconds (one entry per scene); overrides `sceneSeconds`
  * @param {string} [cfg.accent="#e040fb"]
  * @param {string} [cfg.subtitleStyle="bottom"]  "bottom" | "center" | "none"
+ * @param {string} [cfg.fontFamily="Arial"]  brand font used for on-screen captions
  * @param {string} [cfg.logoUrl]
  * @param {Blob|string} [cfg.audio]  voiceover Blob or URL
  * @param {string} [cfg.musicUrl]  background music URL, mixed under the voiceover
@@ -142,8 +144,10 @@ export async function assembleVideo(cfg = {}) {
     scenes = [],
     ratio = "9:16",
     sceneSeconds = 3,
+    sceneDurations = null,
     accent = "#e040fb",
     subtitleStyle = "bottom",
+    fontFamily = "Arial",
     logoUrl = "",
     audio = null,
     musicUrl = "",
@@ -223,7 +227,13 @@ export async function assembleVideo(cfg = {}) {
   if (audioEl) audioEl.play().catch(() => {});
   if (musicEl) musicEl.play().catch(() => {});
 
-  const totalMs = scenes.length * sceneSeconds * 1000;
+  // Per-scene durations: use `sceneDurations` (one entry per scene) if provided,
+  // otherwise fall back to a uniform `sceneSeconds` for every scene.
+  const durationsMs = (Array.isArray(sceneDurations) && sceneDurations.length === scenes.length)
+    ? sceneDurations.map((d) => Math.max(0.5, Number(d) || sceneSeconds) * 1000)
+    : scenes.map(() => sceneSeconds * 1000);
+  const cumMs = durationsMs.reduce((acc, d, i) => { acc.push((acc[i - 1] || 0) + d); return acc; }, []);
+  const totalMs = cumMs[cumMs.length - 1];
   const start = performance.now();
 
   await new Promise((resolve) => {
@@ -231,9 +241,12 @@ export async function assembleVideo(cfg = {}) {
       const elapsed = now - start;
       if (elapsed >= totalMs) return resolve();
 
-      const sceneIdx = Math.min(scenes.length - 1, Math.floor(elapsed / (sceneSeconds * 1000)));
-      const sceneElapsed = elapsed - sceneIdx * sceneSeconds * 1000;
-      const sceneProg = sceneElapsed / (sceneSeconds * 1000);
+      let sceneIdx = cumMs.findIndex((c) => elapsed < c);
+      if (sceneIdx === -1) sceneIdx = scenes.length - 1;
+      const sceneStartMs = sceneIdx > 0 ? cumMs[sceneIdx - 1] : 0;
+      const sceneDurMs = durationsMs[sceneIdx];
+      const sceneElapsed = elapsed - sceneStartMs;
+      const sceneProg = sceneElapsed / sceneDurMs;
 
       // Ken Burns-style slow zoom for life
       const zoom = 1 + 0.06 * sceneProg;
@@ -252,7 +265,7 @@ export async function assembleVideo(cfg = {}) {
       }
 
       if (subtitleStyle !== "none") {
-        drawCaption(ctx, scenes[sceneIdx].caption || scenes[sceneIdx].text, W, H, { accent, subtitleStyle });
+        drawCaption(ctx, scenes[sceneIdx].caption || scenes[sceneIdx].text, W, H, { accent, subtitleStyle, fontFamily });
       }
       drawLogo(ctx, logoImg, W, H);
 

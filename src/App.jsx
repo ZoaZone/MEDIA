@@ -14,10 +14,7 @@ import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import Campaigns from './pages/Campaigns';
 import SocialHub from './pages/SocialHub';
-import MediaStudio from './pages/MediaStudio';
-import VideoEditor from './pages/VideoEditor';
 import AdCreator from './pages/AdCreator';
-import ScriptWriter from './pages/ScriptWriter';
 import WebsiteScanner from './pages/WebsiteScanner';
 import FunnelBuilder from './pages/FunnelBuilder';
 import LeadCapturePage from './pages/LeadCapturePage';
@@ -95,10 +92,10 @@ const AuthenticatedApp = () => {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/campaigns" element={<Campaigns />} />
         <Route path="/social-hub" element={<SocialHub />} />
-        <Route path="/media-studio" element={<MediaStudio />} />
-        <Route path="/video-editor" element={<VideoEditor />} />
+        <Route path="/media-studio" element={<Navigate to="/campaign-studio" replace />} />
+        <Route path="/video-editor" element={<Navigate to="/campaign-studio" replace />} />
+        <Route path="/script-writer" element={<Navigate to="/campaign-studio" replace />} />
         <Route path="/ad-creator" element={<AdCreator />} />
-        <Route path="/script-writer" element={<ScriptWriter />} />
         <Route path="/brands" element={<BrandManager />} />
         <Route path="/campaign-studio" element={<CampaignStudio />} />
         <Route path="/website-scanner" element={<WebsiteScanner />} />
