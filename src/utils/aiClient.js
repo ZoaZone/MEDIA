@@ -11,21 +11,36 @@ export async function generateText({ type = "caption", prompt, platform = "Gener
 }
 
 /**
- * Generate an AI image. Tries the Core integration first (used in
- * CampaignStudio), falls back to the generateImage backend function
- * (used in AdCreator) for compatibility.
+ * Generate an AI image via the generateImage backend function, which also
+ * enforces the free-trial generation limit and logs the result to the
+ * Media Library. Falls back to the Core integration (no trial gating, no
+ * library record) if the backend function itself is unreachable.
+ *
+ * Throws an Error with `.upgradeRequired = true` when the caller's free
+ * trial is exhausted and they have no purchased credits — UI callers should
+ * catch this and show a "Subscribe to continue" CTA linking to /pricing.
+ *
+ * `referenceImageUrls` (optional) lets the caller attach one or more uploaded
+ * images so the model replicates the people/style/likeness from them.
  */
-export async function generateImage({ prompt, platform = "General", dimensions = "1024x1024" }) {
+export async function generateImage({ prompt, platform = "General", dimensions = "1024x1024", referenceImageUrls = [] }) {
   try {
-    const res = await base44.integrations.Core.GenerateImage({ prompt });
-    const url = res?.url ?? res?.data?.url ?? res?.file_url;
+    const res = await base44.functions.invoke("generateImage", { prompt, platform, dimensions, reference_image_urls: referenceImageUrls });
+    const data = res?.data ?? res;
+    const url = data?.url ?? data?.file_url;
     if (url) return url;
-  } catch (_e) {
-    // fall through to function-based generation
+  } catch (e) {
+    const data = e?.response?.data;
+    if (data?.error === "trial_limit_reached") {
+      const err = new Error(data?.message || "Free trial limit reached. Subscribe to continue generating.");
+      err.upgradeRequired = true;
+      throw err;
+    }
+    // fall through to Core integration fallback
   }
   try {
-    const res = await base44.functions.invoke("generateImage", { prompt, platform, dimensions });
-    return res?.data?.url ?? res?.url ?? res?.data?.file_url ?? res?.file_url ?? null;
+    const res = await base44.integrations.Core.GenerateImage({ prompt, existing_image_urls: referenceImageUrls?.length ? referenceImageUrls : undefined });
+    return res?.url ?? res?.data?.url ?? res?.file_url ?? null;
   } catch (_e) {
     return null;
   }

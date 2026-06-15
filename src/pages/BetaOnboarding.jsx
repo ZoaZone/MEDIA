@@ -6,7 +6,7 @@ import {
   Gift, User, Mail, Lock
 } from "lucide-react";
 
-const APP_URL = "https://media.aevoice.ai";
+const APP_URL = "https://digitalstudios.app";
 
 const STEPS = [
   { id: 1, label: "Verify Invite" },
@@ -190,7 +190,7 @@ export default function BetaOnboarding() {
             <span className="text-white font-black text-2xl">A</span>
           </div>
           <h1 className="text-2xl font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">AEVOICE</h1>
-          <p className="text-white/40 text-xs mt-1">media.aevoice.ai</p>
+          <p className="text-white/40 text-xs mt-1">digitalstudios.app</p>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
@@ -281,7 +281,7 @@ export default function BetaOnboarding() {
             <span className="text-white font-black text-xl">A</span>
           </div>
           <span className="text-xl font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-            media.aevoice.ai
+            digitalstudios.app
           </span>
         </div>
 
@@ -479,7 +479,7 @@ export default function BetaOnboarding() {
         </div>
 
         <p className="text-center text-white/20 text-xs mt-6">
-          © 2026 AEVOICE · media.aevoice.ai · Questions? <a href="mailto:hello@aevoice.ai" className="hover:text-white/40 transition-colors">hello@aevoice.ai</a>
+          © 2026 AEVOICE · digitalstudios.app · Questions? <a href="mailto:hello@aevoice.ai" className="hover:text-white/40 transition-colors">hello@aevoice.ai</a>
         </p>
       </div>
     </div>

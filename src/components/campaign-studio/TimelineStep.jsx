@@ -5,8 +5,12 @@ const sel = "bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-
 
 export default function TimelineStep({ campaign, setCampaign }) {
   const addSlot = () => {
-    const d = new Date(); d.setDate(d.getDate() + 1);
-    setCampaign(p => ({ ...p, schedules: [...p.schedules, { date: d.toISOString().split("T")[0], time: "09:00", topic: "" }] }));
+    let date = campaign.launch_date;
+    if (!date) {
+      const d = new Date(); d.setDate(d.getDate() + 1);
+      date = d.toISOString().split("T")[0];
+    }
+    setCampaign(p => ({ ...p, schedules: [...p.schedules, { date, time: "09:00", topic: "" }] }));
   };
 
   const repeat = campaign.repeat || { enabled: false, cadence: "weekly", months: 3 };

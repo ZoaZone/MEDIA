@@ -7,7 +7,7 @@ const { appId, token, functionsVersion } = appParams;
 const appBaseUrl =
   typeof window !== "undefined"
     ? window.location.origin
-    : "https://media.aevoice.ai";
+    : "https://digitalstudios.app";
 
 export const base44 = createClient({
   appId,

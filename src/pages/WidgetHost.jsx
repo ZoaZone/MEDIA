@@ -6,8 +6,8 @@ const TTS_FN     = "https://sreeagent.base44.app/functions/ttsStream";
 const LOGO_URL   = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692b24a5bac54e3067972063/2e8a22a03_AevoiceLogo.JPG";
 const SITE_COLOR = "#d946ef";
 const SITE_NAME  = "MARKETER";
-const SITE_URL   = "https://media.aevoice.ai";
-const SYSTEM_PROMPT = `You are Sree, the AI marketing assistant for MARKETER at media.aevoice.ai. MARKETER is an AI marketing OS — generates content, schedules to 10+ social platforms, runs bulk SMS/WhatsApp/email campaigns, builds funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 80 words.`;
+const SITE_URL   = "https://digitalstudios.app";
+const SYSTEM_PROMPT = `You are Sree, the AI marketing assistant for MARKETER at digitalstudios.app. MARKETER is an AI marketing OS — generates content, schedules to 10+ social platforms, runs bulk SMS/WhatsApp/email campaigns, builds funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 80 words.`;
 
 function getConfig() {
   const p = new URLSearchParams(window.location.search);

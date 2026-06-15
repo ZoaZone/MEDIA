@@ -25,6 +25,7 @@ const SECTIONS = [
   { id: "hipaa", label: "HIPAA (Health)" },
   { id: "children", label: "Children's Privacy" },
   { id: "changes", label: "Policy Changes" },
+  { id: "ai-disclaimer", label: "AI Disclaimer" },
   { id: "contact", label: "Contact Us" },
 ];
 
@@ -178,7 +179,7 @@ export default function PrivacyConsentPage() {
             <ul className="mt-3 space-y-2">
               {[
                 ["AEVOICE Voice Platform", "cream.aevoice.ai", "AI phone agents, CRM, call analytics"],
-                ["Marketer", "media.aevoice.ai", "AI-powered marketing, campaigns, social scheduling"],
+                ["Marketer", "digitalstudios.app", "AI-powered marketing, campaigns, social scheduling"],
                 ["Sree OS", "os.aevoice.ai", "Developer console, workflow engine"],
                 ["Aevathon", "aevathon.aevoice.ai", "AI tools and automation suite"],
                 ["HealthAI Companion", "health.workautomation.app", "Health AI platform — HIPAA-applicable"],
@@ -607,8 +608,33 @@ export default function PrivacyConsentPage() {
             </p>
           </Section>
 
-          {/* 13. CONTACT */}
-          <Section id="contact" title="13. Contact & Data Requests">
+          {/* 13. AI DISCLAIMER */}
+          <Section id="ai-disclaimer" title="13. AI-Generated Content Disclaimer">
+            <AlertBox type="warning">
+              <strong>AI can make mistakes.</strong> Always review and verify the accuracy of any AI-generated content before publishing, sending, or relying on it.
+            </AlertBox>
+            <p>
+              Marketer (digitalstudios.app) uses generative AI to produce images, videos, voiceovers, captions, ad copy, scripts, website-scan summaries, and chatbot responses (including the "Sree" assistant). AI-generated output is created automatically based on your prompts and may be:
+            </p>
+            <ul className="space-y-2 mt-2 text-gray-300">
+              {[
+                "Factually incorrect, outdated, or misleading (commonly called \"hallucinations\").",
+                "Visually imperfect — AI images and videos may depict inaccurate text, logos, products, people, or brand details.",
+                "Unsuitable for regulated contexts (health, financial, legal, or safety claims) without professional review.",
+                "Similar to existing third-party content by coincidence — you are responsible for confirming you have the rights to publish any AI-generated asset.",
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-indigo-400 mt-0.5">•</span> {item}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3">
+              You are solely responsible for reviewing, editing, fact-checking, and approving all AI-generated content — including campaigns, social posts, emails, SMS/WhatsApp messages, and chatbot replies — before it is sent to your contacts, published to your accounts, or used in any customer-facing or business decision. AEVOICE AI Inc. makes no warranty as to the accuracy, completeness, legality, or suitability of AI-generated output and is not liable for actions taken based on it.
+            </p>
+          </Section>
+
+          {/* 14. CONTACT */}
+          <Section id="contact" title="14. Contact & Data Requests">
             <div className="grid sm:grid-cols-2 gap-4">
               {[
                 { title: "General Privacy Inquiries", email: BRAND.supportEmail, icon: "📧" },

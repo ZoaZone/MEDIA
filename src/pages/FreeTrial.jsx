@@ -73,7 +73,7 @@ export default function FreeTrial() {
           </Link>
           <div className="flex items-center gap-2">
             <img src={M_LOGO} alt="" className="w-7 h-7 rounded-lg" onError={e => e.target.style.display = "none"} />
-            <span className="font-black text-sm bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
+            <span className="font-black text-sm bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
           </div>
         </div>
 

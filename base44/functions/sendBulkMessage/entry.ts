@@ -8,8 +8,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  * the account's plan-included quota is used up.
  */
 async function sendPlatformEmail(base44: any, { to, subject, html, text }: any): Promise<{ ok: boolean; error?: string }> {
-  const fromName = 'media.aevoice.ai';
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@media.aevoice.ai';
+  const fromName = 'digitalstudios.app';
+  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@digitalstudios.app';
   const plainText = text || '';
   const htmlContent = html || '<pre style="font-family:sans-serif;white-space:pre-wrap">' + plainText + '</pre>';
 

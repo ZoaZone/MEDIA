@@ -3,8 +3,14 @@ import { useOutletContext, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { mine } from "@/utils/scope";
-import { CreditCard, Check, Zap, Loader2, ExternalLink, Calendar, AlertCircle, Mail, Phone, MessageSquare } from "lucide-react";
+import { CreditCard, Check, Zap, Loader2, ExternalLink, Calendar, AlertCircle, Mail, Phone, MessageSquare, Sparkles, Gift } from "lucide-react";
 import PayPalButton from "@/components/PayPalButton";
+
+// $0.06 per AI generation credit (~50% platform margin over the ~$0.04 raw
+// provider cost). Free trial includes 25 generations (≈5 images / 3 short videos).
+const PRICE_PER_CREDIT = 0.06;
+const FREE_TRIAL_LIMIT = 25;
+const CREDIT_PACKS = [10, 25, 50, 100];
 
 const PLANS = [
   {
@@ -31,6 +37,8 @@ export default function Billing() {
   const [loading, setLoading] = useState(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [error, setError] = useState("");
+  const [creditAmount, setCreditAmount] = useState(10);
+  const [buyingCredits, setBuyingCredits] = useState(false);
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.email],
@@ -41,9 +49,18 @@ export default function Billing() {
   const { data: campaigns = [] } = useQuery({ queryKey: ["campaigns_b", user?.email], queryFn: () => base44.entities.MarketingCampaign.filter(mine(user), null, 200), enabled: !!user?.email });
   const { data: assets = [] } = useQuery({ queryKey: ["assets_b", user?.email], queryFn: () => base44.entities.ContentAsset.filter(mine(user), null, 200), enabled: !!user?.email });
   const { data: messages = [] } = useQuery({ queryKey: ["messages_b", user?.email], queryFn: () => base44.entities.BulkMessage.filter(mine(user), null, 500), enabled: !!user?.email });
+  const { data: aiGenerations = [] } = useQuery({
+    queryKey: ["media_items_b", user?.email],
+    queryFn: () => base44.entities.MediaLibraryItem.filter({ created_by: user?.email, ai_generated: true }, null, 500),
+    enabled: !!user?.email,
+  });
 
   const totalSent = messages.filter(m => m.status === "delivered").length;
   const aiGenCount = assets.filter(a => a.ai_generated).length;
+
+  const isPaidPlan = !!sub && ["active", "trialing"].includes(sub.status) && ["starter", "growth", "agency"].includes(sub.plan_tier);
+  const trialUsed = aiGenerations.length;
+  const creditsBalance = sub?.credits_balance || 0;
 
   const subscribe = async (planKey, planName, amount) => {
     setLoading(planKey);
@@ -62,6 +79,25 @@ export default function Billing() {
       setError(e.message);
     }
     setLoading(null);
+  };
+
+  const buyCredits = async (amount) => {
+    setBuyingCredits(true);
+    setError("");
+    try {
+      const res = await base44.functions.invoke("buyCredits", { amount_usd: amount });
+      const data = res?.data ?? res;
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else if (data?.success) {
+        qc.invalidateQueries(["subscription"]);
+      } else {
+        setError(data?.error || "Something went wrong");
+      }
+    } catch (e) {
+      setError(e?.response?.data?.error || e.message);
+    }
+    setBuyingCredits(false);
   };
 
   const openPortal = async () => {
@@ -89,6 +125,27 @@ export default function Billing() {
       {error && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
+        </div>
+      )}
+
+      {/* Free trial status */}
+      {!isPaidPlan && (
+        <div className="bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-500/30 rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Gift className="w-4 h-4 text-fuchsia-400" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Free Trial</span>
+          </div>
+          <h2 className="text-2xl font-black text-foreground">No subscription yet</h2>
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+              <span>AI generations used</span>
+              <span>{Math.min(trialUsed, FREE_TRIAL_LIMIT)} / {FREE_TRIAL_LIMIT}</span>
+            </div>
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-fuchsia-500 to-purple-600 transition-all" style={{ width: `${Math.min(100, (trialUsed / FREE_TRIAL_LIMIT) * 100)}%` }} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">≈ 5 images or 3 short videos. {creditsBalance > 0 ? `You also have ${creditsBalance.toLocaleString()} purchased credits available.` : "Subscribe to a plan or buy credits below to keep creating once your trial is used up."}</p>
+          </div>
         </div>
       )}
 
@@ -191,11 +248,52 @@ export default function Billing() {
         })}
       </div>
 
+      {/* AI Generation Credits */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-1">
+          <div>
+            <h3 className="font-bold text-foreground flex items-center gap-2"><Sparkles className="w-4 h-4 text-fuchsia-400" /> AI Generation Credits</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Pay-as-you-go credits for AI image &amp; video generations — on top of your plan's monthly allowance, or instead of a subscription.
+              1 credit = 1 generation = ${PRICE_PER_CREDIT.toFixed(2)}.
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-2xl font-black text-foreground">{creditsBalance.toLocaleString()}</div>
+            <div className="text-xs text-muted-foreground">credits available</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+          {CREDIT_PACKS.map(amt => (
+            <button key={amt} onClick={() => setCreditAmount(amt)}
+              className={`py-2.5 rounded-xl border text-sm font-semibold transition-all ${creditAmount === amt ? "bg-fuchsia-500/15 border-fuchsia-500/50 text-fuchsia-400" : "border-border text-muted-foreground hover:bg-muted/20"}`}>
+              ${amt} <span className="block text-[11px] font-normal opacity-70">{Math.floor(amt / PRICE_PER_CREDIT).toLocaleString()} credits</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 mt-3">
+          <div className="relative flex-1 max-w-[160px]">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+            <input type="number" min={10} step={1} value={creditAmount}
+              onChange={e => setCreditAmount(Math.max(10, Number(e.target.value) || 0))}
+              className="w-full h-10 pl-6 pr-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+          </div>
+          <button onClick={() => buyCredits(creditAmount)} disabled={buyingCredits || creditAmount < 10}
+            className="flex items-center gap-2 px-5 h-10 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50 hover:opacity-90 transition-all shadow-lg shadow-fuchsia-500/20">
+            {buyingCredits ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Buy {Math.floor(creditAmount / PRICE_PER_CREDIT).toLocaleString()} Credits
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2">Minimum purchase $10. Any amount $10 or above can be purchased — credits never expire.</p>
+      </div>
+
       {/* Messaging & Email sending */}
       <div className="bg-card border border-border rounded-2xl p-6">
         <h3 className="font-bold text-foreground mb-1">Email, SMS &amp; WhatsApp Sending</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Bring your own provider credentials for zero platform fee, or let media.aevoice.ai send on your behalf —
+          Bring your own provider credentials for zero platform fee, or let digitalstudios.app send on your behalf —
           included up to your plan's monthly message quota, then billed at provider cost + 30% platform usage fee.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

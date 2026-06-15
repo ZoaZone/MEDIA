@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { ShieldCheck, Users, Megaphone, BarChart3, DollarSign, Loader2, Search, Gift, Send, CheckCircle2, X, Plus, Link, Copy, UserCheck, Clock, UserX } from "lucide-react";
+import { ShieldCheck, Users, Megaphone, BarChart3, DollarSign, Loader2, Search, Gift, Send, CheckCircle2, X, Plus, Link, Copy, UserCheck, Clock, UserX, UserPlus } from "lucide-react";
 
 export default function AdminDashboard() {
   const {user}=useOutletContext()||{};
@@ -16,6 +16,12 @@ export default function AdminDashboard() {
   const [inviting,setInviting]=useState(false);
   const [inviteResults,setInviteResults]=useState([]);
   const [linkCopied,setLinkCopied]=useState(false);
+
+  // Free trial invite state
+  const [freeInviteEmails,setFreeInviteEmails]=useState("");
+  const [freeInviteNote,setFreeInviteNote]=useState("");
+  const [freeInviting,setFreeInviting]=useState(false);
+  const [freeInviteResults,setFreeInviteResults]=useState([]);
 
   const isAdmin = user?.role === "admin";
   // These are deliberately platform-wide (admin sees every user's data) —
@@ -42,7 +48,7 @@ export default function AdminDashboard() {
 
   const filteredSubs=subs.filter(s=>!search||(s.owner_email||"").toLowerCase().includes(search.toLowerCase()));
 
-  const APP_URL = "https://media.aevoice.ai";
+  const APP_URL = "https://digitalstudios.app";
   const betaInviteLink = `${APP_URL}/beta`;
 
   const copyLink = () => {
@@ -72,6 +78,28 @@ export default function AdminDashboard() {
     setInviteResults(results);
     setInviting(false);
     qc.invalidateQueries(["admin_subs"]);
+  };
+
+  const sendFreeInvites = async () => {
+    const emails = freeInviteEmails.split(/[\n,;]+/).map(e=>e.trim()).filter(Boolean);
+    if (!emails.length) return;
+    setFreeInviting(true);
+    setFreeInviteResults([]);
+    const results = [];
+    for (const email of emails) {
+      try {
+        await base44.functions.invoke("sendBetaInvite", {
+          email,
+          note: freeInviteNote || "",
+          source: "free_invite",
+        });
+        results.push({ email, status: "success" });
+      } catch (err) {
+        results.push({ email, status: "error", msg: err.message });
+      }
+    }
+    setFreeInviteResults(results);
+    setFreeInviting(false);
   };
 
   const approveBetaRequest = async (req) => {
@@ -113,11 +141,11 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <ShieldCheck className="w-7 h-7 text-fuchsia-400"/>
-        <div><h1 className="text-2xl font-black text-foreground">Admin Dashboard</h1><p className="text-muted-foreground text-sm">media.aevoice.ai platform overview</p></div>
+        <div><h1 className="text-2xl font-black text-foreground">Admin Dashboard</h1><p className="text-muted-foreground text-sm">digitalstudios.app platform overview</p></div>
       </div>
 
       <div className="flex gap-2 border-b border-border pb-1">
-        {[{v:"overview",l:"Overview"},{v:"subscribers",l:"Subscribers"},{v:"activity",l:"Activity"},{v:"beta",l:"🎁 Beta Invites"}].map(t=>(
+        {[{v:"overview",l:"Overview"},{v:"subscribers",l:"Subscribers"},{v:"activity",l:"Activity"},{v:"beta",l:"🎁 Beta Invites"},{v:"freeinvite",l:"🚀 Free Trial Invites"}].map(t=>(
           <button key={t.v} onClick={()=>setTab(t.v)} className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-all ${tab===t.v?"text-fuchsia-400 border-b-2 border-fuchsia-500":"text-muted-foreground hover:text-foreground"}`}>{t.l}</button>
         ))}
       </div>
@@ -265,6 +293,68 @@ export default function AdminDashboard() {
             <div className="bg-card border border-border rounded-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-border text-xs font-semibold text-muted-foreground">Invite Results</div>
               {inviteResults.map((r,i)=>(
+                <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
+                  {r.status==="success"
+                    ?<CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0"/>
+                    :<X className="w-4 h-4 text-red-400 shrink-0"/>}
+                  <span className="text-sm text-foreground flex-1">{r.email}</span>
+                  {r.status==="success"
+                    ?<span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Invited ✓</span>
+                    :<span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full truncate max-w-[200px]">{r.msg}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab==="freeinvite"&&(
+        <div className="space-y-5 max-w-2xl">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-2xl p-5 flex gap-3 items-start">
+            <UserPlus className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0"/>
+            <div>
+              <p className="text-sm font-bold text-foreground">Free Trial Invites — Standard Free Account</p>
+              <p className="text-xs text-muted-foreground mt-1">Invite users to try digitalstudios.app with a no-credit-card free trial: 25 free AI generations (≈5 images or 3 short videos), full platform access, and an in-app prompt to subscribe once their trial limit is reached.</p>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5"><Plus className="w-3.5 h-3.5"/>Email Addresses</label>
+              <textarea
+                value={freeInviteEmails}
+                onChange={e=>setFreeInviteEmails(e.target.value)}
+                rows={5}
+                placeholder={"user1@example.com\nuser2@example.com\nor comma-separated: a@b.com, c@d.com"}
+                className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none font-mono"
+              />
+              <p className="text-[11px] text-muted-foreground">Enter one email per line, or comma/semicolon separated.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Personal Note (optional)</label>
+              <textarea
+                value={freeInviteNote}
+                onChange={e=>setFreeInviteNote(e.target.value)}
+                rows={2}
+                placeholder="e.g. Thanks for your interest — here's your free trial…"
+                className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+              <p className="text-[11px] text-muted-foreground">This note is included in the welcome email sent to each invitee.</p>
+            </div>
+
+            <button
+              onClick={sendFreeInvites}
+              disabled={freeInviting||!freeInviteEmails.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-white text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-all shadow-lg shadow-emerald-500/20">
+              {freeInviting?<><Loader2 className="w-4 h-4 animate-spin"/>Sending Invites…</>:<><Send className="w-4 h-4"/>Send Free Trial Invites</>}
+            </button>
+          </div>
+
+          {freeInviteResults.length>0&&(
+            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-border text-xs font-semibold text-muted-foreground">Invite Results</div>
+              {freeInviteResults.map((r,i)=>(
                 <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
                   {r.status==="success"
                     ?<CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0"/>

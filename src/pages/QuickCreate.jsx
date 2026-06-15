@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { generateText, generateImage, generateVoiceover, uploadFile, splitScriptIntoScenes, shortenCaption } from "@/utils/aiClient";
 import { assembleVideo, VIDEO_RATIOS } from "@/utils/videoAssembler";
-import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic } from "lucide-react";
+import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic, Sparkles, Paperclip, X } from "lucide-react";
 
 // Pixel-dimension hints passed to the image generator per aspect ratio.
 const RATIO_DIMENSIONS = { "1:1": "1024x1024", "16:9": "1792x1024", "9:16": "1024x1792", "4:5": "1024x1280" };
@@ -19,16 +20,37 @@ export default function QuickCreate() {
   const [progress, setProgress] = useState(0);
   const [statusMsg, setStatusMsg] = useState("");
   const [error, setError] = useState("");
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [result, setResult] = useState(null); // { type: "image"|"video", url }
   const [saved, setSaved] = useState(false);
+  const [attachments, setAttachments] = useState([]); // [{ url, name }]
+  const [uploadingFile, setUploadingFile] = useState(false);
+
+  const addAttachments = async (files) => {
+    if (!files?.length) return;
+    setUploadingFile(true);
+    setError("");
+    try {
+      for (const file of Array.from(files)) {
+        const url = await uploadFile(file);
+        if (url) setAttachments(prev => [...prev, { url, name: file.name }]);
+      }
+    } catch (e) {
+      setError(e?.message || "Attachment upload failed.");
+    }
+    setUploadingFile(false);
+  };
+
+  const removeAttachment = (idx) => setAttachments(prev => prev.filter((_, i) => i !== idx));
 
   const generate = async () => {
     if (!prompt.trim()) { setError("Describe what you'd like to create."); return; }
-    setError(""); setResult(null); setSaved(false); setGenerating(true); setProgress(0); setStatusMsg("");
+    setError(""); setUpgradeRequired(false); setResult(null); setSaved(false); setGenerating(true); setProgress(0); setStatusMsg("");
+    const referenceImageUrls = attachments.map(a => a.url);
     try {
       if (outputType === "image") {
         setStatusMsg("Generating image...");
-        const url = await generateImage({ prompt, dimensions: RATIO_DIMENSIONS[ratio] || "1024x1024" });
+        const url = await generateImage({ prompt, dimensions: RATIO_DIMENSIONS[ratio] || "1024x1024", referenceImageUrls });
         if (!url) throw new Error("Image generation failed — try a different description.");
         setResult({ type: "image", url });
       } else {
@@ -43,7 +65,7 @@ export default function QuickCreate() {
         for (let i = 0; i < sceneScripts.length; i++) {
           setStatusMsg(`Generating scene ${i + 1} of ${sceneScripts.length}...`);
           setProgress((i / sceneScripts.length) * 0.6);
-          const imgUrl = await generateImage({ prompt: sceneScripts[i].imagePrompt || sceneScripts[i].text || prompt });
+          const imgUrl = await generateImage({ prompt: sceneScripts[i].imagePrompt || sceneScripts[i].text || prompt, referenceImageUrls });
           scenes.push({ imageUrl: imgUrl, text: sceneScripts[i].text, caption: shortenCaption(sceneScripts[i].text) });
         }
         let audio = null;
@@ -63,6 +85,7 @@ export default function QuickCreate() {
       }
     } catch (e) {
       setError(e?.message || "Generation failed.");
+      if (e?.upgradeRequired) setUpgradeRequired(true);
     }
     setGenerating(false); setStatusMsg("");
   };
@@ -99,6 +122,27 @@ export default function QuickCreate() {
             <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={5}
               placeholder="e.g. A cozy coffee shop's morning menu special, warm tones, inviting and photo-realistic..."
               className="w-full rounded-xl border border-input bg-background text-sm p-3 focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Reference Images (optional)</label>
+            <p className="text-xs text-muted-foreground mb-2">Attach photos of people, products, or a style you'd like the AI to match.</p>
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((a, i) => (
+                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border group">
+                  <img src={a.url} alt={a.name} className="w-full h-full object-cover" />
+                  <button onClick={() => removeAttachment(i)}
+                    className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              <label className="w-16 h-16 rounded-lg border border-dashed border-border flex items-center justify-center cursor-pointer text-muted-foreground hover:bg-muted/20 transition-colors">
+                {uploadingFile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingFile}
+                  onChange={e => { addAttachments(e.target.files); e.target.value = ""; }} />
+              </label>
+            </div>
           </div>
 
           <div>
@@ -151,9 +195,21 @@ export default function QuickCreate() {
             </>
           )}
 
-          {error && (
+          {error && !upgradeRequired && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /> {error}
+            </div>
+          )}
+
+          {upgradeRequired && (
+            <div className="p-4 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-500/30 space-y-3">
+              <div className="flex items-start gap-2 text-sm text-fuchsia-200">
+                <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-fuchsia-400" /> {error}
+              </div>
+              <Link to="/pricing"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-bold hover:opacity-90 transition-all">
+                View Plans &amp; Pricing
+              </Link>
             </div>
           )}
 

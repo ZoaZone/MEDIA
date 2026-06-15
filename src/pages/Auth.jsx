@@ -125,7 +125,7 @@ export default function Auth() {
               alt="AEVOICE" className="w-10 h-10 object-cover rounded-xl"
               onError={e => { e.target.style.display = "none"; }} />
           </div>
-          <h1 className="text-lg font-black text-white tracking-tight">media.aevoice.ai</h1>
+          <h1 className="text-lg font-black text-white tracking-tight">digitalstudios.app</h1>
           <p className="text-xs text-slate-400 mt-0.5">AI Marketing & Media Platform</p>
         </div>
 

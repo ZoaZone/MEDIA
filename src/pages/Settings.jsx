@@ -422,7 +422,7 @@ export default function SettingsPage() {
           </div>
           <div className="p-4 rounded-xl bg-muted/30 border border-border text-xs text-muted-foreground">
             Add a SendGrid / Twilio / WhatsApp key below to send Email, SMS and WhatsApp campaigns from your own
-            account at no platform fee. Leave these blank and media.aevoice.ai will send on your behalf using its
+            account at no platform fee. Leave these blank and digitalstudios.app will send on your behalf using its
             built-in providers — included in your plan's quota, then billed at provider cost + 30%. See <Link to="/billing" className="text-fuchsia-400 hover:underline">Billing</Link> for rates.
           </div>
           {KEY_FIELDS.map(({ k, l, ph, help }) => (

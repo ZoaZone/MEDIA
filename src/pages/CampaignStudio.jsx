@@ -68,7 +68,7 @@ export default function CampaignStudio() {
   const [step, setStep] = useState(0);
   const [showDemo, setShowDemo] = useState(false);
   const [campaign, setCampaign] = useState({
-    brand_id: "", campaign_name: "",
+    brand_id: "", campaign_name: "", launch_date: "",
     content_type: "caption", format: "Standard", length: "Medium (Standard)", tone: "Professional",
     ai_prompt: "", ai_output: "", auto_mode: false,
     outputs: {}, include_hashtags: true,
@@ -90,6 +90,7 @@ export default function CampaignStudio() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [publishReport, setPublishReport] = useState([]);
   const [publishStatus, setPublishStatus] = useState("");
 
@@ -171,6 +172,7 @@ Topic: ${topic}`;
     }
     setGeneratingMedia(true);
     setError("");
+    setUpgradeRequired(false);
     try {
       const brandContext = selectedBrand
         ? ` Brand: ${selectedBrand.name}.${selectedBrand.brand_voice ? ` Brand voice: ${selectedBrand.brand_voice}.` : ""}${selectedBrand.primary_color ? ` Incorporate the brand color ${selectedBrand.primary_color} as an accent.` : ""}`
@@ -196,7 +198,14 @@ Topic: ${topic}`;
         }
       }
       setCampaign(p => ({ ...p, media_urls: [...p.media_urls, finalUrl] }));
-    } catch (e) { setError("Image generation failed: " + (e?.message || "unknown error")); }
+    } catch (e) {
+      if (e?.upgradeRequired) {
+        setError(e.message);
+        setUpgradeRequired(true);
+      } else {
+        setError("Image generation failed: " + (e?.message || "unknown error"));
+      }
+    }
     setGeneratingMedia(false);
   };
 
@@ -543,9 +552,21 @@ Topic: ${topic}`;
         </button>
       </div>
 
-      {error && (
+      {error && !upgradeRequired && (
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" /> {error}
+        </div>
+      )}
+
+      {upgradeRequired && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-500/30 text-sm">
+          <div className="flex items-start gap-3 flex-1 text-fuchsia-200">
+            <Sparkles className="w-5 h-5 shrink-0 mt-0.5 text-fuchsia-400" /> {error}
+          </div>
+          <button onClick={() => navigate("/pricing")}
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-bold hover:opacity-90 transition-all">
+            View Plans &amp; Pricing
+          </button>
         </div>
       )}
 

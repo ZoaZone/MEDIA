@@ -19,7 +19,7 @@ export default function AuthCard({ children, title, subtitle }) {
             <img src={LOGO} alt="AEVOICE" className="w-12 h-12 object-cover rounded-xl"
               onError={e => { e.target.style.display = "none"; }} />
           </div>
-          <h1 className="text-xl font-black text-white tracking-tight">media.aevoice.ai</h1>
+          <h1 className="text-xl font-black text-white tracking-tight">digitalstudios.app</h1>
           <p className="text-xs text-slate-400 mt-0.5">AI Marketing & Media Platform</p>
         </div>
 

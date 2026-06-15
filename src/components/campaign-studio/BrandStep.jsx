@@ -1,4 +1,4 @@
-import { Building2 } from "lucide-react";
+import { Building2, Calendar } from "lucide-react";
 
 const lbl = "block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-2";
 const inp = "w-full bg-neutral-900/50 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-fuchsia-500/70 transition-all";
@@ -6,9 +6,15 @@ const inp = "w-full bg-neutral-900/50 border border-neutral-800 rounded-xl px-4 
 export default function BrandStep({ campaign, setCampaign, brands, navigate }) {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <label className={lbl}>Campaign Details</label>
-        <input value={campaign.campaign_name} onChange={e => setCampaign(p => ({ ...p, campaign_name: e.target.value }))} placeholder="Campaign Name (e.g. Q3 Product Launch)" className={inp} />
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div className="sm:col-span-2">
+          <label className={lbl}>Campaign Details</label>
+          <input value={campaign.campaign_name} onChange={e => setCampaign(p => ({ ...p, campaign_name: e.target.value }))} placeholder="Campaign Name (e.g. Q3 Product Launch)" className={inp} />
+        </div>
+        <div>
+          <label className={lbl}><Calendar className="w-3.5 h-3.5" /> Launch Date (optional)</label>
+          <input type="date" value={campaign.launch_date || ""} onChange={e => setCampaign(p => ({ ...p, launch_date: e.target.value }))} className={inp} />
+        </div>
       </div>
       <div>
         <label className={lbl}>Select Brand Identity</label>

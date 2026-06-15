@@ -4,15 +4,15 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  * sendEmailFallback — Sends transactional emails to ANY external address.
  *
  * Primary:  Resend (RESEND_API_KEY)
- *   From:   RESEND_FROM_EMAIL env var (default: noreply@media.aevoice.ai)
- *   Domain: media.aevoice.ai — verified & active in Resend ✅
+ *   From:   RESEND_FROM_EMAIL env var (default: noreply@digitalstudios.app)
+ *   Domain: digitalstudios.app — verified & active in Resend ✅
  *
  * Fallback: SendGrid (SENDGRID_API_KEY)
  *   From:   SENDGRID_FROM_EMAIL env var (default: noreply@aevoice.ai)
  *
  * Set env vars:
  *   RESEND_API_KEY       — your Resend API key
- *   RESEND_FROM_EMAIL    — sender address (default: noreply@media.aevoice.ai)
+ *   RESEND_FROM_EMAIL    — sender address (default: noreply@digitalstudios.app)
  *   SENDGRID_API_KEY     — SendGrid key (fallback only)
  *   SENDGRID_FROM_EMAIL  — SendGrid from address (fallback only)
  */
@@ -38,8 +38,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const fromName = from_name || 'media.aevoice.ai';
-    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@media.aevoice.ai';
+    const fromName = from_name || 'digitalstudios.app';
+    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@digitalstudios.app';
     const plainText = text || body || '';
     const htmlContent = html || '<pre style="font-family:sans-serif;white-space:pre-wrap">' + plainText + '</pre>';
 

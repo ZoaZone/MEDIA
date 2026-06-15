@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 // Standard relative path module fallback mapping
 import { base44 } from "../api/base44Client";
@@ -42,14 +42,18 @@ const PLATFORMS = [
 
 const FONTS = ["Arial", "Inter", "Poppins", "Montserrat", "Playfair Display", "Roboto"];
 
-const TIER_LIMITS = { starter: 1, pro: 3, agency: 10 };
+// Keyed by the numeric userTier from AppLayout: 0 = free trial (no active
+// subscription), 1 = Starter, 2 = Growth, 3 = Agency.
+const TIER_LIMITS = { 0: 1, 1: 1, 2: 3, 3: 10 };
+const TIER_NAMES = { 0: "Free Trial", 1: "Starter", 2: "Growth", 3: "Agency" };
 const STEPS = ["Details", "Colors & Voice", "Social Accounts", "Review"];
 
 const inp = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-fuchsia-500/70 transition";
 const lbl = "block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5";
 
 export default function BrandManager() {
-  const { user, userTier = "starter", isAdmin } = useOutletContext() || {};
+  const { user, userTier = 0, isAdmin } = useOutletContext() || {};
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const logoRef = useRef();
 
@@ -85,8 +89,9 @@ export default function BrandManager() {
     enabled: !!user?.email,
   });
 
-  const maxBrands = isAdmin ? Infinity : (TIER_LIMITS[userTier] || 1);
+  const maxBrands = isAdmin ? Infinity : (TIER_LIMITS[userTier] ?? 1);
   const canAddMore = brands.length < maxBrands;
+  const tierName = TIER_NAMES[userTier] || "Free Trial";
 
   const openNew = () => {
     setEditing(null); setForm(emptyForm); setFormStep(0); setShowForm(true);
@@ -174,7 +179,7 @@ export default function BrandManager() {
             <Building2 className="w-6 h-6 text-fuchsia-400" /> Brand Manager
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {brands.length}{isAdmin ? "" : `/${maxBrands}`} brands · <span className="capitalize text-fuchsia-400">{isAdmin ? "Admin" : userTier}</span> plan
+            {brands.length}{isAdmin ? "" : `/${maxBrands}`} brands · <span className="text-fuchsia-400">{isAdmin ? "Admin" : tierName}</span> plan
           </p>
         </div>
         <button onClick={openNew} disabled={!canAddMore}
@@ -184,9 +189,19 @@ export default function BrandManager() {
       </div>
 
       {!canAddMore && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex gap-3">
-          <Zap className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-          <p className="text-amber-300 text-sm">Brand limit reached. Upgrade to Pro (3) or Agency (10) for more.</p>
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex gap-3 flex-1">
+            <Zap className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-amber-300 text-sm">
+              {userTier === 0
+                ? `Your free trial includes ${maxBrands} brand. Subscribe to a plan to add more brands and unlock full access.`
+                : `Brand limit reached for the ${tierName} plan (${maxBrands}). Upgrade to Growth (3) or Agency (10) for more.`}
+            </p>
+          </div>
+          <button onClick={() => navigate("/pricing")}
+            className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-bold hover:opacity-90 transition-all">
+            Subscribe
+          </button>
         </div>
       )}
 

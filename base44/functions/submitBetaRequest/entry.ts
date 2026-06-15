@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
           headers: { Authorization: `Bearer ${sgKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             personalizations: [{ to: [{ email: 'hellobizapp@gmail.com' }] }],
-            from: { email: sgFrom, name: 'media.aevoice.ai' },
+            from: { email: sgFrom, name: 'digitalstudios.app' },
             subject: `🚀 New Beta Request from ${full_name}`,
             content: [{ type: 'text/plain', value: `A new beta access request has been submitted:\n\nName: ${full_name}\nEmail: ${email}\nCompany: ${company || '—'}\nUse Case: ${use_case || '—'}\n\nReview and approve in your Admin Dashboard → Beta Invites tab.` }],
           }),

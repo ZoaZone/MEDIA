@@ -95,7 +95,7 @@ export default function Login() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 mb-4 shadow-xl overflow-hidden">
             <img src={LOGO} alt={BRAND} className="w-12 h-12 object-cover rounded-xl"
-              onError={e => { e.target.src = "/logo.png"; }} />
+              onError={e => { e.target.src = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png"; }} />
           </div>
           <h1 className="text-xl font-black text-white tracking-tight">{BRAND}</h1>
           <p className="text-xs text-slate-400 mt-0.5">{TAGLINE}</p>

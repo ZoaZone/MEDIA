@@ -3,7 +3,19 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PayPalButton from "@/components/PayPalButton";
-import { Check, Zap, ArrowRight, ArrowLeft, Loader2, Star } from "lucide-react";
+import { Check, Zap, ArrowRight, ArrowLeft, Loader2, Star, Sparkles, Gift, Mail, Phone, MessageSquare } from "lucide-react";
+
+// $0.06 per AI generation credit (~50% platform margin over the ~$0.04 raw
+// provider cost). Free trial includes 25 generations (≈5 images / 3 short videos).
+const PRICE_PER_CREDIT = 0.06;
+const FREE_TRIAL_LIMIT = 25;
+const CREDIT_PACKS = [10, 25, 50, 100];
+
+const MESSAGING_RATES = [
+  { Icon: Mail, label: "Email", provider: "Base44 / Resend / SendGrid", rate: "$1.30 / 1,000 emails", byo: "Bring your own SendGrid key for $0 platform fee" },
+  { Icon: Phone, label: "SMS", provider: "Twilio", rate: "≈ $0.0103 / SMS (US)", byo: "Bring your own Twilio account for $0 platform fee" },
+  { Icon: MessageSquare, label: "WhatsApp", provider: "Meta Cloud API", rate: "Meta's per-conversation rate + 30%", byo: "Bring your own WhatsApp Business API token for $0 platform fee" },
+];
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
@@ -100,10 +112,14 @@ export default function Pricing() {
         <div className="text-center mb-14">
           <div className="flex items-center justify-center gap-2 mb-4">
             <img src={M_LOGO} alt="" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
-            <span className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">media.aevoice.ai</span>
+            <span className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4">Choose your plan</h1>
-          <p className="text-white/50 text-lg mb-8">Choose the plan that fits your growth.</p>
+          <p className="text-white/50 text-lg mb-6">Choose the plan that fits your growth.</p>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-8">
+            <Gift className="w-4 h-4" /> Start free — {FREE_TRIAL_LIMIT} AI generations (≈5 images or 3 short videos), no credit card required
+          </div>
 
           {/* Billing toggle */}
           <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
@@ -193,6 +209,51 @@ export default function Pricing() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* AI Generation Credits */}
+        <div className="bg-white/3 border border-white/8 rounded-3xl p-7 mb-8">
+          <div className="flex items-start gap-3 mb-4">
+            <Sparkles className="w-6 h-6 text-fuchsia-400 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-xl font-black text-white mb-1">AI Generation Credits</h3>
+              <p className="text-white/50 text-sm">
+                Need more than your plan's monthly AI allowance — or just want to try the platform first? Buy pay-as-you-go credits.
+                1 credit = 1 image or video-scene generation = ${PRICE_PER_CREDIT.toFixed(2)}.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {CREDIT_PACKS.map(amt => (
+              <div key={amt} className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-center">
+                <div className="text-2xl font-black text-white">${amt}</div>
+                <div className="text-xs text-white/40 mt-1">{Math.floor(amt / PRICE_PER_CREDIT).toLocaleString()} credits</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-white/30 mt-4">Minimum purchase $10 — any amount $10 or above thereafter. Credits never expire and stack with your plan's monthly allowance. Manage credits from Billing.</p>
+        </div>
+
+        {/* Email, SMS & WhatsApp sending */}
+        <div className="bg-white/3 border border-white/8 rounded-3xl p-7 mb-12">
+          <h3 className="text-xl font-black text-white mb-1">Email, SMS &amp; WhatsApp Sending</h3>
+          <p className="text-white/50 text-sm mb-5">
+            Bring your own provider credentials for zero platform fee, or let digitalstudios.app send on your behalf —
+            included up to your plan's monthly message quota, then billed at provider cost + 30% platform usage fee.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {MESSAGING_RATES.map(m => (
+              <div key={m.label} className="p-4 rounded-2xl border border-white/10 bg-white/3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <m.Icon className="w-4 h-4 text-fuchsia-400" />
+                  <span className="font-semibold text-white text-sm">{m.label}</span>
+                </div>
+                <p className="text-xs text-white/40 mb-1">Managed via {m.provider}</p>
+                <p className="text-sm font-bold text-white mb-1">{m.rate}</p>
+                <p className="text-xs text-white/40">{m.byo}</p>
+              </div>
+            ))}
           </div>
         </div>
 

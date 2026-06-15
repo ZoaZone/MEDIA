@@ -58,7 +58,7 @@ export default function AgentProgram() {
       {/* Nav */}
       <nav className="border-b border-white/8 px-6 h-16 flex items-center justify-between max-w-7xl mx-auto">
         <Link to="/" className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
-          media.aevoice.ai
+          digitalstudios.app
         </Link>
         <Link to="/dashboard" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</Link>
       </nav>
@@ -77,7 +77,7 @@ export default function AgentProgram() {
             on every referral.
           </h1>
           <p className="text-lg text-white/50 mb-10 max-w-xl mx-auto leading-relaxed">
-            Become an approved AEVOICE Agent. Refer businesses to media.aevoice.ai and earn 50% recurring commission — every month, for life.
+            Become an approved AEVOICE Agent. Refer businesses to digitalstudios.app and earn 50% recurring commission — every month, for life.
           </p>
           <a href="#apply" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold text-base hover:opacity-90 transition-opacity shadow-2xl shadow-fuchsia-500/30">
             Apply to Become an Agent <ArrowRight className="w-5 h-5" />
@@ -225,7 +225,7 @@ export default function AgentProgram() {
 
       {/* Footer */}
       <footer className="border-t border-white/8 py-8 px-6 text-center">
-        <p className="text-white/30 text-xs">© 2026 AEVOICE · <a href="mailto:partners@aevoice.ai" className="hover:text-white/50">partners@aevoice.ai</a> · <Link to="/" className="hover:text-white/50">media.aevoice.ai</Link></p>
+        <p className="text-white/30 text-xs">© 2026 AEVOICE · <a href="mailto:partners@aevoice.ai" className="hover:text-white/50">partners@aevoice.ai</a> · <Link to="/" className="hover:text-white/50">digitalstudios.app</Link></p>
       </footer>
     </div>
   );
