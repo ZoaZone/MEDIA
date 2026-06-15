@@ -68,7 +68,7 @@ const NAV_SECTIONS = [
     label: "AI STUDIO",
     items: [
       { to: "/quick-create",    icon: Wand2,    label: "Quick Create", badge: "NEW" },
-      { to: "/demo-video",      icon: Monitor,  label: "Demo Video",   badge: "NEW" },
+      { to: "/demo-video",      icon: Monitor,  label: "Create Demo Video", badge: "NEW" },
       { to: "/ad-creator",      icon: PenTool,  label: "Ad Creator",   minTier: 2 },
       { to: "/website-scanner", icon: Search,   label: "Website Scanner", minTier: 2 },
       { to: "/media-library",   icon: Image,    label: "Media Library" },

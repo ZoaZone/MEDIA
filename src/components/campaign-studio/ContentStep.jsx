@@ -174,8 +174,8 @@ export default function ContentStep({ campaign, setCampaign, selectedBrand, gene
 
       {/* Also generate — secondary outputs (ad copy, caption, hashtags, video script) */}
       <div className="pt-6 border-t border-neutral-800">
-        <h3 className="font-bold text-white mb-1">Also Generate</h3>
-        <p className="text-xs text-neutral-500 mb-4">Spin off extra formats from the same topic — handy for repurposing this campaign across platforms.</p>
+        <h3 className="font-bold text-white mb-1">Also Generate — Global Defaults</h3>
+        <p className="text-xs text-neutral-500 mb-4">Spin off extra formats from the same topic. The <strong>Hashtags</strong> and <strong>Social Caption</strong> below become the default fallback used for every platform when you Launch — to customize for one specific platform, set an override in the <strong>Repurpose</strong> step.</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           {SECONDARY_OUTPUTS.map(out => (
             <button key={out.id} onClick={() => generateSecondary(out)} disabled={loadingOutput === out.id}
@@ -202,6 +202,12 @@ export default function ContentStep({ campaign, setCampaign, selectedBrand, gene
               </div>
               <textarea value={campaign.outputs[out.id]} onChange={e => setCampaign(p => ({ ...p, outputs: { ...p.outputs, [out.id]: e.target.value } }))}
                 className={`${inp} h-28 text-sm leading-relaxed resize-none`} />
+              {out.id === "hashtag_set" && (
+                <label className="flex items-center gap-2 mt-3 text-sm text-neutral-400 cursor-pointer">
+                  <input type="checkbox" checked={campaign.include_hashtags !== false} onChange={e => setCampaign(p => ({ ...p, include_hashtags: e.target.checked }))} className="rounded border-neutral-700 bg-neutral-900 text-fuchsia-500 focus:ring-fuchsia-500" />
+                  Append these hashtags to the caption when posts are published
+                </label>
+              )}
             </div>
           ))}
         </div>

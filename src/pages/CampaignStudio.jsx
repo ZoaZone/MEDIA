@@ -7,7 +7,7 @@ import {
   Share2, Sparkles, CheckCircle2, PlayCircle, AlertTriangle, Eye, Layers,
 } from "lucide-react";
 import { generateText, generateImage, uploadFile, generateVoiceover, splitScriptIntoScenes, shortenCaption } from "@/utils/aiClient";
-import { assembleVideo } from "@/utils/videoAssembler";
+import { assembleVideo, compositeLogo } from "@/utils/videoAssembler";
 import { computeOccurrenceDates } from "@/utils/recurrence";
 import { PLATFORM_META } from "@/components/campaign-studio/platformMeta";
 import BrandStep from "@/components/campaign-studio/BrandStep";
@@ -69,7 +69,7 @@ export default function CampaignStudio() {
     brand_id: "", campaign_name: "",
     content_type: "caption", format: "Standard", length: "Medium (Standard)", tone: "Professional",
     ai_prompt: "", ai_output: "", auto_mode: false,
-    outputs: {},
+    outputs: {}, include_hashtags: true,
     selected_accounts: [], media_urls: [], video_url: "",
     clip_durations: [],
     video_settings: { music: "Trending TikTok", voice: "AI Female (Natural)", mood: "Energetic", musicUrl: "", musicName: "", subtitleStyle: "bottom" },
@@ -177,8 +177,23 @@ Topic: ${topic}`;
         prompt: `High quality professional marketing image for: ${campaign.ai_prompt || campaign.ai_output}.${brandContext} ${campaign.tone} style, 8k, highly detailed, no text overlay.`,
         platform: selectedBrand?.name || "General",
       });
-      if (url) setCampaign(p => ({ ...p, media_urls: [...p.media_urls, url] }));
-      else setError("Image generation returned no result.");
+      if (!url) { setError("Image generation returned no result."); setGeneratingMedia(false); return; }
+
+      // Overlay the brand logo (if set) and persist the branded version.
+      let finalUrl = url;
+      const logoUrl = selectedBrand?.logo_file_url || selectedBrand?.logo_url || "";
+      if (logoUrl) {
+        try {
+          const branded = await compositeLogo(url, logoUrl);
+          if (branded) {
+            const hostedUrl = await uploadFile(new File([branded], "branded-image.png", { type: "image/png" }));
+            if (hostedUrl) finalUrl = hostedUrl;
+          }
+        } catch (_e) {
+          // fall back to the un-branded image
+        }
+      }
+      setCampaign(p => ({ ...p, media_urls: [...p.media_urls, finalUrl] }));
     } catch (e) { setError("Image generation failed: " + (e?.message || "unknown error")); }
     setGeneratingMedia(false);
   };
@@ -365,7 +380,7 @@ Topic: ${topic}`;
 
       const captionFor = (occurrenceCaption, platform, fallback = "") => {
         const override = platform ? campaign.platform_overrides?.[platform] || {} : {};
-        const hashtags = override.hashtags || campaign.outputs?.hashtag_set || "";
+        const hashtags = campaign.include_hashtags === false ? "" : (override.hashtags || campaign.outputs?.hashtag_set || "");
         const base = occurrenceCaption || fallback;
         return hashtags ? `${base}\n\n${hashtags}` : base;
       };

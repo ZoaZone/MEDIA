@@ -45,15 +45,14 @@ export async function uploadFile(file) {
 export async function generateVoiceover(text) {
   if (!text?.trim()) return null;
   try {
-    const res = await fetch("https://sreeagent.base44.app/functions/ttsStream", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text.slice(0, 2000), voice: "alloy" }),
-    });
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    if (!buf?.byteLength) return null;
-    return new Blob([buf], { type: "audio/mpeg" });
+    const res = await base44.functions.invoke("generateVoiceover", { text: text.slice(0, 2000) });
+    const data = res?.data ?? res;
+    const b64 = data?.audio_base64;
+    if (!b64) return null;
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: data?.mime || "audio/mpeg" });
   } catch (_e) {
     return null;
   }

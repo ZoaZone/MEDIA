@@ -285,4 +285,31 @@ export async function assembleVideo(cfg = {}) {
   return { url: URL.createObjectURL(blob), blob };
 }
 
+/**
+ * Overlay a brand logo (top-right corner) onto a generated image and return
+ * a new PNG Blob. Returns null if either image fails to load, or if the
+ * canvas can't be exported (e.g. a cross-origin source without CORS
+ * headers) — callers should fall back to the original, un-branded image.
+ */
+export async function compositeLogo(imageUrl, logoUrl) {
+  if (!imageUrl || !logoUrl) return null;
+  const [img, logoImg] = await Promise.all([loadImage(imageUrl), loadImage(logoUrl)]);
+  if (!img || !logoImg) return null;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  drawLogo(ctx, logoImg, canvas.width, canvas.height);
+
+  try {
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))), "image/png");
+    });
+  } catch (_e) {
+    return null;
+  }
+}
+
 export const VIDEO_RATIOS = Object.keys(RATIOS);

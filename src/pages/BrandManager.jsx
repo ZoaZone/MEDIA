@@ -4,11 +4,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 // Standard relative path module fallback mapping
 import { base44 } from "../api/base44Client";
 import {
-  Building2, Plus, Globe, Mail, Phone, Users, Mic2, Pencil, Trash2,
-  CheckCircle2, Star, X, Loader2, Zap, Upload, ImagePlus, Share2,
-  Instagram, Link2, Palette, Tag, AlignLeft, ChevronRight, ChevronDown,
-  Eye, EyeOff
+  Building2, Plus, Pencil, Trash2,
+  CheckCircle2, X, Loader2, Zap, Upload, ImagePlus, Share2, ChevronRight, ChevronDown,
+  Eye, EyeOff, RefreshCw
 } from "lucide-react";
+
+const ACCOUNT_STATUS = {
+  active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
+  connected:    { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
+  expired:      { dot: "bg-amber-400",   text: "text-amber-400",   label: "Expired" },
+  disconnected: { dot: "bg-red-400",     text: "text-red-400",     label: "Disconnected" },
+};
 
 const INDUSTRIES = [
   "E-commerce","Fashion & Apparel","Food & Beverage","Health & Wellness",
@@ -64,6 +70,7 @@ export default function BrandManager() {
   const [newAccount, setNewAccount] = useState({ platform:"instagram", account_name:"", username:"", password:"", access_token:"", connection_method:"credentials" });
   const [addingAccount, setAddingAccount] = useState(false);
   const [savingAccount, setSavingAccount] = useState(false);
+  const [testingId, setTestingId] = useState(null);
 
   const { data: brands = [], isLoading } = useQuery({
     queryKey: ["brands"],
@@ -130,7 +137,10 @@ export default function BrandManager() {
     if (!newAccount.account_name.trim()) { alert("Account name is required"); return; }
     setSavingAccount(true);
     try {
-      await base44.entities.SocialAccount.create({ ...newAccount, brand_id: brandId, status: "active" });
+      const created = await base44.entities.SocialAccount.create({ ...newAccount, brand_id: brandId, status: "disconnected" });
+      try {
+        await base44.functions.invoke("testSocialConnection", { account_id: created.id });
+      } catch (_e) { /* verification is best-effort */ }
       qc.invalidateQueries(["social_accounts"]);
       setNewAccount({ platform:"instagram", account_name:"", username:"", password:"", access_token:"", connection_method:"credentials" });
       setAddingAccount(false);
@@ -141,6 +151,15 @@ export default function BrandManager() {
   const removeAccount = async (id) => {
     await base44.entities.SocialAccount.delete(id);
     qc.invalidateQueries(["social_accounts"]);
+  };
+
+  const testConnection = async (id) => {
+    setTestingId(id);
+    try {
+      await base44.functions.invoke("testSocialConnection", { account_id: id });
+      qc.invalidateQueries(["social_accounts"]);
+    } catch (e) { alert("Connection test failed: " + e.message); }
+    setTestingId(null);
   };
 
   const brandAccounts = (brandId) => allAccounts.filter(a => a.brand_id === brandId);
@@ -244,8 +263,10 @@ export default function BrandManager() {
                       <div className="grid sm:grid-cols-2 gap-2">
                         {accs.map(a => {
                           const plat = PLATFORMS.find(p => p.id === a.platform);
+                          const st = ACCOUNT_STATUS[a.status] || ACCOUNT_STATUS.disconnected;
+                          const isTesting = testingId === a.id;
                           return (
-                            <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                            <div key={a.id} title={a.description || st.label} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                               <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${plat?.color || "from-gray-500 to-gray-700"} flex items-center justify-center flex-shrink-0`}>
                                 <span className="text-xs font-black text-white">{a.platform?.[0]?.toUpperCase()}</span>
                               </div>
@@ -253,7 +274,12 @@ export default function BrandManager() {
                                 <p className="text-xs font-bold text-foreground">{a.account_name}</p>
                                 <p className="text-xs text-muted-foreground">{plat?.label} {a.username ? `· @${a.username}` : ""}</p>
                               </div>
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Active</span>
+                              <span className={`flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full bg-white/5 ${st.text}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} /> {st.label}
+                              </span>
+                              <button onClick={() => testConnection(a.id)} disabled={isTesting} title="Test connection" className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition disabled:opacity-50">
+                                {isTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                              </button>
                               <button onClick={() => removeAccount(a.id)} className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition">
                                 <X className="w-3 h-3" />
                               </button>

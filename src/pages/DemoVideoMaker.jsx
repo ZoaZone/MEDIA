@@ -5,7 +5,7 @@ import { generateText, generateImage, generateVoiceover, uploadFile, splitScript
 import { assembleVideo, VIDEO_RATIOS } from "@/utils/videoAssembler";
 import {
   Globe, Loader2, Sparkles, Monitor, Wand2, Play, Square, Download, Save,
-  CheckCircle2, AlertTriangle, Mic, ExternalLink,
+  CheckCircle2, AlertTriangle, Mic, ExternalLink, RefreshCw,
 } from "lucide-react";
 
 export default function DemoVideoMaker() {
@@ -13,12 +13,15 @@ export default function DemoVideoMaker() {
   const [url, setUrl] = useState("");
   const [scanning, setScanning] = useState(false);
   const [scan, setScan] = useState(null);
+  const [description, setDescription] = useState("");
+  const [screenshotUrl, setScreenshotUrl] = useState("");
   const [script, setScript] = useState("");
   const [error, setError] = useState("");
   const [mode, setMode] = useState("walkthrough"); // "walkthrough" | "recording"
 
   // Mode A — AI-narrated walkthrough
   const [ratio, setRatio] = useState("16:9");
+  const [showCaptions, setShowCaptions] = useState(false);
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMsg, setStatusMsg] = useState("");
@@ -48,18 +51,36 @@ export default function DemoVideoMaker() {
   const analyze = async () => {
     if (!url.trim()) return;
     const cleanUrl = url.startsWith("http") ? url : `https://${url}`;
-    setScanning(true); setError(""); setScan(null); setScript(""); resetResults();
+    setScanning(true); setError(""); setScan(null); setScript(""); setDescription(""); setScreenshotUrl(""); resetResults();
     try {
       const res = await base44.functions.invoke("scanWebsite", { url: cleanUrl });
       const data = res?.data || res;
       const analysis = data?.analysis || data;
       setScan(analysis);
+      setDescription((analysis?.business_summary || "").trim());
+      setScreenshotUrl(`https://image.thum.io/get/width/1280/${cleanUrl}`);
 
       const prompt = `Write a short, engaging voiceover script (about 60-90 seconds when read aloud, plain prose, no scene labels, no markdown, no preamble) for a demo video introducing this website/product.\nURL: ${cleanUrl}\nBusiness summary: ${analysis?.business_summary || "N/A"}\nServices: ${(analysis?.services_found || []).join(", ") || "N/A"}\nKeywords: ${(analysis?.keywords_found || []).join(", ") || "N/A"}`;
       const generatedScript = await generateText({ type: "video_script", prompt, tone: analysis?.tone || "Professional" });
       setScript((generatedScript || "").trim());
     } catch (e) {
       setError(e?.message || "Scan failed.");
+    }
+    setScanning(false);
+  };
+
+  // Re-write the voiceover script using the user-edited Description (and any
+  // extra points they added), without re-scanning the URL.
+  const regenerateScript = async () => {
+    if (!description.trim()) return;
+    setError(""); setScanning(true);
+    try {
+      const cleanUrl = url.startsWith("http") ? url : `https://${url}`;
+      const prompt = `Write a short, engaging voiceover script (about 60-90 seconds when read aloud, plain prose, no scene labels, no markdown, no preamble) for a demo video introducing this website/product.\nURL: ${cleanUrl}\nDescription: ${description}\nServices: ${(scan?.services_found || []).join(", ") || "N/A"}\nKeywords: ${(scan?.keywords_found || []).join(", ") || "N/A"}`;
+      const generatedScript = await generateText({ type: "video_script", prompt, tone: scan?.tone || "Professional" });
+      setScript((generatedScript || "").trim());
+    } catch (e) {
+      setError(e?.message || "Script generation failed.");
     }
     setScanning(false);
   };
@@ -74,8 +95,14 @@ export default function DemoVideoMaker() {
       for (let i = 0; i < sceneScripts.length; i++) {
         setStatusMsg(`Generating scene ${i + 1} of ${sceneScripts.length}...`);
         setProgress((i / sceneScripts.length) * 0.5);
-        const context = scan?.business_summary ? `Context: ${scan.business_summary}. ` : "";
-        const imgUrl = await generateImage({ prompt: `${context}Create a clean, modern marketing visual representing: ${sceneScripts[i].text}` });
+        let imgUrl;
+        if (i === 0 && screenshotUrl) {
+          // Open on a real screenshot of the scanned URL, not a generic AI image.
+          imgUrl = screenshotUrl;
+        } else {
+          const context = description ? `Context: ${description}. ` : "";
+          imgUrl = await generateImage({ prompt: `${context}Create a clean, modern marketing visual representing: ${sceneScripts[i].text}` });
+        }
         scenes.push({ imageUrl: imgUrl, text: sceneScripts[i].text, caption: shortenCaption(sceneScripts[i].text) });
       }
       setStatusMsg("Generating voiceover...");
@@ -83,6 +110,7 @@ export default function DemoVideoMaker() {
       setStatusMsg("Assembling video...");
       const { url: videoUrl, blob } = await assembleVideo({
         scenes, ratio, sceneSeconds: 4, audio,
+        subtitleStyle: showCaptions ? "bottom" : "none",
         onProgress: (p) => setProgress(0.5 + p * 0.4),
       });
       setStatusMsg("Uploading...");
@@ -190,7 +218,7 @@ export default function DemoVideoMaker() {
   return (
     <div className="max-w-5xl mx-auto space-y-5">
       <div>
-        <h1 className="text-2xl font-black text-foreground flex items-center gap-2"><Monitor className="w-6 h-6 text-fuchsia-400" /> Demo Video Generator</h1>
+        <h1 className="text-2xl font-black text-foreground flex items-center gap-2"><Monitor className="w-6 h-6 text-fuchsia-400" /> Create Demo Video</h1>
         <p className="text-muted-foreground text-sm mt-0.5">Turn any app, site, or product URL into a narrated demo video — automatically, or by recording your own screen with an AI voiceover.</p>
       </div>
 
@@ -221,14 +249,27 @@ export default function DemoVideoMaker() {
       {scan && (
         <>
           {/* Scan summary */}
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-2">
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
             <h3 className="font-semibold text-foreground flex items-center gap-2"><Globe className="w-4 h-4 text-fuchsia-400" /> {url.replace(/^https?:\/\//, "")}</h3>
-            {scan.business_summary && <p className="text-sm text-foreground leading-relaxed">{scan.business_summary}</p>}
+            {screenshotUrl && (
+              <img src={screenshotUrl} alt="" className="w-full max-h-64 object-cover rounded-xl border border-border bg-black"
+                onError={e => { e.target.style.display = "none"; }} />
+            )}
             {scan.services_found?.length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-1">
+              <div className="flex flex-wrap gap-1">
                 {scan.services_found.map(s => <span key={s} className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full">{s}</span>)}
               </div>
             )}
+            <div>
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Description</label>
+              <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+                placeholder="What does this site/product do? Edit this or add a few more points — it informs the script and visuals below."
+                className="w-full rounded-xl border border-input bg-background text-sm p-3 focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+              <button onClick={regenerateScript} disabled={scanning || !description.trim()}
+                className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted/20 disabled:opacity-60">
+                {scanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Regenerate Script from Description
+              </button>
+            </div>
           </div>
 
           {/* Script */}
@@ -270,6 +311,10 @@ export default function DemoVideoMaker() {
                   ))}
                 </div>
               </div>
+              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={showCaptions} onChange={e => setShowCaptions(e.target.checked)} className="rounded border-input bg-background text-fuchsia-500 focus:ring-fuchsia-500" />
+                Show on-screen captions
+              </label>
               <button onClick={generateWalkthrough} disabled={generatingVideo}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-bold hover:opacity-90 disabled:opacity-60 shadow-lg">
                 {generatingVideo ? <><Loader2 className="w-4 h-4 animate-spin" /> {statusMsg || "Generating..."}</> : <><Wand2 className="w-4 h-4" /> Generate Video</>}

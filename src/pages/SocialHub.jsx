@@ -3,13 +3,20 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import {
-  Share2, Plus, Calendar, Clock, CheckCircle2, XCircle, Loader2, X,
+  Share2, Plus, Calendar, Clock, Loader2, X,
   Send, ExternalLink, AlertCircle, RefreshCw, Trash2, Image, Video,
   Music, ChevronRight, ChevronLeft, Sparkles, Upload, Mail, MessageSquare,
-  Hash, Play, Film, Layers, Instagram, Youtube, Linkedin, Twitter,
-  Globe, Users, BarChart2, Eye, Heart, Repeat2, Edit2, Copy, Filter,
-  LayoutGrid, List, Zap, ArrowRight, Check
+  Hash, Users, List, Zap, Check
 } from "lucide-react";
+import AddAccountModal from "@/components/social-hub/AddAccountModal";
+
+// ── Account connection status ────────────────────────────────────────────────
+const ACCOUNT_STATUS = {
+  active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Connected" },
+  connected:    { dot: "bg-emerald-400", text: "text-emerald-400", label: "Connected" },
+  expired:      { dot: "bg-amber-400",   text: "text-amber-400",   label: "Token expired" },
+  disconnected: { dot: "bg-red-400",     text: "text-red-400",     label: "Disconnected" },
+};
 
 // ── Platform config ──────────────────────────────────────────────────────────
 const PLATFORMS = [
@@ -122,6 +129,8 @@ export default function SocialHub() {
   const [saving, setSaving] = useState(false);
   const [publishingId, setPublishingId] = useState(null);
   const [publishError, setPublishError] = useState({});
+  const [showAddAccount, setShowAddAccount] = useState(false);
+  const [testingId, setTestingId] = useState(null);
 
   // Email/WA blast state
   const [blastForm, setBlastForm] = useState({ campaign_id: "", channel: "email" });
@@ -289,6 +298,17 @@ HASHTAGS:
     qc.invalidateQueries(["scheduled_posts"]);
   };
 
+  const testConnection = async (accountId) => {
+    setTestingId(accountId);
+    try {
+      await base44.functions.invoke("testSocialConnection", { account_id: accountId });
+      qc.invalidateQueries(["social_accounts"]);
+    } catch (e) {
+      alert("Connection test failed: " + e.message);
+    }
+    setTestingId(null);
+  };
+
   const sendBlast = async () => {
     if (!blastForm.campaign_id) { alert("Select a campaign"); return; }
     setBlasting(true);
@@ -376,15 +396,29 @@ HASHTAGS:
           {/* Connected accounts */}
           {accounts.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
-              <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Connected Accounts</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Connected Accounts</p>
+                <button onClick={() => setShowAddAccount(true)}
+                  className="flex items-center gap-1 text-xs font-semibold text-fuchsia-400 hover:text-fuchsia-300">
+                  <Plus className="w-3.5 h-3.5" /> Add Account
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {accounts.map(acc => {
                   const plt = PLATFORMS.find(p => p.id === acc.platform);
+                  const st = ACCOUNT_STATUS[acc.status] || ACCOUNT_STATUS.disconnected;
+                  const isTesting = testingId === acc.id;
                   return (
-                    <div key={acc.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${plt?.bg || "bg-muted border-border text-foreground"}`}>
+                    <div key={acc.id} title={acc.description || st.label} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${plt?.bg || "bg-muted border-border text-foreground"}`}>
                       <span className="font-black">{plt?.short || "?"}</span>
                       {acc.account_name || acc.platform}
-                      <span className="text-emerald-400">●</span>
+                      <span className={`flex items-center gap-1 ${st.text}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} /> {st.label}
+                      </span>
+                      <button onClick={() => testConnection(acc.id)} disabled={isTesting} title="Test connection"
+                        className="hover:opacity-70 disabled:opacity-50">
+                        {isTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      </button>
                     </div>
                   );
                 })}
@@ -394,10 +428,14 @@ HASHTAGS:
           {!accountsLoading && accounts.length === 0 && (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
               <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-semibold text-amber-300">No social accounts connected</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Go to <strong>Settings → Social Accounts</strong> to connect Instagram, Facebook, LinkedIn, etc.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Connect Instagram, Facebook, LinkedIn and more to schedule and publish posts.</p>
               </div>
+              <button onClick={() => setShowAddAccount(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition-all flex-shrink-0">
+                <Plus className="w-3.5 h-3.5" /> Add Account
+              </button>
             </div>
           )}
 
@@ -933,6 +971,9 @@ HASHTAGS:
           </div>
         </div>
       )}
+
+      <AddAccountModal open={showAddAccount} onClose={() => setShowAddAccount(false)} platforms={PLATFORMS}
+        onSaved={() => qc.invalidateQueries(["social_accounts"])} />
     </div>
   );
 }

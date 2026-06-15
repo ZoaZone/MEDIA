@@ -3,9 +3,16 @@ import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Settings, Key, Bell, Save, CheckCircle2, Loader2, Eye, EyeOff,
-  Zap, User, Share2, Plus, Trash2, AlertCircle, ExternalLink
+  Zap, User, Share2, Plus, Trash2, AlertCircle, ExternalLink, RefreshCw
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+
+const ACCOUNT_STATUS = {
+  active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
+  connected:    { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
+  expired:      { dot: "bg-amber-400",   text: "text-amber-400",   label: "Token expired" },
+  disconnected: { dot: "bg-red-400",     text: "text-red-400",     label: "Disconnected" },
+};
 
 const KEY_FIELDS = [
   { k: "sendgrid_key",      l: "SendGrid API Key",    ph: "SG.xxxxxxxx",  help: "For email campaigns — get from sendgrid.com/account/apikeys" },
@@ -34,6 +41,7 @@ function SocialAccountsTab() {
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [testingId, setTestingId] = useState(null);
   const [showToken, setShowToken] = useState({});
   const [form, setForm] = useState({
     platform: "instagram",
@@ -43,7 +51,7 @@ function SocialAccountsTab() {
     access_token: "",
     refresh_token: "",
     page_id: "",
-    connection_method: "credentials", // credentials | api | webhook
+    connection_method: "api", // credentials | api | webhook
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -60,7 +68,7 @@ function SocialAccountsTab() {
     if (!form.account_name.trim()) { alert("Account / display name is required"); return; }
     setSaving(true);
     try {
-      await base44.entities.SocialAccount.create({
+      const created = await base44.entities.SocialAccount.create({
         platform: form.platform,
         account_name: form.account_name,
         username: form.username || "",
@@ -68,12 +76,15 @@ function SocialAccountsTab() {
         access_token: form.access_token || "",
         refresh_token: form.refresh_token || "",
         page_id: form.page_id || "",
-        connection_method: form.connection_method || "credentials",
-        status: "active",
+        connection_method: form.connection_method || "api",
+        status: "disconnected",
       });
+      try {
+        await base44.functions.invoke("testSocialConnection", { account_id: created.id });
+      } catch (_e) { /* verification is best-effort */ }
       qc.invalidateQueries(["social_accounts"]);
       setAdding(false);
-      setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "credentials" });
+      setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" });
     } catch (e) {
       alert("Failed to save account: " + e.message);
     }
@@ -88,6 +99,15 @@ function SocialAccountsTab() {
       qc.invalidateQueries(["social_accounts"]);
     } catch (e) { alert(e.message); }
     setDeletingId(null);
+  };
+
+  const testConnection = async (id) => {
+    setTestingId(id);
+    try {
+      await base44.functions.invoke("testSocialConnection", { account_id: id });
+      qc.invalidateQueries(["social_accounts"]);
+    } catch (e) { alert("Connection test failed: " + e.message); }
+    setTestingId(null);
   };
 
   return (
@@ -115,8 +135,10 @@ function SocialAccountsTab() {
           {accounts.map(acc => {
             const platform = SOCIAL_PLATFORMS.find(p => p.id === acc.platform);
             const isDeleting = deletingId === acc.id;
+            const isTesting = testingId === acc.id;
+            const st = ACCOUNT_STATUS[acc.status] || ACCOUNT_STATUS.disconnected;
             return (
-              <div key={acc.id} className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border">
+              <div key={acc.id} title={acc.description || st.label} className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border">
                 <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${platform?.color || "from-gray-500 to-gray-700"} flex items-center justify-center flex-shrink-0`}>
                   <span className="text-sm font-black text-white">{(acc.platform || "?")[0].toUpperCase()}</span>
                 </div>
@@ -126,9 +148,19 @@ function SocialAccountsTab() {
                     <span className="capitalize">{platform?.label || acc.platform}</span>
                     {acc.username && <span>· @{acc.username}</span>}
                     {acc.page_id && <span>· Page ID: {acc.page_id}</span>}
-                    <span className="text-emerald-400">· Active</span>
+                    <span className={`flex items-center gap-1 ${st.text}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} /> {st.label}
+                    </span>
                   </p>
                 </div>
+                <button
+                  onClick={() => testConnection(acc.id)}
+                  disabled={isTesting}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                  title="Test connection"
+                >
+                  {isTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                </button>
                 <button
                   onClick={() => handleDelete(acc.id)}
                   disabled={isDeleting}
@@ -276,7 +308,7 @@ function SocialAccountsTab() {
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => { setAdding(false); setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "credentials" }); }}
+              onClick={() => { setAdding(false); setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" }); }}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               Cancel

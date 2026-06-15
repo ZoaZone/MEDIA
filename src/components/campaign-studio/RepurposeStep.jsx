@@ -66,20 +66,31 @@ export default function RepurposeStep({ campaign, setCampaign, brandAccounts, re
                 )}
               </div>
 
-              {/* Hashtags + description */}
+              {/* Hashtags + description — optional per-platform override of the Copy & Scripts defaults */}
               <div className="space-y-2">
+                <p className="text-[11px] text-neutral-500">Optional — leave blank to use your global Hashtags &amp; Caption from Copy &amp; Scripts for this platform.</p>
                 <button onClick={() => generatePlatformCopy(platform)} disabled={busyCopy}
                   className="w-full py-2.5 bg-fuchsia-600/20 border border-fuchsia-500/50 text-fuchsia-300 rounded-xl font-bold text-sm hover:bg-fuchsia-600/40 transition-colors flex justify-center items-center gap-2 disabled:opacity-50">
-                  {busyCopy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Generate Hashtags &amp; Description
+                  {busyCopy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Generate Hashtags &amp; Description for {meta.label}
                 </button>
                 <div>
-                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Hash className="w-3 h-3" /> Hashtags</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1"><Hash className="w-3 h-3" /> Hashtags Override</label>
+                    {!!(campaign.outputs?.hashtag_set) && (
+                      <button onClick={() => setOverride(platform, { hashtags: campaign.outputs.hashtag_set })} className="text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300">Use Global</button>
+                    )}
+                  </div>
                   <textarea value={override.hashtags || ""} onChange={e => setOverride(platform, { hashtags: e.target.value })} rows={2}
-                    placeholder="Generated hashtags for this platform..."
+                    placeholder="Falls back to your global Hashtags from Copy & Scripts..."
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-fuchsia-300 placeholder:text-neutral-600 resize-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="w-3 h-3" /> Description</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1"><MessageSquare className="w-3 h-3" /> Description Override</label>
+                    {!!campaign.ai_output && (
+                      <button onClick={() => setOverride(platform, { description: campaign.ai_output })} className="text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300">Use Global Caption</button>
+                    )}
+                  </div>
                   <textarea value={override.description || ""} onChange={e => setOverride(platform, { description: e.target.value })} rows={2}
                     placeholder="Platform-tailored description / auto-caption..."
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 placeholder:text-neutral-600 resize-none" />

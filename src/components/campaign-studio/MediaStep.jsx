@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
   Upload, Image as ImageIcon, Video, Music, Mic, Captions, X,
-  Loader2, AlertTriangle, Library,
+  Loader2, AlertTriangle, Library, Eye, Download, Save, CheckCircle2,
 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import AssetPickerModal from "./AssetPickerModal";
 import ClipTimeline from "./ClipTimeline";
 
@@ -23,8 +24,51 @@ export default function MediaStep({
   compileVideo, generatingMedia, uploadingMusic, videoProgress, imageCount,
 }) {
   const [showPicker, setShowPicker] = useState(false);
+  const [savedAssets, setSavedAssets] = useState({});
 
   const images = campaign.media_urls.filter(isImageUrl);
+
+  // Map an index into `images` (the image-only subset) back to its real
+  // index in `campaign.media_urls`, so reorder/remove keep videos in place.
+  const imageIndices = campaign.media_urls.map((u, i) => (isImageUrl(u) ? i : -1)).filter(i => i !== -1);
+
+  const moveClip = (fromIdx, toIdx) => {
+    if (toIdx < 0 || toIdx >= images.length) return;
+    const from = imageIndices[fromIdx];
+    const to = imageIndices[toIdx];
+    const nextUrls = [...campaign.media_urls];
+    const [moved] = nextUrls.splice(from, 1);
+    nextUrls.splice(to, 0, moved);
+    let nextDur = campaign.clip_durations || [];
+    if (nextDur.length === images.length) {
+      nextDur = [...nextDur];
+      const [d] = nextDur.splice(fromIdx, 1);
+      nextDur.splice(toIdx, 0, d);
+    }
+    setCampaign(p => ({ ...p, media_urls: nextUrls, clip_durations: nextDur }));
+  };
+
+  const removeClip = (idx) => {
+    const actual = imageIndices[idx];
+    const nextUrls = campaign.media_urls.filter((_, i) => i !== actual);
+    let nextDur = campaign.clip_durations || [];
+    if (nextDur.length === images.length) nextDur = nextDur.filter((_, i) => i !== idx);
+    setCampaign(p => ({ ...p, media_urls: nextUrls, clip_durations: nextDur }));
+  };
+
+  const saveAsset = async (url, i) => {
+    try {
+      await base44.entities.ContentAsset.create({
+        type: isImageUrl(url) ? "image" : "video",
+        title: `${campaign.campaign_name || "Studio asset"} ${i + 1}`,
+        file_url: url,
+        ai_generated: true,
+      });
+      setSavedAssets(p => ({ ...p, [url]: true }));
+    } catch (_e) {
+      // best-effort; saving is non-critical
+    }
+  };
 
   const handleLibrarySelect = (assets) => {
     const urls = assets.map(a => a.file_url).filter(Boolean);
@@ -121,7 +165,8 @@ export default function MediaStep({
       </div>
 
       {/* Per-clip duration editor */}
-      <ClipTimeline images={images} durations={campaign.clip_durations} onChange={next => setCampaign(p => ({ ...p, clip_durations: next }))} />
+      <ClipTimeline images={images} durations={campaign.clip_durations} onChange={next => setCampaign(p => ({ ...p, clip_durations: next }))}
+        onMove={moveClip} onRemove={removeClip} />
 
       {/* Assembled video preview */}
       {campaign.video_url && (
@@ -148,6 +193,16 @@ export default function MediaStep({
                 )}
                 <button onClick={() => setCampaign(p => ({ ...p, media_urls: p.media_urls.filter((_, j) => j !== i) }))} className="absolute top-2 right-2 bg-black/70 backdrop-blur-md rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4 text-white" /></button>
                 {!isImageUrl(url) && <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-white">VIDEO</div>}
+                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 p-1.5 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a href={url} target="_blank" rel="noopener noreferrer" title="View"
+                    className="bg-black/60 backdrop-blur-md rounded-full p-1.5 hover:bg-black/90"><Eye className="w-3.5 h-3.5 text-white" /></a>
+                  <a href={url} download target="_blank" rel="noopener noreferrer" title="Download"
+                    className="bg-black/60 backdrop-blur-md rounded-full p-1.5 hover:bg-black/90"><Download className="w-3.5 h-3.5 text-white" /></a>
+                  <button onClick={() => saveAsset(url, i)} title="Save to Library"
+                    className="bg-black/60 backdrop-blur-md rounded-full p-1.5 hover:bg-black/90">
+                    {savedAssets[url] ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Save className="w-3.5 h-3.5 text-white" />}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
