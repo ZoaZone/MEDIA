@@ -1,4 +1,4 @@
-import { Wand2, Loader2, CheckCircle2, AlertTriangle, Zap, Repeat, Layers } from "lucide-react";
+import { Wand2, Loader2, CheckCircle2, AlertTriangle, Zap, Repeat, Layers, ExternalLink } from "lucide-react";
 import { occurrenceCount } from "@/utils/recurrence";
 
 export default function LaunchStep({ campaign, navigate, saving, saved, publishReport, publishCampaign, imageCount, publishStatus }) {
@@ -24,9 +24,14 @@ export default function LaunchStep({ campaign, navigate, saving, saved, publishR
                   : "bg-red-500/10 border-red-500/20 text-red-300"
                 }`}>
                   {r.status === "ok" ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold">{r.account_name} <span className="text-xs opacity-70 capitalize">({r.platform})</span></p>
                     <p className="text-xs opacity-80 mt-0.5">{r.message}</p>
+                    {r.post_url && (
+                      <a href={r.post_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300 hover:text-emerald-200 underline mt-1.5">
+                        <ExternalLink className="w-3 h-3" /> View live post
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}

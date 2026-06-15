@@ -5,7 +5,7 @@ import {
   Search, GitBranch, UserPlus, MailCheck, Image, Globe,
   BarChart3, Settings, CreditCard, ChevronDown, LogOut, Menu, X,
   Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share,
-  Sun, Moon
+  Sun, Moon, Wand2, Monitor
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -67,6 +67,8 @@ const NAV_SECTIONS = [
   {
     label: "AI STUDIO",
     items: [
+      { to: "/quick-create",    icon: Wand2,    label: "Quick Create", badge: "NEW" },
+      { to: "/demo-video",      icon: Monitor,  label: "Demo Video",   badge: "NEW" },
       { to: "/ad-creator",      icon: PenTool,  label: "Ad Creator",   minTier: 2 },
       { to: "/website-scanner", icon: Search,   label: "Website Scanner", minTier: 2 },
       { to: "/media-library",   icon: Image,    label: "Media Library" },

@@ -215,7 +215,7 @@ Topic: ${topic}`;
       if (campaign.video_settings.voice !== "No Voiceover") {
         audio = await generateVoiceover(scenes.map(s => s.text).join(". "));
       }
-      const { url } = await assembleVideo({
+      const { url, blob } = await assembleVideo({
         scenes,
         ratio: "9:16",
         sceneSeconds: 3,
@@ -228,7 +228,11 @@ Topic: ${topic}`;
         fontFamily: selectedBrand?.font_family || "Arial",
         onProgress: setVideoProgress,
       });
+      // Show the local preview immediately, then swap in a persistent, publicly
+      // fetchable URL — platform APIs (Instagram, TikTok, etc.) can't reach blob: URLs.
       setCampaign(p => ({ ...p, video_url: url }));
+      const hostedUrl = await uploadFile(new File([blob], "campaign-video.webm", { type: "video/webm" }));
+      if (hostedUrl) setCampaign(p => ({ ...p, video_url: hostedUrl }));
     } catch (e) {
       setError("Video compile failed: " + (e?.message || "unknown error"));
     }
@@ -252,7 +256,7 @@ Topic: ${topic}`;
       if (campaign.video_settings.voice !== "No Voiceover") {
         audio = await generateVoiceover(scenes.map(s => s.text).join(". "));
       }
-      const { url } = await assembleVideo({
+      const { url, blob } = await assembleVideo({
         scenes,
         ratio,
         sceneDurations: campaign.clip_durations,
@@ -264,6 +268,11 @@ Topic: ${topic}`;
         fontFamily: selectedBrand?.font_family || "Arial",
       });
       setCampaign(p => ({ ...p, platform_overrides: { ...p.platform_overrides, [platform]: { ...(p.platform_overrides?.[platform] || {}), media_url: url, ratio } } }));
+      // Swap in a persistent, publicly fetchable URL once uploaded (see compileVideo).
+      const hostedUrl = await uploadFile(new File([blob], `campaign-video-${platform}.webm`, { type: "video/webm" }));
+      if (hostedUrl) {
+        setCampaign(p => ({ ...p, platform_overrides: { ...p.platform_overrides, [platform]: { ...(p.platform_overrides?.[platform] || {}), media_url: hostedUrl, ratio } } }));
+      }
     } catch (e) {
       setError(`Resize for ${platform} failed: ` + (e?.message || "unknown error"));
     }
@@ -399,26 +408,33 @@ Topic: ${topic}`;
         }
         for (const acc of toPublish) {
           const { media_url, media_type, description } = mediaFor(acc.platform);
-          await base44.entities.ScheduledPost.create({
-            social_account_id: acc.id,
-            platform: acc.platform,
-            caption: captionFor(occurrenceCaptions[0], acc.platform) || "",
-            media_url,
-            media_type,
-            description,
-            scheduled_at: "",
-            status: "draft",
-          });
-        }
-        if (toPublish.length) {
-          const newPosts = await base44.entities.ScheduledPost.list("-created_date", toPublish.length);
-          for (const p of newPosts.slice(0, toPublish.length)) {
-            try { await base44.functions.invoke("publishScheduledPosts", { post_id: p.id }); } catch (_) {}
+          const platformLabel = PLATFORM_META[acc.platform]?.label || acc.platform;
+          setPublishStatus(`Posting to ${acc.account_name} (${platformLabel})...`);
+          try {
+            const created = await base44.entities.ScheduledPost.create({
+              social_account_id: acc.id,
+              platform: acc.platform,
+              caption: captionFor(occurrenceCaptions[0], acc.platform) || "",
+              media_url,
+              media_type,
+              description,
+              scheduled_at: "",
+              status: "draft",
+            });
+            // Publish immediately and read back the REAL per-post result
+            // (status/post_url/error) instead of assuming success.
+            const res = await base44.functions.invoke("publishScheduledPosts", { post_id: created.id });
+            const result = res?.data?.results?.[0] || res?.results?.[0];
+            if (result?.status === "posted") {
+              report.push({ account_name: acc.account_name, platform: acc.platform, status: "ok", message: "Posted live.", post_url: result.post_url || "" });
+            } else {
+              report.push({ account_name: acc.account_name, platform: acc.platform, status: "failed", message: result?.error || "Publish failed — check this account's connection in Brand Manager." });
+            }
+          } catch (e) {
+            report.push({ account_name: acc.account_name, platform: acc.platform, status: "failed", message: e?.message || "Publish failed." });
           }
-          for (const acc of toPublish) {
-            report.push({ account_name: acc.account_name, platform: acc.platform, status: "ok", message: "Posted now." });
-          }
         }
+        setPublishStatus("");
       } else {
         for (const acc of accounts) {
           if (!isAccountConnected(acc)) {

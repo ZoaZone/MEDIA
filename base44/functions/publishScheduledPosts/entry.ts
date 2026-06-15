@@ -212,11 +212,12 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Update post record
+      // Update post record. Note: ScheduledPost has no `error_message` field —
+      // writing one would make this update throw and leave the post stuck as
+      // "draft" with the real failure reason only visible in `results` below.
       await base44.entities.ScheduledPost.update(post.id, {
         status,
         post_url: postUrl || null,
-        ...(errorMsg ? { error_message: errorMsg } : {}),
       });
 
       if (status === 'posted') published++;

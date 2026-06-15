@@ -40,6 +40,8 @@ import AgencyEnquiry from './pages/AgencyEnquiry';
 import FreeTrial from './pages/FreeTrial';
 import BrandManager from './pages/BrandManager';
 import CampaignStudio from './pages/CampaignStudio';
+import QuickCreate from './pages/QuickCreate';
+import DemoVideoMaker from './pages/DemoVideoMaker';
 
 
 const AuthenticatedApp = () => {
@@ -98,6 +100,8 @@ const AuthenticatedApp = () => {
         <Route path="/ad-creator" element={<AdCreator />} />
         <Route path="/brands" element={<BrandManager />} />
         <Route path="/campaign-studio" element={<CampaignStudio />} />
+        <Route path="/quick-create" element={<QuickCreate />} />
+        <Route path="/demo-video" element={<DemoVideoMaker />} />
         <Route path="/website-scanner" element={<WebsiteScanner />} />
         <Route path="/funnel-builder" element={<FunnelBuilder />} />
         <Route path="/follow-up" element={<FollowUp />} />
