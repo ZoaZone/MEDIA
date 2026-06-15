@@ -17,12 +17,16 @@ export default function AdminDashboard() {
   const [inviteResults,setInviteResults]=useState([]);
   const [linkCopied,setLinkCopied]=useState(false);
 
-  const {data:subs=[]}=useQuery({queryKey:["admin_subs"],queryFn:()=>base44.entities.Subscription.filter({},"-created_date",200)});
-  const {data:betaRequests=[],refetch:refetchBeta}=useQuery({queryKey:["beta_requests"],queryFn:()=>base44.entities.BetaRequest.filter({},"-created_date",200)});
-  const {data:campaigns=[]}=useQuery({queryKey:["admin_campaigns"],queryFn:()=>base44.entities.MarketingCampaign.filter({},"-created_date",200)});
-  const {data:leads=[]}=useQuery({queryKey:["admin_leads"],queryFn:()=>base44.entities.LeadCapture.filter({},"-captured_at",500)});
-  const {data:contacts=[]}=useQuery({queryKey:["admin_contacts"],queryFn:()=>base44.entities.MarketingContact.filter({},"-created_date",500)});
-  const {data:assets=[]}=useQuery({queryKey:["admin_assets"],queryFn:()=>base44.entities.ContentAsset.filter({},"-created_date",200)});
+  const isAdmin = user?.role === "admin";
+  // These are deliberately platform-wide (admin sees every user's data) —
+  // gated on isAdmin so a non-admin's browser never fetches other users'
+  // records while the access-denied screen below is rendering.
+  const {data:subs=[]}=useQuery({queryKey:["admin_subs"],queryFn:()=>base44.entities.Subscription.filter({},"-created_date",200),enabled:isAdmin});
+  const {data:betaRequests=[],refetch:refetchBeta}=useQuery({queryKey:["beta_requests"],queryFn:()=>base44.entities.BetaRequest.filter({},"-created_date",200),enabled:isAdmin});
+  const {data:campaigns=[]}=useQuery({queryKey:["admin_campaigns"],queryFn:()=>base44.entities.MarketingCampaign.filter({},"-created_date",200),enabled:isAdmin});
+  const {data:leads=[]}=useQuery({queryKey:["admin_leads"],queryFn:()=>base44.entities.LeadCapture.filter({},"-captured_at",500),enabled:isAdmin});
+  const {data:contacts=[]}=useQuery({queryKey:["admin_contacts"],queryFn:()=>base44.entities.MarketingContact.filter({},"-created_date",500),enabled:isAdmin});
+  const {data:assets=[]}=useQuery({queryKey:["admin_assets"],queryFn:()=>base44.entities.ContentAsset.filter({},"-created_date",200),enabled:isAdmin});
 
   if(user?.role!=="admin") return(
     <div className="flex items-center justify-center min-h-[60vh]">

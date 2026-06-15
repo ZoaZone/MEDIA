@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { CreditCard, Check, Zap, Loader2, ExternalLink, TrendingUp, Calendar, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { mine } from "@/utils/scope";
+import { CreditCard, Check, Zap, Loader2, ExternalLink, Calendar, AlertCircle, Mail, Phone, MessageSquare } from "lucide-react";
 import PayPalButton from "@/components/PayPalButton";
 
 const PLANS = [
@@ -38,9 +38,9 @@ export default function Billing() {
     enabled: !!user?.email,
   });
 
-  const { data: campaigns = [] } = useQuery({ queryKey: ["campaigns_b"], queryFn: () => base44.entities.MarketingCampaign.list(null, 200) });
-  const { data: assets = [] } = useQuery({ queryKey: ["assets_b"], queryFn: () => base44.entities.ContentAsset.list(null, 200) });
-  const { data: messages = [] } = useQuery({ queryKey: ["messages_b"], queryFn: () => base44.entities.BulkMessage.list(null, 500) });
+  const { data: campaigns = [] } = useQuery({ queryKey: ["campaigns_b", user?.email], queryFn: () => base44.entities.MarketingCampaign.filter(mine(user), null, 200), enabled: !!user?.email });
+  const { data: assets = [] } = useQuery({ queryKey: ["assets_b", user?.email], queryFn: () => base44.entities.ContentAsset.filter(mine(user), null, 200), enabled: !!user?.email });
+  const { data: messages = [] } = useQuery({ queryKey: ["messages_b", user?.email], queryFn: () => base44.entities.BulkMessage.filter(mine(user), null, 500), enabled: !!user?.email });
 
   const totalSent = messages.filter(m => m.status === "delivered").length;
   const aiGenCount = assets.filter(a => a.ai_generated).length;
@@ -189,6 +189,35 @@ export default function Billing() {
             </div>
           );
         })}
+      </div>
+
+      {/* Messaging & Email sending */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h3 className="font-bold text-foreground mb-1">Email, SMS &amp; WhatsApp Sending</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Bring your own provider credentials for zero platform fee, or let media.aevoice.ai send on your behalf —
+          included up to your plan's monthly message quota, then billed at provider cost + 30% platform usage fee.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { Icon: Mail, label: "Email", provider: "Base44 / Resend / SendGrid", rate: "$1.30 / 1,000 emails", byo: "Bring your own SendGrid key for $0 platform fee" },
+            { Icon: Phone, label: "SMS", provider: "Twilio", rate: "≈ $0.0103 / SMS (US)", byo: "Bring your own Twilio account for $0 platform fee" },
+            { Icon: MessageSquare, label: "WhatsApp", provider: "Meta Cloud API", rate: "Meta's per-conversation rate + 30%", byo: "Bring your own WhatsApp Business API token for $0 platform fee" },
+          ].map(m => (
+            <div key={m.label} className="p-4 rounded-xl border border-border bg-background">
+              <div className="flex items-center gap-2 mb-1.5">
+                <m.Icon className="w-4 h-4 text-fuchsia-400" />
+                <span className="font-semibold text-foreground text-sm">{m.label}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-1">Managed via {m.provider}</p>
+              <p className="text-sm font-bold text-foreground mb-1">{m.rate}</p>
+              <p className="text-xs text-muted-foreground">{m.byo}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground mt-4">
+          Add your own credentials anytime in <Link to="/settings" className="text-fuchsia-400 hover:underline">Settings → API Keys</Link>.
+        </p>
       </div>
 
       <p className="text-center text-xs text-muted-foreground">

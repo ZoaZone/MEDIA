@@ -1,6 +1,51 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 /**
+ * Calls a user-supplied "bring your own LLM" key (Growth/Agency plans —
+ * configured in Settings > AI Provider). Supports OpenAI, Anthropic, and any
+ * OpenAI-compatible custom endpoint. Throws on failure so the caller can fall
+ * back to the platform's default providers.
+ */
+async function callUserLLM(apiKeys: any, prompt: string): Promise<string> {
+  const { llm_provider, llm_api_key, llm_model, llm_base_url } = apiKeys;
+
+  if (llm_provider === 'anthropic') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': llm_api_key,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: llm_model || 'claude-3-5-sonnet-20241022',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) throw new Error(`Anthropic request failed: ${await res.text()}`);
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  }
+
+  // OpenAI, or any OpenAI-compatible "custom" endpoint
+  const baseUrl = llm_provider === 'custom' && llm_base_url
+    ? llm_base_url.replace(/\/$/, '')
+    : 'https://api.openai.com/v1';
+  const res = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llm_api_key}` },
+    body: JSON.stringify({
+      model: llm_model || 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+  if (!res.ok) throw new Error(`LLM request failed: ${await res.text()}`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+/**
  * generateMediaContent — AI content generation for all media types
  * Supports: caption, ad_copy, email_template, sms_template, hashtag_set,
  *           video_script, video_storyboard, thumbnail, blog_post, whatsapp,
@@ -34,7 +79,7 @@ Deno.serve(async (req) => {
     let context = '';
     if (website_scan_id) {
       try {
-        const scans = await base44.entities.WebsiteScan.filter({ id: website_scan_id });
+        const scans = await base44.entities.WebsiteScan.filter({ id: website_scan_id, created_by: user.email });
         if (scans.length > 0) {
           const scan = scans[0];
           context = `\n\nBusiness context:\n- Summary: ${scan.business_summary}\n- Services: ${(scan.services_found || []).join(', ')}\n- Keywords: ${(scan.keywords_found || []).join(', ')}\n- Tone: ${scan.tone}`;
@@ -67,30 +112,52 @@ Deno.serve(async (req) => {
     // Use the incoming prompt if it's already detailed (frontend-built), else use legacy
     const finalPrompt = isRichPrompt ? prompt : (legacyPrompts[type] || legacyPrompts.caption);
 
-    // Try Base44 LLM first, fall back to OpenAI
-    let result; // <--- This is the only one you need
+    // Define the guardrail and apply it to the prompt
+    const spellingGuardrail = "\n\nCRITICAL: Double-check all spellings. If you are unsure of the spelling of a word, do not include it. Provide content in a clear, professional brand voice.";
+    const finalPromptWithGuardrail = finalPrompt + spellingGuardrail;
+
+    // LLM provider chain:
+    //  1. Bring-your-own LLM (Growth/Agency plans, or admin) — if configured in Settings > AI Provider
+    //  2. Base44's built-in AI — the default for every plan
+    //  3. Admin-configured OpenAI key — last-resort platform fallback
+    let result: string | undefined;
+
+    const apiKeys = user.settings?.api_keys || {};
+    let planTier = 'starter';
     try {
-      // Define the guardrail and apply it to the prompt
-      const spellingGuardrail = "\n\nCRITICAL: Double-check all spellings. If you are unsure of the spelling of a word, do not include it. Provide content in a clear, professional brand voice.";
-      const finalPromptWithGuardrail = finalPrompt + spellingGuardrail;
-      
-      result = await base44.integrations.Core.InvokeLLM({ prompt: finalPromptWithGuardrail });
-    } catch (llmError) {
-      // ...
-      // ... your existing OpenAI fallback code ...
-      const openaiKey = Deno.env.get("OPENAI_API_KEY");
-      if (!openaiKey) throw llmError;
-      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: finalPrompt }],
-        }),
-      });
-      if (!openaiRes.ok) throw new Error(`OpenAI fallback failed: ${await openaiRes.text()}`);
-      const openaiData = await openaiRes.json();
-      result = openaiData.choices[0].message.content;
+      const subs = await base44.entities.Subscription.filter({ owner_email: user.email }, '-created_date', 1);
+      if (subs[0]?.plan_tier) planTier = subs[0].plan_tier;
+    } catch (_) { /* default to starter */ }
+
+    const canUseOwnLLM = (planTier === 'growth' || planTier === 'agency' || user.role === 'admin')
+      && apiKeys.llm_provider && apiKeys.llm_api_key;
+
+    if (canUseOwnLLM) {
+      try {
+        result = await callUserLLM(apiKeys, finalPromptWithGuardrail);
+      } catch (_ownLlmError) {
+        result = undefined; // fall through to platform defaults
+      }
+    }
+
+    if (!result) {
+      try {
+        result = await base44.integrations.Core.InvokeLLM({ prompt: finalPromptWithGuardrail });
+      } catch (llmError) {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (!openaiKey) throw llmError;
+        const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: finalPrompt }],
+          }),
+        });
+        if (!openaiRes.ok) throw new Error(`OpenAI fallback failed: ${await openaiRes.text()}`);
+        const openaiData = await openaiRes.json();
+        result = openaiData.choices[0].message.content;
+      }
     }
 
     // Persist to ContentAsset

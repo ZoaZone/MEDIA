@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     const { post_id } = body; // Optional: publish a specific post by ID
 
     // Load user's social accounts (keyed by id for fast lookup)
-    const userAccounts = await base44.entities.SocialAccount.list('-created_date', 50);
+    const userAccounts = await base44.entities.SocialAccount.filter({ created_by: user.email }, '-created_date', 50);
     const accountMap: Record<string, any> = {};
     for (const acc of userAccounts) {
       accountMap[acc.id] = acc;
@@ -43,12 +43,12 @@ Deno.serve(async (req) => {
     let postsToPublish: any[] = [];
     if (post_id) {
       // Single post — user explicitly clicked "Publish Now"
-      const allPosts = await base44.entities.ScheduledPost.filter({ id: post_id });
-      postsToPublish = allPosts.filter((p: any) => p.created_by === user.email || !p.created_by);
+      const allPosts = await base44.entities.ScheduledPost.filter({ id: post_id, created_by: user.email });
+      postsToPublish = allPosts;
     } else {
       // All scheduled posts that are due for this user
       const now = new Date();
-      const scheduledPosts = await base44.entities.ScheduledPost.filter({ status: 'scheduled' });
+      const scheduledPosts = await base44.entities.ScheduledPost.filter({ status: 'scheduled', created_by: user.email });
       postsToPublish = scheduledPosts.filter((p: any) => {
         if (!p.scheduled_at) return false;
         return new Date(p.scheduled_at) <= now;

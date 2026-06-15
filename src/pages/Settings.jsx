@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Settings, Key, Bell, Save, CheckCircle2, Loader2, Eye, EyeOff,
-  Zap, User, Share2, Plus, Trash2, AlertCircle, ExternalLink, RefreshCw
+  Zap, User, Share2, Plus, Trash2, AlertCircle, ExternalLink, RefreshCw,
+  Sparkles, Lock
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 
 const ACCOUNT_STATUS = {
   active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
@@ -37,6 +39,7 @@ const SOCIAL_PLATFORMS = [
 
 // ── Social Accounts tab ──────────────────────────────────────────────────────
 function SocialAccountsTab() {
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -56,8 +59,9 @@ function SocialAccountsTab() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ["social_accounts"],
-    queryFn: () => base44.entities.SocialAccount.list("-created_date", 50),
+    queryKey: ["social_accounts", user?.email],
+    queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 50),
+    enabled: !!user?.email,
   });
 
   const selectedPlatform = SOCIAL_PLATFORMS.find(p => p.id === form.platform);
@@ -330,7 +334,7 @@ function SocialAccountsTab() {
 
 // ── Main Settings component ───────────────────────────────────────────────────
 export default function SettingsPage() {
-  const { user } = useOutletContext() || {};
+  const { user, userTier = 0, isAdmin } = useOutletContext() || {};
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [show, setShow] = useState({});
@@ -338,6 +342,7 @@ export default function SettingsPage() {
   const [keys, setKeys] = useState({
     sendgrid_key: "", twilio_sid: "", twilio_token: "", twilio_phone: "",
     whatsapp_token: "", whatsapp_phone_id: "", stripe_key: "",
+    llm_provider: "", llm_api_key: "", llm_model: "", llm_base_url: "",
   });
   const [profile, setProfile] = useState({ full_name: "", business_name: "", website: "", logo_url: "", timezone: "Asia/Calcutta" });
   const [notifs, setNotifs] = useState({ email_campaigns: true, email_leads: true, email_social: false, weekly_report: true });
@@ -363,6 +368,7 @@ export default function SettingsPage() {
 
   const TABS = [
     { v: "apikeys",  l: "API Keys",        Icon: Key },
+    { v: "ai",       l: "AI Provider",     Icon: Sparkles },
     { v: "social",   l: "Social Accounts", Icon: Share2 },
     { v: "profile",  l: "Profile",         Icon: User },
     { v: "notifs",   l: "Notifications",   Icon: Bell },
@@ -414,6 +420,11 @@ export default function SettingsPage() {
             <Zap className="w-3.5 h-3.5 inline mr-1.5" />
             Keys are encrypted and stored in your account settings. Used only for your campaigns.
           </div>
+          <div className="p-4 rounded-xl bg-muted/30 border border-border text-xs text-muted-foreground">
+            Add a SendGrid / Twilio / WhatsApp key below to send Email, SMS and WhatsApp campaigns from your own
+            account at no platform fee. Leave these blank and media.aevoice.ai will send on your behalf using its
+            built-in providers — included in your plan's quota, then billed at provider cost + 30%. See <Link to="/billing" className="text-fuchsia-400 hover:underline">Billing</Link> for rates.
+          </div>
           {KEY_FIELDS.map(({ k, l, ph, help }) => (
             <div key={k}>
               <label className="text-sm font-medium text-foreground block mb-1">{l}</label>
@@ -435,6 +446,90 @@ export default function SettingsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── AI Provider ── */}
+      {tab === "ai" && (
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-fuchsia-500/5 border border-fuchsia-500/20 text-xs text-muted-foreground space-y-1.5">
+            <p className="flex items-center gap-1.5 text-fuchsia-400 font-semibold mb-1"><Sparkles className="w-3.5 h-3.5" /> How AI generation is routed</p>
+            <p><strong className="text-foreground">1. Base44 built-in AI</strong> — the default for every plan, no setup needed.</p>
+            <p><strong className="text-foreground">2. Platform backup model</strong> — used automatically if the built-in AI is briefly unavailable.</p>
+            <p><strong className="text-foreground">3. Your own LLM key</strong> (below) — when set, your requests use it first, before falling back to 1 and 2.</p>
+          </div>
+
+          {userTier < 2 && !isAdmin ? (
+            <div className="p-5 rounded-xl bg-card border border-border text-center space-y-2">
+              <Lock className="w-5 h-5 text-muted-foreground mx-auto" />
+              <p className="text-sm font-semibold text-foreground">Bring your own LLM</p>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">Connect your own OpenAI, Anthropic, or custom-endpoint API key so your AI generations run on your account. Available on Growth and Agency plans.</p>
+              <Link to="/billing" className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-fuchsia-400 hover:underline">Upgrade plan →</Link>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1">Provider</label>
+                <p className="text-xs text-muted-foreground mb-1.5">Leave as platform default unless you want to use your own model/billing.</p>
+                <select
+                  value={keys.llm_provider || ""}
+                  onChange={e => setKeys(p => ({ ...p, llm_provider: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-card border border-border text-sm focus:outline-none focus:border-fuchsia-500/50 transition-colors"
+                >
+                  <option value="">Platform default (Base44 AI)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic (Claude)</option>
+                  <option value="custom">Custom / OpenAI-compatible endpoint</option>
+                </select>
+              </div>
+
+              {keys.llm_provider && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-1">API Key</label>
+                    <div className="relative">
+                      <input
+                        type={show.llm_api_key ? "text" : "password"}
+                        value={keys.llm_api_key || ""}
+                        onChange={e => setKeys(p => ({ ...p, llm_api_key: e.target.value }))}
+                        placeholder={keys.llm_provider === "anthropic" ? "sk-ant-..." : "sk-..."}
+                        className="w-full px-3 py-2.5 pr-10 rounded-xl bg-card border border-border text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50 transition-colors"
+                      />
+                      <button
+                        onClick={() => setShow(p => ({ ...p, llm_api_key: !p.llm_api_key }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {show.llm_api_key ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-1">Model (optional)</label>
+                    <input
+                      value={keys.llm_model || ""}
+                      onChange={e => setKeys(p => ({ ...p, llm_model: e.target.value }))}
+                      placeholder={keys.llm_provider === "anthropic" ? "claude-3-5-sonnet-20241022" : keys.llm_provider === "openai" ? "gpt-4o-mini" : "model name required by your endpoint"}
+                      className="w-full px-3 py-2.5 rounded-xl bg-card border border-border text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50 transition-colors"
+                    />
+                  </div>
+
+                  {keys.llm_provider === "custom" && (
+                    <div>
+                      <label className="text-sm font-medium text-foreground block mb-1">Base URL</label>
+                      <p className="text-xs text-muted-foreground mb-1.5">OpenAI-compatible API base, e.g. https://your-endpoint.com/v1</p>
+                      <input
+                        value={keys.llm_base_url || ""}
+                        onChange={e => setKeys(p => ({ ...p, llm_base_url: e.target.value }))}
+                        placeholder="https://your-endpoint.com/v1"
+                        className="w-full px-3 py-2.5 rounded-xl bg-card border border-border text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50 transition-colors"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
 

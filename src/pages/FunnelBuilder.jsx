@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 import { GitBranch, Plus, ArrowDown, Loader2, X, Trash2 } from "lucide-react";
 
 const ACTION_COLORS = { email:"bg-blue-500/10 text-blue-400", sms:"bg-emerald-500/10 text-emerald-400", whatsapp:"bg-amber-500/10 text-amber-400", wait:"bg-muted text-muted-foreground", tag:"bg-purple-500/10 text-purple-400", move_stage:"bg-fuchsia-500/10 text-fuchsia-400" };
 
 export default function FunnelBuilder() {
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const [selected, setSelected] = useState(null);
   const [showNewFunnel, setShowNewFunnel] = useState(false);
@@ -14,13 +17,13 @@ export default function FunnelBuilder() {
   const [stageForm, setStageForm] = useState({ name:"", action_type:"email" });
   const [saving, setSaving] = useState(false);
 
-  const { data: funnels = [], isLoading } = useQuery({ queryKey:["funnels"], queryFn:()=>base44.entities.Funnel.list("-created_date",50) });
+  const { data: funnels = [], isLoading } = useQuery({ queryKey:["funnels", user?.email], queryFn:()=>base44.entities.Funnel.filter(mine(user),"-created_date",50), enabled:!!user?.email });
   const { data: stages = [] } = useQuery({
-    queryKey:["funnel_stages", selected?.id],
-    queryFn:()=>base44.entities.FunnelStage.filter({ funnel_id: selected?.id },"stage_order",20),
-    enabled:!!selected?.id,
+    queryKey:["funnel_stages", selected?.id, user?.email],
+    queryFn:()=>base44.entities.FunnelStage.filter(mine(user, { funnel_id: selected?.id }),"stage_order",20),
+    enabled:!!selected?.id && !!user?.email,
   });
-  const { data: leads = [] } = useQuery({ queryKey:["leads_count"], queryFn:()=>base44.entities.LeadCapture.list(null,200) });
+  const { data: leads = [] } = useQuery({ queryKey:["leads_count", user?.email], queryFn:()=>base44.entities.LeadCapture.filter(mine(user),null,200), enabled:!!user?.email });
 
   const saveFunnel = async () => {
     if (!funnelForm.name) return;

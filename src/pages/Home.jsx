@@ -1,25 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe, 
-  BarChart3, Zap, ArrowRight, Check, Star, PlayCircle, Bot, 
-  Menu, X, Send, Loader2, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2
+import {
+  Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe,
+  BarChart3, Zap, ArrowRight, Check, PlayCircle, Bot,
+  Menu, X, Send, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2, Users
 } from "lucide-react";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
-// Set this to a real, embeddable demo video URL (e.g. an unlisted YouTube link
-// with embedding enabled, or an MP4) once one is recorded. Leave empty to show
+// Direct video file (mp4/webm) for the "Watch Demo" modal. Leave empty to show
 // the in-app feature tour instead of a broken/placeholder embed.
-const DEMO_VIDEO_URL = "";
+const DEMO_VIDEO_URL = "https://media.base44.com/videos/public/69c3c2f5acaefc3a7afad5fd/916073a9e_demo-walkthrough.webm";
 
 const FEATURES = [
-  { Icon: Wand2,     title: "AI Media Creation",    desc: "Generate images, videos, scripts, ad creatives, and brand kits with AI in seconds.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
-  { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
+  { Icon: Wand2,     title: "AI Content Studio",    desc: "Generate images, videos, voiceovers, ad creatives and branded captions with AI, then assemble them into ready-to-post content in one place.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
+  { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
   { Icon: GitBranch, title: "Funnel Builder",        desc: "Drag-drop visual funnels. Automated follow-up sequences.", colSpan: "md:col-span-1", color: "from-amber-500 to-orange-600" },
   { Icon: Megaphone, title: "Bulk Messaging",        desc: "Send thousands of SMS, WhatsApp & Email campaigns with real-time tracking.", colSpan: "md:col-span-2", color: "from-pink-500 to-rose-600" },
   { Icon: UserPlus,  title: "Lead Capture",          desc: "QR codes, forms, social leads. Score and nurture automatically.", colSpan: "md:col-span-1", color: "from-emerald-500 to-teal-600" },
+  { Icon: Globe,     title: "Website Scanner & Ad Creator", desc: "Scan any website to extract brand voice, services and offers, then auto-generate ad creatives and campaign copy.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600" },
   { Icon: BarChart3, title: "Analytics & ROI",       desc: "Track campaign performance, conversion rates, and revenue.", colSpan: "md:col-span-1", color: "from-red-500 to-rose-600" },
+  { Icon: Users,     title: "Brand & Agency Manager", desc: "Manage multiple brands or white-label client workspaces, each with its own voice, colors and connected accounts.", colSpan: "md:col-span-1", color: "from-sky-500 to-cyan-600" },
   { Icon: Zap,       title: "Automation Engine",     desc: "Trigger sequences from form fills or stage changes. Fully automated.", colSpan: "md:col-span-1", color: "from-yellow-500 to-amber-600" },
 ];
 
@@ -37,7 +38,13 @@ const TESTIMONIALS = [
 
 const SITE_KNOWLEDGE = `
 You are Sree, the AI assistant for media.aevoice.ai — an AI-powered marketing OS platform.
-PLATFORM OVERVIEW: media.aevoice.ai is an all-in-one AI marketing platform.
+PLATFORM OVERVIEW: media.aevoice.ai is an all-in-one AI marketing platform covering:
+- AI Content Studio: generate images, videos, voiceovers, ad creatives and branded captions, then assemble them into ready-to-post content.
+- Social Scheduling: connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification and a visual content calendar.
+- Bulk Messaging: Email, SMS and WhatsApp campaigns with real-time delivery tracking.
+- Funnel Builder & Lead Capture: drag-drop funnels, QR codes and forms with automated follow-up sequences.
+- Website Scanner & Ad Creator: scan any website to extract brand voice and auto-generate ad creatives.
+- Analytics & ROI tracking, plus a Brand & Agency Manager for multiple brands or white-label client workspaces.
 PRICING: Starter ($49/mo), Growth ($149/mo), Agency ($399/mo). 14-day free trial available.
 Always be helpful, concise (under 80 words). If asked about pricing, always mention the free trial.
 `;
@@ -401,16 +408,14 @@ export default function Home() {
             {/* Video Container */}
             {DEMO_VIDEO_URL ? (
               <div className="aspect-video w-full bg-black relative pt-[72px]">
-                <iframe
-                  width="100%"
-                  height="100%"
+                <video
                   src={DEMO_VIDEO_URL}
                   title="Aevoice Marketing OS Demo"
-                  className="w-full h-full object-cover"
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen>
-                </iframe>
+                  className="w-full h-full object-contain"
+                  controls
+                  autoPlay
+                  playsInline>
+                </video>
               </div>
             ) : (
               /* Fallback product tour — shown until a real recorded demo video is added above */

@@ -1,20 +1,22 @@
 import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Users, Megaphone, Share2, GitBranch, MessageSquare, Clock, TrendingUp, Sparkles, Zap, ArrowRight, Plus, CheckCircle2, AlertCircle } from "lucide-react";
+import { mine } from "@/utils/scope";
+import { Users, Megaphone, Share2, GitBranch, MessageSquare, Clock, TrendingUp, Sparkles, Zap, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
 
 export default function Dashboard() {
   const { user } = useOutletContext() || {};
+  const enabled = !!user?.email;
 
-  const { data: contacts = [] } = useQuery({ queryKey: ["contacts"], queryFn: () => base44.entities.MarketingContact.list("-created_date", 50) });
-  const { data: campaigns = [] } = useQuery({ queryKey: ["campaigns"], queryFn: () => base44.entities.MarketingCampaign.list("-created_date", 10) });
-  const { data: posts = [] } = useQuery({ queryKey: ["scheduled_posts"], queryFn: () => base44.entities.ScheduledPost.list("-created_date", 10) });
-  const { data: funnels = [] } = useQuery({ queryKey: ["funnels"], queryFn: () => base44.entities.Funnel.list("-created_date", 10) });
-  const { data: leads = [] } = useQuery({ queryKey: ["leads"], queryFn: () => base44.entities.LeadCapture.list("-created_date", 20) });
-  const { data: messages = [] } = useQuery({ queryKey: ["bulk_messages"], queryFn: () => base44.entities.BulkMessage.list("-created_date", 100) });
+  const { data: contacts = [] } = useQuery({ queryKey: ["contacts", user?.email], queryFn: () => base44.entities.MarketingContact.filter(mine(user), "-created_date", 50), enabled });
+  const { data: campaigns = [] } = useQuery({ queryKey: ["campaigns", user?.email], queryFn: () => base44.entities.MarketingCampaign.filter(mine(user), "-created_date", 10), enabled });
+  const { data: posts = [] } = useQuery({ queryKey: ["scheduled_posts", user?.email], queryFn: () => base44.entities.ScheduledPost.filter(mine(user), "-created_date", 10), enabled });
+  const { data: funnels = [] } = useQuery({ queryKey: ["funnels", user?.email], queryFn: () => base44.entities.Funnel.filter(mine(user), "-created_date", 10), enabled });
+  const { data: leads = [] } = useQuery({ queryKey: ["leads", user?.email], queryFn: () => base44.entities.LeadCapture.filter(mine(user), "-created_date", 20), enabled });
+  const { data: messages = [] } = useQuery({ queryKey: ["bulk_messages", user?.email], queryFn: () => base44.entities.BulkMessage.filter(mine(user), "-created_date", 100), enabled });
 
   const activeCampaigns = campaigns.filter(c => c.status === "running").length;
   const pendingPosts = posts.filter(p => p.status === "scheduled").length;

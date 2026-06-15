@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { UserPlus, Plus, Search, Globe, Share2, Loader2, X, Download } from "lucide-react";
+import { mine } from "@/utils/scope";
+import { UserPlus, Plus, Search, Loader2, X } from "lucide-react";
 
 const SOURCE_COLORS = { website:"bg-blue-500/10 text-blue-400", social:"bg-pink-500/10 text-pink-400", ad:"bg-amber-500/10 text-amber-400", referral:"bg-emerald-500/10 text-emerald-400", manual:"bg-muted text-muted-foreground", qr_code:"bg-purple-500/10 text-purple-400" };
 
 export default function LeadCapturePage() {
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
@@ -13,8 +16,8 @@ export default function LeadCapturePage() {
   const [form, setForm] = useState({ full_name:"", email:"", phone:"", whatsapp:"", source:"website", utm_source:"", utm_campaign:"" });
   const [saving, setSaving] = useState(false);
 
-  const { data: leads = [], isLoading } = useQuery({ queryKey:["leads"], queryFn:()=>base44.entities.LeadCapture.list("-captured_at",200) });
-  const { data: funnels = [] } = useQuery({ queryKey:["funnels_list"], queryFn:()=>base44.entities.Funnel.list(null,50) });
+  const { data: leads = [], isLoading } = useQuery({ queryKey:["leads", user?.email], queryFn:()=>base44.entities.LeadCapture.filter(mine(user),"-captured_at",200), enabled:!!user?.email });
+  const { data: funnels = [] } = useQuery({ queryKey:["funnels_list", user?.email], queryFn:()=>base44.entities.Funnel.filter(mine(user),null,50), enabled:!!user?.email });
 
   const filtered = leads.filter(l=>{
     const q = search.toLowerCase();

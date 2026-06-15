@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 // Standard relative path module fallback mapping
 import { base44 } from "../api/base44Client";
+import { mine } from "../utils/scope";
 import {
   Building2, Plus, Pencil, Trash2,
   CheckCircle2, X, Loader2, Zap, Upload, ImagePlus, Share2, ChevronRight, ChevronDown,
@@ -48,7 +49,7 @@ const inp = "w-full bg-background border border-border rounded-xl px-3 py-2.5 te
 const lbl = "block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5";
 
 export default function BrandManager() {
-  const { user, userTier = "starter" } = useOutletContext() || {};
+  const { user, userTier = "starter", isAdmin } = useOutletContext() || {};
   const qc = useQueryClient();
   const logoRef = useRef();
 
@@ -73,16 +74,18 @@ export default function BrandManager() {
   const [testingId, setTestingId] = useState(null);
 
   const { data: brands = [], isLoading } = useQuery({
-    queryKey: ["brands"],
-    queryFn: () => base44.entities.Brand.list("-created_date", 20),
+    queryKey: ["brands", user?.email],
+    queryFn: () => base44.entities.Brand.filter(mine(user), "-created_date", 20),
+    enabled: !!user?.email,
   });
 
   const { data: allAccounts = [] } = useQuery({
-    queryKey: ["social_accounts"],
-    queryFn: () => base44.entities.SocialAccount.list("-created_date", 100),
+    queryKey: ["social_accounts", user?.email],
+    queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 100),
+    enabled: !!user?.email,
   });
 
-  const maxBrands = TIER_LIMITS[userTier] || 1;
+  const maxBrands = isAdmin ? Infinity : (TIER_LIMITS[userTier] || 1);
   const canAddMore = brands.length < maxBrands;
 
   const openNew = () => {
@@ -171,7 +174,7 @@ export default function BrandManager() {
             <Building2 className="w-6 h-6 text-fuchsia-400" /> Brand Manager
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {brands.length}/{maxBrands} brands · <span className="capitalize text-fuchsia-400">{userTier}</span> plan
+            {brands.length}{isAdmin ? "" : `/${maxBrands}`} brands · <span className="capitalize text-fuchsia-400">{isAdmin ? "Admin" : userTier}</span> plan
           </p>
         </div>
         <button onClick={openNew} disabled={!canAddMore}

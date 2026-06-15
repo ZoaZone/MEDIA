@@ -37,6 +37,15 @@
       ],
       "default": "pending"
     },
+    "sent_via": {
+      "type": "string",
+      "description": "Which credentials were used to send this message",
+      "enum": [
+        "byo",
+        "platform"
+      ],
+      "default": "platform"
+    },
     "sent_at": {
       "type": "string",
       "format": "date-time"

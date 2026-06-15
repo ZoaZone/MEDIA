@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useOutletContext, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 import {
   Share2, Plus, Calendar, Clock, Loader2, X,
   Send, ExternalLink, AlertCircle, RefreshCw, Trash2, Image, Video,
@@ -139,16 +140,19 @@ export default function SocialHub() {
 
   // Data queries
   const { data: accounts = [], isLoading: accountsLoading } = useQuery({
-    queryKey: ["social_accounts"],
-    queryFn: () => base44.entities.SocialAccount.list("-created_date", 50),
+    queryKey: ["social_accounts", user?.email],
+    queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 50),
+    enabled: !!user?.email,
   });
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["scheduled_posts"],
-    queryFn: () => base44.entities.ScheduledPost.list("-scheduled_at", 200),
+    queryKey: ["scheduled_posts", user?.email],
+    queryFn: () => base44.entities.ScheduledPost.filter(mine(user), "-scheduled_at", 200),
+    enabled: !!user?.email,
   });
   const { data: campaigns = [] } = useQuery({
-    queryKey: ["campaigns_hub"],
-    queryFn: () => base44.entities.MarketingCampaign.list("-created_date", 50),
+    queryKey: ["campaigns_hub", user?.email],
+    queryFn: () => base44.entities.MarketingCampaign.filter(mine(user), "-created_date", 50),
+    enabled: !!user?.email,
   });
 
   // Stats
@@ -247,7 +251,7 @@ HASHTAGS:
 
       // If "Post Now" — trigger publish for each
       if (wiz.postNow) {
-        const newPosts = await base44.entities.ScheduledPost.list("-created_date", wiz.selectedPlatforms.length);
+        const newPosts = await base44.entities.ScheduledPost.filter(mine(user), "-created_date", wiz.selectedPlatforms.length);
         for (const p of newPosts.slice(0, wiz.selectedPlatforms.length)) {
           try {
             await base44.functions.invoke("publishScheduledPosts", { post_id: p.id });
@@ -567,11 +571,17 @@ HASHTAGS:
               )}
             </div>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-5 opacity-60">
+          <div className="bg-card border border-border rounded-2xl p-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1">
-              <Zap className="w-4 h-4 text-amber-400" /> Coming Soon: Email Builder
+              <Zap className="w-4 h-4 text-emerald-400" />
+              Sending mode: {user?.settings?.api_keys?.sendgrid_key ? "Your SendGrid account" : "Platform-managed (Base44 / Resend)"}
             </div>
-            <p className="text-xs text-muted-foreground">Drag-and-drop email designer with templates, A/B testing, and open rate tracking.</p>
+            <p className="text-xs text-muted-foreground">
+              {user?.settings?.api_keys?.sendgrid_key
+                ? "Emails send from your own SendGrid account — billed directly by SendGrid, no platform fee."
+                : "Emails send via media.aevoice.ai's built-in delivery (Base44 → Resend → SendGrid). Included in your plan's monthly quota; overage is billed at provider cost + 30% platform fee."}
+              {" "}<Link to="/settings" className="text-fuchsia-400 hover:underline">Manage in Settings</Link> · <Link to="/billing" className="text-fuchsia-400 hover:underline">View pricing</Link>
+            </p>
           </div>
         </div>
       )}

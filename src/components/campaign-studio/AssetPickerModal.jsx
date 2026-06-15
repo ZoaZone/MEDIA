@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 import { Search, Loader2, X, CheckCircle2, FileText, Image as ImageIcon, Video } from "lucide-react";
 
 const TYPE_COLORS = {
@@ -39,13 +41,14 @@ function Thumbnail({ asset }) {
  * multi-select via `multiple`.
  */
 export default function AssetPickerModal({ open, onClose, types, multiple = true, title = "Select from Library", onSelect }) {
+  const { user } = useOutletContext() || {};
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
 
   const { data: assets = [], isLoading } = useQuery({
-    queryKey: ["media_library"],
-    queryFn: () => base44.entities.ContentAsset.list("-created_date", 200),
-    enabled: open,
+    queryKey: ["media_library", user?.email],
+    queryFn: () => base44.entities.ContentAsset.filter(mine(user), "-created_date", 200),
+    enabled: open && !!user?.email,
   });
 
   if (!open) return null;

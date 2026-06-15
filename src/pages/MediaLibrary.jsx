@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 import { Image, FileText, Video, Trash2, Download, Copy, Search, Loader2, Sparkles, X, ExternalLink } from "lucide-react";
 
 const TYPE_COLORS = {
@@ -46,6 +48,7 @@ function AssetPreview({ asset, onClose }) {
 }
 
 export default function MediaLibrary() {
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -53,7 +56,7 @@ export default function MediaLibrary() {
   const [view, setView] = useState("grid");
   const [preview, setPreview] = useState(null);
 
-  const { data: assets = [], isLoading } = useQuery({ queryKey: ["media_library"], queryFn: () => base44.entities.ContentAsset.list("-created_date", 200) });
+  const { data: assets = [], isLoading } = useQuery({ queryKey: ["media_library", user?.email], queryFn: () => base44.entities.ContentAsset.filter(mine(user), "-created_date", 200), enabled: !!user?.email });
 
   const filtered = assets.filter(a => {
     const q = search.toLowerCase();

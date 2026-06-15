@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { mine } from "@/utils/scope";
 import {
   Building2, FileText, Image as ImageIcon, Calendar, Check, X,
   Share2, Sparkles, CheckCircle2, PlayCircle, AlertTriangle, Eye, Layers,
@@ -59,6 +60,7 @@ const isImageUrl = (u = "") => /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(u) || u
 
 export default function CampaignStudio() {
   const navigate = useNavigate();
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const mediaRef = useRef();
   const musicRef = useRef();
@@ -91,8 +93,8 @@ export default function CampaignStudio() {
   const [publishReport, setPublishReport] = useState([]);
   const [publishStatus, setPublishStatus] = useState("");
 
-  const { data: brands = [] } = useQuery({ queryKey: ["brands"], queryFn: () => base44.entities.Brand.list("-created_date", 20) });
-  const { data: allAccounts = [] } = useQuery({ queryKey: ["social_accounts"], queryFn: () => base44.entities.SocialAccount.list("-created_date", 100) });
+  const { data: brands = [] } = useQuery({ queryKey: ["brands", user?.email], queryFn: () => base44.entities.Brand.filter(mine(user), "-created_date", 20), enabled: !!user?.email });
+  const { data: allAccounts = [] } = useQuery({ queryKey: ["social_accounts", user?.email], queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 100), enabled: !!user?.email });
 
   // Prefill / media import handoff from other pages (kept from original, now safe-guarded)
   useEffect(() => {

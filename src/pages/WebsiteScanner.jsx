@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Globe, Zap, Sparkles, Loader2, ArrowRight, Tag, TrendingUp, Building2 } from "lucide-react";
+import { mine } from "@/utils/scope";
+import { Globe, Zap, Sparkles, Loader2, ArrowRight } from "lucide-react";
 
 export default function WebsiteScanner() {
+  const { user } = useOutletContext() || {};
   const qc = useQueryClient();
   const [url, setUrl] = useState("");
   const [scanning, setScanning] = useState(false);
@@ -11,7 +14,7 @@ export default function WebsiteScanner() {
   const [generating, setGenerating] = useState(null);
   const [generated, setGenerated] = useState({});
 
-  const {data:scans=[],isLoading}=useQuery({queryKey:["scans"],queryFn:()=>base44.entities.WebsiteScan.list("-created_date",20)});
+  const {data:scans=[],isLoading}=useQuery({queryKey:["scans", user?.email],queryFn:()=>base44.entities.WebsiteScan.filter(mine(user),"-created_date",20),enabled:!!user?.email});
 
   const scan = async () => {
     if (!url) return;
