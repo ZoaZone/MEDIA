@@ -1,7 +1,7 @@
 /**
  * AuthCard — shared branded wrapper for all auth steps.
  */
-const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692b24a5bac54e3067972063/2e8a22a03_AevoiceLogo.JPG";
+const LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
 
 export default function AuthCard({ children, title, subtitle }) {
   return (

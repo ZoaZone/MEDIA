@@ -45,7 +45,7 @@ function DarkToggle() {
 }
 
 
-const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
+const M_LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
 
 const NAV_SECTIONS = [
   {

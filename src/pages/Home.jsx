@@ -6,7 +6,7 @@ import {
   Menu, X, Send, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2, Users
 } from "lucide-react";
 
-const M_LOGO = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png";
+const M_LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
 
 // Direct video file (mp4/webm) for the "Watch Demo" modal. Leave empty to show
 // the in-app feature tour instead of a broken/placeholder embed.

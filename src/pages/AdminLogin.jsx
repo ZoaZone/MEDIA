@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
 
-const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692b24a5bac54e3067972063/2e8a22a03_AevoiceLogo.JPG";
+const LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
 const BRAND = "Marketer OS";
 const ADMIN_REDIRECT = "/admin-dashboard";
 
@@ -53,7 +53,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 mb-4 shadow-xl overflow-hidden">
-            <img src={LOGO} alt={BRAND} className="w-12 h-12 object-cover rounded-xl" onError={e => { e.target.src = "https://media.base44.com/images/public/69b1f1d60b1fb9d791fddc64/d1aa347a6_generated_image.png"; }} />
+            <img src={LOGO} alt={BRAND} className="w-12 h-12 object-cover rounded-xl" />
           </div>
           <h1 className="text-xl font-black text-white tracking-tight">{BRAND}</h1>
           <p className="text-xs text-amber-400 mt-0.5 flex items-center justify-center gap-1">
