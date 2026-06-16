@@ -42,10 +42,11 @@ export default function Login() {
     setLoading(true); setError(""); setMsg("");
     try {
       if (mode === "login") {
-        await base44.auth.login({ email: form.email, password: form.password });
+        await base44.auth.loginViaEmailPassword(form.email, form.password);
         navigate(from, { replace: true });
       } else if (mode === "signup") {
-        await base44.auth.signUp({ email: form.email, password: form.password, full_name: form.name });
+        await base44.auth.register({ email: form.email, password: form.password, full_name: form.name });
+        await base44.auth.loginViaEmailPassword(form.email, form.password);
         navigate(SIGNUP_REDIRECT, { replace: true });
       } else {
         // Password reset — try multiple SDK method names for compatibility
@@ -93,10 +94,8 @@ export default function Login() {
 
         {/* Logo + Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 mb-4 shadow-xl overflow-hidden">
-            <img src={LOGO} alt={BRAND} className="w-12 h-12 object-cover rounded-xl" />
-          </div>
-          <h1 className="text-xl font-black text-white tracking-tight">{BRAND}</h1>
+          <img src={LOGO} alt="MediaStudios.app" className="h-14 object-contain mx-auto mb-1"
+            onError={e => { e.target.style.display = "none"; }} />
           <p className="text-xs text-slate-400 mt-0.5">{TAGLINE}</p>
         </div>
 

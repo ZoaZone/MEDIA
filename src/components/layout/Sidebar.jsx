@@ -120,15 +120,10 @@ export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) 
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-5 border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-          <img src={M_LOGO} alt="M" className="h-9 w-9 rounded-xl object-cover shadow-lg shadow-fuchsia-500/20" onError={(e) => e.target.style.display="none"} />
-          <div>
-            <span className="text-base font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent tracking-tight">digitalstudios.app</span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <Zap className="w-2.5 h-2.5 text-fuchsia-400" />
-              <span className="text-[9px] text-muted-foreground font-medium tracking-wide">AI MARKETING OS</span>
-            </div>
-          </div>
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+          <img src="/logo.png" alt="MediaStudios.app"
+            className="h-10 object-contain"
+            onError={(e) => e.target.style.display="none"} />
         </Link>
       </div>
 

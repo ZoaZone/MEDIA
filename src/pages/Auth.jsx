@@ -54,22 +54,24 @@ export default function Auth() {
   const handlePasswordSubmit = async ({ password, name }) => {
     setLoading(true);
     setError("");
+    const safeFrom = (from && !/\/(login|auth)/i.test(from)) ? from : DASHBOARD;
     try {
       if (mode === "signup") {
-        await base44.auth.signUp({ email, password, full_name: name });
+        await base44.auth.register({ email, password, full_name: name });
+        await base44.auth.loginViaEmailPassword(email, password);
       } else {
-        // login or reset — try login first, fallback to signUp for new-password-reset users
         try {
-          await base44.auth.login({ email, password });
+          await base44.auth.loginViaEmailPassword(email, password);
         } catch {
           if (mode === "reset") {
-            await base44.auth.signUp({ email, password });
+            await base44.auth.register({ email, password });
+            await base44.auth.loginViaEmailPassword(email, password);
           } else {
             throw new Error("Invalid email or password.");
           }
         }
       }
-      navigate(from, { replace: true });
+      navigate(safeFrom, { replace: true });
     } catch (err) {
       setError(err?.message || "Authentication failed. Please try again.");
     } finally {
@@ -119,14 +121,10 @@ export default function Auth() {
 
         {/* Logo + branding */}
         <div className="text-center mb-7">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-white/10 bg-white/5 mb-3 shadow-xl overflow-hidden">
-            <img
-              src="/logo.png"
-              alt="AEVOICE" className="w-10 h-10 object-cover rounded-xl"
-              onError={e => { e.target.style.display = "none"; }} />
-          </div>
-          <h1 className="text-lg font-black text-white tracking-tight">digitalstudios.app</h1>
-          <p className="text-xs text-slate-400 mt-0.5">AI Marketing & Media Platform</p>
+          <img src="/logo.png" alt="MediaStudios.app"
+            className="h-14 object-contain mx-auto mb-1"
+            onError={e => { e.target.style.display = "none"; }} />
+          <p className="text-xs text-slate-400 mt-0.5">AI Marketing &amp; Media Platform</p>
         </div>
 
         {/* 3-step progress bar */}

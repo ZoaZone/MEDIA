@@ -118,9 +118,8 @@ export default function Pricing() {
 
         {/* Header */}
         <div className="text-center mb-14">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <img src={M_LOGO} alt="" className="w-8 h-8 rounded-lg object-contain" onError={(e) => e.target.style.display="none"} />
-            <span className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
+          <div className="flex items-center justify-center mb-4">
+            <img src="/logo.png" alt="MediaStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4">Choose your plan</h1>
           <p className="text-white/50 text-lg mb-6">From free trial to full enterprise media production.</p>

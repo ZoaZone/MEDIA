@@ -26,9 +26,10 @@ const FEATURES = [
 ];
 
 const PLANS = [
-  { name: "Starter", price: 49, desc: "Small businesses", features: ["1 Client Workspace", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"], popular: false },
-  { name: "Growth",  price: 149, desc: "Growing teams",   features: ["5 Client Workspaces", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"], popular: true },
-  { name: "Agency",  price: 399, desc: "Full agencies",   features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "White-label reports", "API access"], popular: false },
+  { name: "Starter",    price: 49,  desc: "Small businesses",     features: ["1 Client Workspace", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"],                                                              popular: false },
+  { name: "Growth",     price: 149, desc: "Growing teams",        features: ["5 Client Workspaces", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"],                                   popular: true  },
+  { name: "Agency",     price: 399, desc: "Full agencies",        features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "BYO messaging (zero platform fee)", "White-label & API access"],            popular: false },
+  { name: "Enterprise", price: 999, desc: "Studios & enterprises",features: ["25 brands / unlimited clients", "Unlimited AI generations", "🎬 Movie Maker with dubbing", "🎵 Song Creator (any language)", "🎞 AI Media Editor", "Dedicated success manager"], popular: false, enterprise: true },
 ];
 
 const TESTIMONIALS = [
@@ -212,9 +213,8 @@ export default function Home() {
       {/* NAV */}
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${scrolled ? "border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={M_LOGO} alt="M" className="w-9 h-9 rounded-xl shadow-lg shadow-fuchsia-500/20" onError={(e) => e.target.style.display="none"} />
-            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="MediaStudios.app" className="h-10 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -317,39 +317,58 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Simple pricing.<br /><span className="text-neutral-500">Unfair advantage.</span></h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 items-center">
+          {/* Credits callout */}
+          <div className="mb-10 p-5 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <Zap className="w-5 h-5 text-fuchsia-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-black text-white">Pay-as-you-go AI Credits</p>
+                <p className="text-xs text-neutral-400 mt-0.5">No subscription needed. 1 credit = 1 AI image or video scene = $0.06. Packs from $10. Credits never expire.</p>
+              </div>
+            </div>
+            <Link to="/pricing" className="shrink-0 px-4 py-2 rounded-xl bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold hover:bg-fuchsia-500/30 transition-all whitespace-nowrap">
+              View credit packs →
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
             {PLANS.map((plan) => (
-              <div key={plan.name} className={`relative rounded-3xl p-8 border backdrop-blur-xl transition-transform hover:-translate-y-2 ${
-                plan.popular
-                  ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-[0_0_40px_rgba(217,70,239,0.15)] md:scale-105 z-10"
-                  : "border-white/10 bg-white/5"
+              <div key={plan.name} className={`relative rounded-3xl p-7 border backdrop-blur-xl transition-transform hover:-translate-y-1 flex flex-col ${
+                plan.enterprise ? "border-cyan-500/40 bg-gradient-to-b from-cyan-500/8 to-blue-500/5"
+                : plan.popular  ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-[0_0_40px_rgba(217,70,239,0.15)]"
+                : "border-white/10 bg-white/5"
               }`}>
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg tracking-wide uppercase">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg tracking-wide uppercase whitespace-nowrap">
                     Most Popular
                   </div>
                 )}
-                <div className="mb-8">
-                  <h3 className="text-2xl font-black text-white mb-2">{plan.name}</h3>
-                  <p className="text-neutral-400 text-sm">{plan.desc}</p>
+                {plan.enterprise && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-xs font-bold text-white shadow-lg whitespace-nowrap">
+                    🎬 Media Hub
+                  </div>
+                )}
+                <div className="mb-5 mt-1">
+                  <h3 className="text-xl font-black text-white mb-1">{plan.name}</h3>
+                  <p className="text-neutral-400 text-xs">{plan.desc}</p>
                 </div>
-                <div className="flex items-baseline gap-1 mb-8">
-                  <span className="text-5xl font-black text-white">${plan.price}</span>
-                  <span className="text-neutral-500 font-medium">/mo</span>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-black text-white">${plan.price}</span>
+                  <span className="text-neutral-500 font-medium text-sm">/mo</span>
                 </div>
-                <div className="space-y-4 mb-10">
+                <div className="space-y-3 mb-8 flex-1">
                   {plan.features.map(f => (
-                    <div key={f} className="flex items-start gap-3 text-sm text-neutral-300 font-medium">
-                      <Check className={`w-5 h-5 shrink-0 ${plan.popular ? "text-fuchsia-400" : "text-neutral-500"}`} /> {f}
+                    <div key={f} className="flex items-start gap-2.5 text-xs text-neutral-300 font-medium">
+                      <Check className={`w-4 h-4 shrink-0 mt-0.5 ${plan.enterprise ? "text-cyan-400" : plan.popular ? "text-fuchsia-400" : "text-neutral-500"}`} /> {f}
                     </div>
                   ))}
                 </div>
-                <Link to="/pricing" className={`block text-center py-4 rounded-xl font-bold transition-all ${
-                  plan.popular
-                    ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                <Link to="/pricing" className={`block text-center py-3 rounded-xl font-bold text-sm transition-all ${
+                  plan.enterprise ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90"
+                  : plan.popular  ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg"
+                  : "bg-white/10 hover:bg-white/20 text-white"
                 }`}>
-                  Start 14-Day Trial
+                  {plan.enterprise ? "Contact Sales" : "Get Started"}
                 </Link>
               </div>
             ))}
@@ -375,9 +394,8 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="border-t border-white/10 py-12 px-6 bg-neutral-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src={M_LOGO} alt="M" className="w-8 h-8 rounded-lg" onError={(e) => e.target.style.display="none"} />
-            <span className="font-black text-white text-lg tracking-tight">digitalstudios.app</span>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="MediaStudios.app" className="h-9 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="flex flex-wrap gap-6 text-sm font-medium items-center justify-center">
             <a href="mailto:care@aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">care@aevoice.ai</a>
