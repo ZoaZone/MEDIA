@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { CheckCircle2, Globe, Megaphone, Share2, ArrowRight, Loader2, Sparkles } from "lucide-react";
 
-const M_LOGO="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
+const M_LOGO="/favicon.png";
 const STEPS=[
   {id:1,Icon:Globe,title:"Scan Your Website",desc:"Let AI learn about your business — auto-generates content concepts",color:"from-fuchsia-500 to-purple-600"},
   {id:2,Icon:Share2,title:"Connect Social Accounts",desc:"Link Instagram, TikTok, LinkedIn and more to start scheduling",color:"from-pink-500 to-rose-600"},

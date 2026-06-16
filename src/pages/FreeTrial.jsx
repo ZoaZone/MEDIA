@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Upload, User, MapPin, Briefcase, Globe, Tag, FileText, Lock, ArrowRight, Loader2, CheckCircle2, Sparkles, Image, Video, Mail, GitBranch, Share2, BarChart3, Zap, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const M_LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
+const M_LOGO = "/favicon.png";
 
 const LOCKED_FEATURES = [
   { Icon: Image,    label: "AI Image Generation",     desc: "Create stunning visuals in seconds with AI." },

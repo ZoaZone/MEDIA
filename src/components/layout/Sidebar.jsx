@@ -5,7 +5,7 @@ import {
   Search, GitBranch, UserPlus, MailCheck, Image, Globe,
   BarChart3, Settings, CreditCard, ChevronDown, LogOut, Menu, X,
   Lock, Bell, HelpCircle, ShieldCheck, Zap, Building2, Share,
-  Sun, Moon, Wand2, Monitor
+  Sun, Moon, Wand2, Monitor, Film, Music, Sliders,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -45,7 +45,7 @@ function DarkToggle() {
 }
 
 
-const M_LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
+const M_LOGO = "/favicon.png";
 
 const NAV_SECTIONS = [
   {
@@ -72,6 +72,9 @@ const NAV_SECTIONS = [
       { to: "/ad-creator",      icon: PenTool,  label: "Ad Creator",   minTier: 2 },
       { to: "/website-scanner", icon: Search,   label: "Website Scanner", minTier: 2 },
       { to: "/media-library",   icon: Image,    label: "Media Library" },
+      { to: "/media-editor",    icon: Sliders,  label: "AI Media Editor", badge: "ENT", minTier: 4 },
+      { to: "/movie-maker",     icon: Film,     label: "Movie Maker", badge: "ENT", minTier: 4 },
+      { to: "/song-creator",    icon: Music,    label: "Song Creator", badge: "ENT", minTier: 4 },
     ],
   },
   {

@@ -44,8 +44,8 @@ const FONTS = ["Arial", "Inter", "Poppins", "Montserrat", "Playfair Display", "R
 
 // Keyed by the numeric userTier from AppLayout: 0 = free trial (no active
 // subscription), 1 = Starter, 2 = Growth, 3 = Agency.
-const TIER_LIMITS = { 0: 1, 1: 1, 2: 3, 3: 10 };
-const TIER_NAMES = { 0: "Free Trial", 1: "Starter", 2: "Growth", 3: "Agency" };
+const TIER_LIMITS = { 0: 1, 1: 1, 2: 3, 3: 10, 4: 25 };
+const TIER_NAMES = { 0: "Free Trial", 1: "Starter", 2: "Growth", 3: "Agency", 4: "Enterprise" };
 const STEPS = ["Details", "Colors & Voice", "Social Accounts", "Review"];
 
 const inp = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-fuchsia-500/70 transition";

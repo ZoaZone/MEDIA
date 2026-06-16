@@ -292,30 +292,31 @@ export default function Billing() {
       {/* Messaging & Email sending */}
       <div className="bg-card border border-border rounded-2xl p-6">
         <h3 className="font-bold text-foreground mb-1">Email, SMS &amp; WhatsApp Sending</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Bring your own provider credentials for zero platform fee, or let digitalstudios.app send on your behalf —
-          included up to your plan's monthly message quota, then billed at provider cost + 30% platform usage fee.
+        <p className="text-sm text-muted-foreground mb-1">
+          Platform-managed sending is included up to your plan's monthly quota, then billed per message.
+        </p>
+        <p className="text-xs text-muted-foreground mb-4">
+          <strong className="text-foreground">Agency &amp; Enterprise:</strong> bring your own SendGrid, Twilio, or Meta BSP credentials for zero platform fee — enter them in{" "}
+          <Link to="/settings" className="text-fuchsia-400 hover:underline">Settings → API Keys</Link>.
+          WhatsApp marketing campaigns require pre-approved message templates (Meta Business API rules). Transactional messages can be sent from your registered sender without pre-approval.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { Icon: Mail, label: "Email", provider: "Base44 / Resend / SendGrid", rate: "$1.30 / 1,000 emails", byo: "Bring your own SendGrid key for $0 platform fee" },
-            { Icon: Phone, label: "SMS", provider: "Twilio", rate: "≈ $0.0103 / SMS (US)", byo: "Bring your own Twilio account for $0 platform fee" },
-            { Icon: MessageSquare, label: "WhatsApp", provider: "Meta Cloud API", rate: "Meta's per-conversation rate + 30%", byo: "Bring your own WhatsApp Business API token for $0 platform fee" },
+            { Icon: Mail, label: "Email", provider: "SendGrid / Resend", rate: "$1.30 / 1,000 emails", byo: "Agency & Enterprise: BYO SendGrid key — $0 platform fee" },
+            { Icon: Phone, label: "SMS", provider: "Twilio", rate: "≈ $0.013 / SMS (US)", byo: "Agency & Enterprise: BYO Twilio account — $0 platform fee" },
+            { Icon: MessageSquare, label: "WhatsApp", provider: "Meta Cloud API", rate: "≈ $0.013 / conversation (US)", byo: "Agency & Enterprise: BYO Meta BSP token — $0 platform fee" },
           ].map(m => (
             <div key={m.label} className="p-4 rounded-xl border border-border bg-background">
               <div className="flex items-center gap-2 mb-1.5">
                 <m.Icon className="w-4 h-4 text-fuchsia-400" />
                 <span className="font-semibold text-foreground text-sm">{m.label}</span>
               </div>
-              <p className="text-xs text-muted-foreground mb-1">Managed via {m.provider}</p>
+              <p className="text-xs text-muted-foreground mb-1">via {m.provider}</p>
               <p className="text-sm font-bold text-foreground mb-1">{m.rate}</p>
               <p className="text-xs text-muted-foreground">{m.byo}</p>
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mt-4">
-          Add your own credentials anytime in <Link to="/settings" className="text-fuchsia-400 hover:underline">Settings → API Keys</Link>.
-        </p>
       </div>
 
       <p className="text-center text-xs text-muted-foreground">

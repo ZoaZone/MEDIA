@@ -1,7 +1,7 @@
 /**
  * AuthCard — shared branded wrapper for all auth steps.
  */
-const LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png";
+const LOGO = "/logo.png";
 
 export default function AuthCard({ children, title, subtitle }) {
   return (

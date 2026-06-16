@@ -17,7 +17,8 @@
         "free",
         "starter",
         "growth",
-        "agency"
+        "agency",
+        "enterprise"
       ]
     },
     "stripe_subscription_id": {

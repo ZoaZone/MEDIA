@@ -420,12 +420,46 @@ export default function SettingsPage() {
             <Zap className="w-3.5 h-3.5 inline mr-1.5" />
             Keys are encrypted and stored in your account settings. Used only for your campaigns.
           </div>
-          <div className="p-4 rounded-xl bg-muted/30 border border-border text-xs text-muted-foreground">
-            Add a SendGrid / Twilio / WhatsApp key below to send Email, SMS and WhatsApp campaigns from your own
-            account at no platform fee. Leave these blank and digitalstudios.app will send on your behalf using its
-            built-in providers — included in your plan's quota, then billed at provider cost + 30%. See <Link to="/billing" className="text-fuchsia-400 hover:underline">Billing</Link> for rates.
-          </div>
-          {KEY_FIELDS.map(({ k, l, ph, help }) => (
+          {(userTier < 3 && !isAdmin) ? (
+            <div className="p-4 rounded-xl bg-card border border-border flex gap-3 items-start">
+              <Lock className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">BYO credentials — Agency &amp; Enterprise only</p>
+                <p className="text-xs text-muted-foreground mt-1">Bring your own SendGrid, Twilio, WhatsApp BSP or Stripe keys for zero platform messaging fee. Upgrade to Agency or Enterprise to unlock this feature.</p>
+                <Link to="/billing" className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-fuchsia-400 hover:underline">Upgrade plan →</Link>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-muted/30 border border-border text-xs text-muted-foreground">
+              Add your SendGrid / Twilio / WhatsApp BSP credentials below to send campaigns from your own sender accounts at
+              <strong className="text-foreground"> zero platform fee</strong>. Leave blank and digitalstudios.app will send on your behalf
+              (included in your plan's monthly quota, then per-message rates apply). See <Link to="/billing" className="text-fuchsia-400 hover:underline">Billing</Link> for rates.
+            </div>
+          )}
+
+          {/* Sender account provisioning */}
+          {(userTier >= 3 || isAdmin) && (
+            <div className="p-4 rounded-xl bg-fuchsia-500/5 border border-fuchsia-500/20">
+              <p className="text-xs font-semibold text-fuchsia-400 mb-2">Don't have a sender account yet? Sign up directly:</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Get SendGrid (Email)", url: "https://signup.sendgrid.com/" },
+                  { label: "Get Twilio (SMS)", url: "https://www.twilio.com/try-twilio" },
+                  { label: "Get WhatsApp BSP (Meta)", url: "https://business.facebook.com/messaging/whatsapp" },
+                ].map(l => (
+                  <a key={l.url} href={l.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-xs text-fuchsia-300 hover:bg-fuchsia-500/20 transition-colors">
+                    <ExternalLink className="w-3 h-3" /> {l.label}
+                  </a>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2">
+                WhatsApp: marketing messages require pre-approved templates via Meta Business Manager.
+                Transactional messages (OTPs, order updates) can be sent from your registered number without pre-approval.
+              </p>
+            </div>
+          )}
+          {(userTier >= 3 || isAdmin) && KEY_FIELDS.map(({ k, l, ph, help }) => (
             <div key={k}>
               <label className="text-sm font-medium text-foreground block mb-1">{l}</label>
               <p className="text-xs text-muted-foreground mb-1.5">{help}</p>

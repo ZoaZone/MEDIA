@@ -18,7 +18,7 @@ export default function AppLayout() {
     enabled: !!user?.email,
   });
 
-  const TIER_MAP = { starter: 1, growth: 2, agency: 3 };
+  const TIER_MAP = { starter: 1, growth: 2, agency: 3, enterprise: 4 };
   const userTier = TIER_MAP[subscription?.plan_tier] || 0;
   const isAdmin = user?.role === "admin";
 

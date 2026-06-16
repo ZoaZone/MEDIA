@@ -121,7 +121,7 @@ export default function Auth() {
         <div className="text-center mb-7">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-white/10 bg-white/5 mb-3 shadow-xl overflow-hidden">
             <img
-              src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png"
+              src="/logo.png"
               alt="AEVOICE" className="w-10 h-10 object-cover rounded-xl"
               onError={e => { e.target.style.display = "none"; }} />
           </div>

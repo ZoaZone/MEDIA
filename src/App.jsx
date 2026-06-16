@@ -42,6 +42,9 @@ import BrandManager from './pages/BrandManager';
 import CampaignStudio from './pages/CampaignStudio';
 import QuickCreate from './pages/QuickCreate';
 import DemoVideoMaker from './pages/DemoVideoMaker';
+import MediaEditor from './pages/MediaEditor';
+import MovieMaker from './pages/MovieMaker';
+import SongCreator from './pages/SongCreator';
 
 
 const AuthenticatedApp = () => {
@@ -102,6 +105,9 @@ const AuthenticatedApp = () => {
         <Route path="/campaign-studio" element={<CampaignStudio />} />
         <Route path="/quick-create" element={<QuickCreate />} />
         <Route path="/demo-video" element={<DemoVideoMaker />} />
+        <Route path="/media-editor" element={<MediaEditor />} />
+        <Route path="/movie-maker" element={<MovieMaker />} />
+        <Route path="/song-creator" element={<SongCreator />} />
         <Route path="/website-scanner" element={<WebsiteScanner />} />
         <Route path="/funnel-builder" element={<FunnelBuilder />} />
         <Route path="/follow-up" element={<FollowUp />} />

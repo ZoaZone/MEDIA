@@ -8,12 +8,12 @@
   "theme_color": "#0f0f0f",
   "icons": [
     {
-      "src": "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png",
+      "src": "/favicon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/808a74f8a_generated_image.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
