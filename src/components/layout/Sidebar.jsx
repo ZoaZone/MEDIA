@@ -119,10 +119,10 @@ export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) 
   const navContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="p-5 border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center" onClick={() => setMobileOpen(false)}>
+      <div className="px-4 pt-5 pb-4 border-b border-sidebar-border">
+        <Link to="/dashboard" className="block" onClick={() => setMobileOpen(false)}>
           <img src="/logo.png" alt="MediaStudios.app"
-            className="w-full max-h-14 object-contain"
+            className="w-full max-h-24 object-contain object-left"
             onError={(e) => e.target.style.display="none"} />
         </Link>
       </div>

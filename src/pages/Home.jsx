@@ -221,7 +221,7 @@ export default function Home() {
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${scrolled ? "border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center">
-            <img src="/logo.png" alt="MediaStudios.app" className="h-10 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="/logo.png" alt="MediaStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -259,10 +259,18 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="relative max-w-5xl mx-auto text-center z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+
+          {/* Brand logo — hero */}
+          <div className="flex justify-center mb-8">
+            <img src="/logo.png" alt="MediaStudios.app"
+              className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_0_32px_rgba(217,70,239,0.35)]"
+              onError={(e) => e.target.style.display="none"} />
+          </div>
+
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-xs font-bold mb-8 uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5" /> The AI Marketing Engine
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tight mb-8">
             <span className="text-white">Your entire marketing</span><br />
             <span className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -409,7 +417,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 px-6 bg-neutral-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
-            <img src="/logo.png" alt="MediaStudios.app" className="h-9 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="/logo.png" alt="MediaStudios.app" className="h-11 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="flex flex-wrap gap-6 text-sm font-medium items-center justify-center">
             <a href="mailto:care@aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">care@aevoice.ai</a>
