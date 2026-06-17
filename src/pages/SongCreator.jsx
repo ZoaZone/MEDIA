@@ -9,6 +9,18 @@ import {
 } from "lucide-react";
 import { generateText, generateVoiceover } from "@/utils/aiClient";
 
+// Strip markdown symbols & section brackets before sending to TTS
+function toSpeakableText(text) {
+  return (text || "")
+    .replace(/\*\*/g, "").replace(/\*/g, "")     // bold/italic markers
+    .replace(/#{1,6}\s*/g, "")                   // headings
+    .replace(/\[([^\]]+)\]/g, "")                // section labels like [VERSE 1]
+    .replace(/^\s*[-•]\s/gm, "")                 // bullet points
+    .replace(/`[^`]*`/g, "")                     // inline code
+    .replace(/\n{3,}/g, "\n\n")                  // excessive blank lines
+    .trim();
+}
+
 const LANGUAGES = [
   "English", "Spanish", "French", "German", "Portuguese", "Hindi", "Arabic",
   "Japanese", "Korean", "Chinese (Mandarin)", "Italian", "Russian", "Tamil",
@@ -104,7 +116,7 @@ export default function SongCreator() {
     setVoiceLoading(true);
     setError("");
     try {
-      const blob = await generateVoiceover(text.slice(0, 2000));
+      const blob = await generateVoiceover(toSpeakableText(text).slice(0, 2000));
       if (blob) {
         const url = URL.createObjectURL(blob);
         onUrl(url, blob);

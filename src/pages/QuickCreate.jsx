@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { generateText, generateImage, generateVoiceover, uploadFile, splitScriptIntoScenes, shortenCaption } from "@/utils/aiClient";
 import { assembleVideo, VIDEO_RATIOS } from "@/utils/videoAssembler";
-import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic, Sparkles, Paperclip, X } from "lucide-react";
+import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic, Sparkles, Paperclip, X, RefreshCw } from "lucide-react";
 
 // Pixel-dimension hints passed to the image generator per aspect ratio.
 const RATIO_DIMENSIONS = { "1:1": "1024x1024", "16:9": "1792x1024", "9:16": "1024x1792", "4:5": "1024x1280" };
@@ -25,6 +25,22 @@ export default function QuickCreate() {
   const [saved, setSaved] = useState(false);
   const [attachments, setAttachments] = useState([]); // [{ url, name }]
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [expandingPrompt, setExpandingPrompt] = useState(false);
+
+  const expandPrompt = async () => {
+    if (!prompt.trim()) { setError("Enter a brief description first."); return; }
+    setExpandingPrompt(true);
+    setError("");
+    try {
+      const expanded = await generateText({
+        type: "caption",
+        prompt: `Expand this brief into a detailed, vivid AI image/video generation prompt (2-3 sentences, no preamble, just the prompt): "${prompt}"`,
+        tone: "Professional",
+      });
+      if (expanded) setPrompt(expanded.trim());
+    } catch { setError("AI expansion failed."); }
+    setExpandingPrompt(false);
+  };
 
   const addAttachments = async (files) => {
     if (!files?.length) return;
@@ -66,7 +82,7 @@ export default function QuickCreate() {
           setStatusMsg(`Generating scene ${i + 1} of ${sceneScripts.length}...`);
           setProgress((i / sceneScripts.length) * 0.6);
           const imgUrl = await generateImage({ prompt: sceneScripts[i].imagePrompt || sceneScripts[i].text || prompt, referenceImageUrls });
-          scenes.push({ imageUrl: imgUrl, text: sceneScripts[i].text, caption: shortenCaption(sceneScripts[i].text) });
+          scenes.push({ imageUrl: imgUrl, text: sceneScripts[i].text, caption: voiceover ? "" : shortenCaption(sceneScripts[i].text) });
         }
         let audio = null;
         if (voiceover) {
@@ -75,7 +91,8 @@ export default function QuickCreate() {
         }
         setStatusMsg("Assembling video...");
         const { url, blob } = await assembleVideo({
-          scenes, ratio, sceneSeconds: 3, audio,
+          scenes, ratio, sceneSeconds: 5, audio,
+          subtitleStyle: voiceover ? "none" : "bottom",
           onProgress: (p) => setProgress(0.6 + p * 0.3),
         });
         setStatusMsg("Uploading...");
@@ -118,9 +135,16 @@ export default function QuickCreate() {
         {/* Config */}
         <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
           <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Describe what you want</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide">Describe what you want</label>
+              <button onClick={expandPrompt} disabled={expandingPrompt || !prompt.trim()}
+                className="flex items-center gap-1 text-xs text-fuchsia-400 hover:text-fuchsia-300 disabled:opacity-40 transition-colors">
+                {expandingPrompt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                {expandingPrompt ? "Expanding…" : "✨ Expand with AI"}
+              </button>
+            </div>
             <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={5}
-              placeholder="e.g. A cozy coffee shop's morning menu special, warm tones, inviting and photo-realistic..."
+              placeholder="Brief description → click '✨ Expand with AI' to get a detailed prompt, or write your own..."
               className="w-full rounded-xl border border-input bg-background text-sm p-3 focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
           </div>
 

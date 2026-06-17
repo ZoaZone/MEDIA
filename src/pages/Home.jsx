@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe,
   BarChart3, Zap, ArrowRight, Check, PlayCircle, Bot, Monitor,
-  Menu, X, Send, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2, Users
+  Menu, X, Send, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2, Users,
+  Film, Music, Sliders, PenTool
 } from "lucide-react";
 
 const M_LOGO = "/favicon.png";
@@ -18,8 +19,12 @@ const FEATURES = [
   { Icon: GitBranch, title: "Funnel Builder",        desc: "Drag-drop visual funnels. Automated follow-up sequences.", colSpan: "md:col-span-1", color: "from-amber-500 to-orange-600" },
   { Icon: Megaphone, title: "Bulk Messaging",        desc: "Send thousands of SMS, WhatsApp & Email campaigns with real-time tracking.", colSpan: "md:col-span-2", color: "from-pink-500 to-rose-600" },
   { Icon: UserPlus,  title: "Lead Capture",          desc: "QR codes, forms, social leads. Score and nurture automatically.", colSpan: "md:col-span-1", color: "from-emerald-500 to-teal-600" },
-  { Icon: Globe,     title: "Website Scanner & Ad Creator", desc: "Scan any website to extract brand voice, services and offers, then auto-generate ad creatives and campaign copy.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600" },
+  { Icon: PenTool,   title: "Ad Creator",            desc: "AI-generated ad copy and visuals for Instagram, TikTok, Facebook, LinkedIn, YouTube, and Google — post directly to any connected account after review.", colSpan: "md:col-span-1", color: "from-fuchsia-500 to-pink-600" },
+  { Icon: Globe,     title: "Website Scanner",       desc: "Scan any website to extract brand voice, services and offers, then auto-generate ad creatives and campaign copy.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600" },
   { Icon: Monitor,   title: "AI Demo Video Maker",   desc: "Paste any website URL and AI scans it, writes a script, and assembles a narrated demo video — great for sales outreach, onboarding, and social proof.", colSpan: "md:col-span-1", color: "from-indigo-500 to-violet-600" },
+  { Icon: Film,      title: "Movie Maker",           desc: "Multi-scene AI film production: generate scripts, AI images per scene, full voiceover narration, background music, and language dubbing — Enterprise.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600", badge: "Enterprise" },
+  { Icon: Music,     title: "Song Creator",          desc: "Generate original song lyrics in any language, AI voiceover rendering with dubbing into any other language — Enterprise.", colSpan: "md:col-span-1", color: "from-violet-500 to-pink-600", badge: "Enterprise" },
+  { Icon: Sliders,   title: "AI Media Editor",       desc: "Apply AI style presets to any image or video: cinematic grading, anime, pop art, and more. Add captions, music, and export directly to your library.", colSpan: "md:col-span-1", color: "from-sky-500 to-indigo-600", badge: "Enterprise" },
   { Icon: BarChart3, title: "Analytics & ROI",       desc: "Track campaign performance, conversion rates, and revenue.", colSpan: "md:col-span-1", color: "from-red-500 to-rose-600" },
   { Icon: Users,     title: "Brand & Agency Manager", desc: "Manage multiple brands or white-label client workspaces, each with its own voice, colors and connected accounts.", colSpan: "md:col-span-1", color: "from-sky-500 to-cyan-600" },
   { Icon: Zap,       title: "Automation Engine",     desc: "Trigger sequences from form fills or stage changes. Fully automated.", colSpan: "md:col-span-1", color: "from-yellow-500 to-amber-600" },
@@ -33,28 +38,30 @@ const PLANS = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Sarah M.", role: "Marketing Director", text: "digitalstudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
+  { name: "Sarah M.", role: "Marketing Director", text: "MediaStudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
   { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
   { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
 ];
 
 const SITE_KNOWLEDGE = `
-You are Sree, the AI assistant for digitalstudios.app — an AI-powered marketing OS platform.
-PLATFORM OVERVIEW: digitalstudios.app is an all-in-one AI marketing platform covering:
+You are Sree, the AI assistant for MediaStudios.app — an AI-powered marketing OS platform.
+PLATFORM OVERVIEW: MediaStudios.app is an all-in-one AI marketing platform covering:
 - AI Content Studio: generate images, videos, voiceovers, ad creatives and branded captions, then assemble them into ready-to-post content.
+- Ad Creator: AI ad copy + visuals for Instagram, TikTok, Facebook, LinkedIn, YouTube, and Google — post directly to connected accounts.
 - Social Scheduling: connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification and a visual content calendar.
 - Bulk Messaging: Email, SMS and WhatsApp campaigns with real-time delivery tracking.
 - Funnel Builder & Lead Capture: drag-drop funnels, QR codes and forms with automated follow-up sequences.
-- Website Scanner & Ad Creator: scan any website to extract brand voice and auto-generate ad creatives.
-- AI Demo Video Maker: paste any website URL and AI scans it, writes a narration script, and assembles a narrated demo video — useful for sales outreach, onboarding, or social proof.
+- Website Scanner: scan any website to extract brand voice and auto-generate ad creatives.
+- AI Demo Video Maker: paste any website URL and AI scans it, writes a narration script, and assembles a narrated demo video.
 - Analytics & ROI tracking, plus a Brand & Agency Manager for multiple brands or white-label client workspaces.
-PRICING: Starter ($49/mo), Growth ($149/mo), Agency ($399/mo). Free trial: 25 AI generations (about 5 images or 3 short videos), no credit card required. After that, pay-as-you-go AI credits start at $10.
+- Enterprise features: Movie Maker (multi-scene films with AI script + dubbing), Song Creator (lyrics in any language), AI Media Editor.
+PRICING: Starter ($49/mo), Growth ($149/mo), Agency ($399/mo), Enterprise ($999/mo). Free trial: 25 AI generations, no credit card required. Pay-as-you-go AI credits start at $10.
 Always be helpful, concise (under 80 words). If asked about pricing, always mention the free trial.
 `;
 
 function SreeFloatBot({ accentColor }) {
   const [open, setOpen] = React.useState(false);
-  const [msgs, setMsgs] = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with digitalstudios.app. Ask me about features, pricing, or how to get started!" }]);
+  const [msgs, setMsgs] = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with MediaStudios.app. Ask me about features, pricing, or how to get started!" }]);
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [listening, setListening] = React.useState(false);
@@ -144,7 +151,7 @@ function SreeFloatBot({ accentColor }) {
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}99)` }}><Bot size={18} color="white" /></div>
             <div className="flex-1">
               <p className="m-0 text-[13px] font-bold text-white">Sree AI</p>
-              <p className="m-0 text-[10px] text-emerald-400">● digitalstudios.app · Online</p>
+              <p className="m-0 text-[10px] text-emerald-400">● MediaStudios.app · Online</p>
             </div>
             <button onClick={toggleSpeaker} style={{ ...btnBase, width: 30, height: 30, background: speakerOn ? `${ac}22` : "rgba(255,255,255,0.07)" }}>
               {speakerOn ? <Volume2 size={14} color={ac} /> : <VolumeX size={14} color="#666" />}
@@ -299,8 +306,15 @@ export default function Home() {
             {FEATURES.map((f, i) => (
               <div key={f.title} className={`${f.colSpan} p-8 rounded-3xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent hover:border-white/10 transition-colors group relative overflow-hidden`}>
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${f.color} opacity-10 blur-3xl group-hover:opacity-20 transition-opacity`} />
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-6 shadow-lg`}>
-                  <f.Icon className="w-6 h-6 text-white" />
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
+                    <f.Icon className="w-6 h-6 text-white" />
+                  </div>
+                  {f.badge && (
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                      {f.badge}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
                 <p className="text-neutral-400 leading-relaxed">{f.desc}</p>
@@ -382,7 +396,7 @@ export default function Home() {
           <div className="p-12 md:p-20 rounded-[3rem] border border-fuchsia-500/20 bg-gradient-to-b from-fuchsia-500/10 to-transparent relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[100px] pointer-events-none" />
             <h2 className="text-4xl md:text-6xl font-black text-white mb-6 relative z-10 tracking-tight">Ready to 10x your output?</h2>
-            <p className="text-neutral-400 text-lg md:text-xl mb-10 relative z-10 max-w-2xl mx-auto">Join the smartest businesses using digitalstudios.app to automate their marketing and scale revenue.</p>
+            <p className="text-neutral-400 text-lg md:text-xl mb-10 relative z-10 max-w-2xl mx-auto">Join the smartest businesses using MediaStudios.app to automate their marketing and scale revenue.</p>
             <Link to="/free-trial" className="relative z-10 inline-flex items-center gap-2 px-10 py-5 rounded-full bg-white text-black font-black text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]">
               Start Free Trial <ArrowRight className="w-6 h-6" />
             </Link>

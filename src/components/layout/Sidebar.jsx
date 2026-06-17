@@ -120,9 +120,9 @@ export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) 
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-5 border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+        <Link to="/dashboard" className="flex items-center" onClick={() => setMobileOpen(false)}>
           <img src="/logo.png" alt="MediaStudios.app"
-            className="h-10 object-contain"
+            className="w-full max-h-14 object-contain"
             onError={(e) => e.target.style.display="none"} />
         </Link>
       </div>
