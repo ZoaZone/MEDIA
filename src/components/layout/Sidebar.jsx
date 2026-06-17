@@ -121,9 +121,12 @@ export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) 
       {/* Logo */}
       <div className="px-4 pt-5 pb-4 border-b border-sidebar-border">
         <Link to="/dashboard" className="block" onClick={() => setMobileOpen(false)}>
-          <img src="/logo.png" alt="MediaStudios.app"
-            className="w-full max-h-24 object-contain object-left"
-            onError={(e) => e.target.style.display="none"} />
+          {/* Dark bg wrapper — visible in light mode (white sidebar bg), transparent in dark mode */}
+          <div className="dark:bg-transparent bg-[#12121e] dark:p-0 p-2 rounded-xl transition-colors">
+            <img src="/logo.png" alt="MediaStudios.app"
+              className="w-full max-h-24 object-contain object-left"
+              onError={(e) => e.target.style.display="none"} />
+          </div>
         </Link>
       </div>
 
