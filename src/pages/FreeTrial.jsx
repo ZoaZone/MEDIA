@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Upload, User, MapPin, Briefcase, Globe, Tag, FileText, Lock, ArrowRight, Loader2, CheckCircle2, Sparkles, Image, Video, Mail, GitBranch, Share2, BarChart3, Zap, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const M_LOGO = "/favicon.png";
+const M_LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/aa408b540_IMG_8880.jpeg";
 
 const LOCKED_FEATURES = [
   { Icon: Image,    label: "AI Image Generation",     desc: "Create stunning visuals in seconds with AI." },
@@ -73,7 +73,7 @@ export default function FreeTrial() {
           </Link>
           <div className="flex items-center gap-2">
             <img src={M_LOGO} alt="" className="w-7 h-7 rounded-lg" onError={e => e.target.style.display = "none"} />
-            <span className="font-black text-sm bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
+            <span className="font-black text-sm bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">DigitalStudios.app</span>
           </div>
         </div>
 

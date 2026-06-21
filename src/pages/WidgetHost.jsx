@@ -3,11 +3,11 @@ import { Mic, MicOff, Send, X, MessageSquare, Volume2, VolumeX, Bot, Loader2 } f
 
 const SRI_FN     = "https://sreeagent.base44.app/functions/sriChat";
 const TTS_FN     = "https://sreeagent.base44.app/functions/ttsStream";
-const LOGO_URL   = "/favicon.png";
+const LOGO_URL   = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/aa408b540_IMG_8880.jpeg";
 const SITE_COLOR = "#d946ef";
 const SITE_NAME  = "MARKETER";
 const SITE_URL   = "https://digitalstudios.app";
-const SYSTEM_PROMPT = `You are Sree, the AI marketing assistant for MARKETER at digitalstudios.app. MARKETER is an AI marketing OS — generates content, schedules to 10+ social platforms, runs bulk SMS/WhatsApp/email campaigns, builds funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 80 words.`;
+const SYSTEM_PROMPT = `You are Sree, the AI marketing assistant for MARKETER at DigitalStudios.app. MARKETER is an AI marketing OS — generates content, schedules to 10+ social platforms, runs bulk SMS/WhatsApp/email campaigns, builds funnels, captures leads. Plans: Starter $49, Growth $149, Agency $399. Keep answers under 80 words.`;
 
 function getConfig() {
   const p = new URLSearchParams(window.location.search);

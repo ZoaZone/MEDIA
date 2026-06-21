@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
 
-const LOGO = "/logo.png";
+const LOGO = "https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg";
 const BRAND = "MARKETER";
 const TAGLINE = "AI Marketing OS";
 const DASHBOARD = "/Dashboard";
@@ -94,7 +94,7 @@ export default function Login() {
 
         {/* Logo + Brand */}
         <div className="text-center mb-8">
-          <img src={LOGO} alt="MediaStudios.app" className="h-14 object-contain mx-auto mb-1"
+          <img src={LOGO} alt="DigitalStudios.app" className="h-14 object-contain mx-auto mb-1"
             onError={e => { e.target.style.display = "none"; }} />
           <p className="text-xs text-slate-400 mt-0.5">{TAGLINE}</p>
         </div>

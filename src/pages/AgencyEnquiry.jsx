@@ -47,7 +47,7 @@ export default function AgencyEnquiry() {
       {/* Nav */}
       <nav className="border-b border-white/8 px-6 h-16 flex items-center justify-between max-w-7xl mx-auto">
         <Link to="/" className="text-lg font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
-          digitalstudios.app
+          DigitalStudios.app
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/agent-program" className="text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors font-medium">Agent Program →</Link>
@@ -109,7 +109,7 @@ export default function AgencyEnquiry() {
               {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
             </div>
             <p className="text-white/70 text-lg leading-relaxed mb-4 italic max-w-2xl mx-auto">
-              "Switching our entire agency to digitalstudios.app was the best decision we made. Managing 20 clients from one platform, with AI doing the heavy lifting."
+              "Switching our entire agency to DigitalStudios.app was the best decision we made. Managing 20 clients from one platform, with AI doing the heavy lifting."
             </p>
             <p className="text-white font-semibold text-sm">James K. — Agency Owner, 20 Clients</p>
           </div>
@@ -203,7 +203,7 @@ export default function AgencyEnquiry() {
 
       {/* Footer */}
       <footer className="border-t border-white/8 py-8 px-6 text-center">
-        <p className="text-white/30 text-xs">© 2026 AEVOICE · <a href="mailto:agency@aevoice.ai" className="hover:text-white/50">agency@aevoice.ai</a> · <Link to="/" className="hover:text-white/50">digitalstudios.app</Link></p>
+        <p className="text-white/30 text-xs">© 2026 AEVOICE · <a href="mailto:agency@aevoice.ai" className="hover:text-white/50">agency@aevoice.ai</a> · <Link to="/" className="hover:text-white/50">DigitalStudios.app</Link></p>
       </footer>
     </div>
   );

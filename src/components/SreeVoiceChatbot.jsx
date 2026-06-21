@@ -52,7 +52,7 @@ Be warm, clear, and always recommend consulting a healthcare professional for me
     icon: "📣",
     gradient: "from-orange-500 to-pink-600",
     shadow: "shadow-pink-300/50",
-    system: `You are Marketer AI — the AI assistant for digitalstudios.app, an AI marketing platform.
+    system: `You are Marketer AI — the AI assistant for DigitalStudios.app, an AI marketing platform.
 Help users: create campaigns, write ad copy, generate social content, analyze leads, build funnels, and automate outreach.
 Be creative, data-driven, and action-oriented.`,
     quickPrompts: ["Write an Instagram caption", "Analyze my campaign performance", "Generate 5 ad headlines", "Build a lead capture funnel"],

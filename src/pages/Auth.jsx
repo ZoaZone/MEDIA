@@ -121,7 +121,7 @@ export default function Auth() {
 
         {/* Logo + branding */}
         <div className="text-center mb-7">
-          <img src="/logo.png" alt="MediaStudios.app"
+          <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app"
             className="h-14 object-contain mx-auto mb-1"
             onError={e => { e.target.style.display = "none"; }} />
           <p className="text-xs text-slate-400 mt-0.5">AI Marketing &amp; Media Platform</p>

@@ -64,7 +64,7 @@ const FAQS = [
       { q: "How many brands can I create?", a: "Free trial & Starter: 1 brand · Growth: 3 brands · Agency: 10 brands. Admin accounts have no limit." },
       { q: "What happens when I hit my brand limit?", a: "Brand Manager shows a 'Brand limit reached' notice with a Subscribe button linking to Pricing, where you can upgrade for more brand slots." },
       { q: "What is the Agency Portal?", a: "Available on the Agency plan — manage all your client brands/accounts from one place, including white-label client workspaces." },
-      { q: "How does the Affiliate Program work?", a: "Agency-plan users get access to the Affiliate Portal to earn recurring commissions by referring new users to digitalstudios.app." },
+      { q: "How does the Affiliate Program work?", a: "Agency-plan users get access to the Affiliate Portal to earn recurring commissions by referring new users to DigitalStudios.app." },
     ],
   },
   {

@@ -38,14 +38,14 @@ const PLANS = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Sarah M.", role: "Marketing Director", text: "MediaStudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
+  { name: "Sarah M.", role: "Marketing Director", text: "DigitalStudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
   { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
   { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
 ];
 
 const SITE_KNOWLEDGE = `
-You are Sree, the AI assistant for MediaStudios.app — an AI-powered marketing OS platform.
-PLATFORM OVERVIEW: MediaStudios.app is an all-in-one AI marketing platform covering:
+You are Sree, the AI assistant for DigitalStudios.app — an AI-powered marketing OS platform.
+PLATFORM OVERVIEW: DigitalStudios.app is an all-in-one AI marketing platform covering:
 - AI Content Studio: generate images, videos, voiceovers, ad creatives and branded captions, then assemble them into ready-to-post content.
 - Ad Creator: AI ad copy + visuals for Instagram, TikTok, Facebook, LinkedIn, YouTube, and Google — post directly to connected accounts.
 - Social Scheduling: connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification and a visual content calendar.
@@ -61,7 +61,7 @@ Always be helpful, concise (under 80 words). If asked about pricing, always ment
 
 function SreeFloatBot({ accentColor }) {
   const [open, setOpen] = React.useState(false);
-  const [msgs, setMsgs] = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with MediaStudios.app. Ask me about features, pricing, or how to get started!" }]);
+  const [msgs, setMsgs] = React.useState([{ role: "assistant", content: "Hi! I'm Sree 👋 I'm here to help you with DigitalStudios.app. Ask me about features, pricing, or how to get started!" }]);
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [listening, setListening] = React.useState(false);
@@ -151,7 +151,7 @@ function SreeFloatBot({ accentColor }) {
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}99)` }}><Bot size={18} color="white" /></div>
             <div className="flex-1">
               <p className="m-0 text-[13px] font-bold text-white">Sree AI</p>
-              <p className="m-0 text-[10px] text-emerald-400">● MediaStudios.app · Online</p>
+              <p className="m-0 text-[10px] text-emerald-400">● DigitalStudios.app · Online</p>
             </div>
             <button onClick={toggleSpeaker} style={{ ...btnBase, width: 30, height: 30, background: speakerOn ? `${ac}22` : "rgba(255,255,255,0.07)" }}>
               {speakerOn ? <Volume2 size={14} color={ac} /> : <VolumeX size={14} color="#666" />}
@@ -221,7 +221,7 @@ export default function Home() {
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${scrolled ? "border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center">
-            <img src="/logo.png" alt="MediaStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -262,7 +262,7 @@ export default function Home() {
 
           {/* Brand logo — hero */}
           <div className="flex justify-center mb-8">
-            <img src="/logo.png" alt="MediaStudios.app"
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app"
               className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_0_32px_rgba(217,70,239,0.35)]"
               onError={(e) => e.target.style.display="none"} />
           </div>
@@ -404,7 +404,7 @@ export default function Home() {
           <div className="p-12 md:p-20 rounded-[3rem] border border-fuchsia-500/20 bg-gradient-to-b from-fuchsia-500/10 to-transparent relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[100px] pointer-events-none" />
             <h2 className="text-4xl md:text-6xl font-black text-white mb-6 relative z-10 tracking-tight">Ready to 10x your output?</h2>
-            <p className="text-neutral-400 text-lg md:text-xl mb-10 relative z-10 max-w-2xl mx-auto">Join the smartest businesses using MediaStudios.app to automate their marketing and scale revenue.</p>
+            <p className="text-neutral-400 text-lg md:text-xl mb-10 relative z-10 max-w-2xl mx-auto">Join the smartest businesses using DigitalStudios.app to automate their marketing and scale revenue.</p>
             <Link to="/free-trial" className="relative z-10 inline-flex items-center gap-2 px-10 py-5 rounded-full bg-white text-black font-black text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]">
               Start Free Trial <ArrowRight className="w-6 h-6" />
             </Link>
@@ -417,7 +417,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 px-6 bg-neutral-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
-            <img src="/logo.png" alt="MediaStudios.app" className="h-11 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-11 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <div className="flex flex-wrap gap-6 text-sm font-medium items-center justify-center">
             <a href="mailto:care@aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">care@aevoice.ai</a>

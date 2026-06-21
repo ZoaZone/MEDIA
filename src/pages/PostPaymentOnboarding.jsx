@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { CheckCircle2, Globe, Megaphone, Share2, ArrowRight, Loader2, Sparkles } from "lucide-react";
 
-const M_LOGO="/favicon.png";
+const M_LOGO="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/aa408b540_IMG_8880.jpeg";
 const STEPS=[
   {id:1,Icon:Globe,title:"Scan Your Website",desc:"Let AI learn about your business — auto-generates content concepts",color:"from-fuchsia-500 to-purple-600"},
   {id:2,Icon:Share2,title:"Connect Social Accounts",desc:"Link Instagram, TikTok, LinkedIn and more to start scheduling",color:"from-pink-500 to-rose-600"},
   {id:3,Icon:Megaphone,title:"Create Your First Campaign",desc:"Set up your first email, SMS, or WhatsApp campaign in 2 minutes",color:"from-amber-500 to-orange-600"},
-  {id:4,Icon:Sparkles,title:"You're Ready!",desc:"digitalstudios.app is fully set up. Explore the dashboard to get started.",color:"from-emerald-500 to-teal-600"},
+  {id:4,Icon:Sparkles,title:"You're Ready!",desc:"DigitalStudios.app is fully set up. Explore the dashboard to get started.",color:"from-emerald-500 to-teal-600"},
 ];
 
 export default function PostPaymentOnboarding() {
@@ -38,7 +38,7 @@ export default function PostPaymentOnboarding() {
       <div className="w-full max-w-lg">
         <div className="flex items-center justify-center gap-2 mb-8">
           <img src={M_LOGO} alt="" className="w-9 h-9 rounded-xl" onError={e=>e.target.style.display="none"}/>
-          <span className="text-xl font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">digitalstudios.app</span>
+          <span className="text-xl font-black bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">DigitalStudios.app</span>
         </div>
 
         <div className="flex items-center gap-2 mb-8">

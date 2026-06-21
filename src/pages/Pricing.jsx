@@ -119,7 +119,7 @@ export default function Pricing() {
         {/* Header */}
         <div className="text-center mb-14">
           <div className="flex items-center justify-center mb-4">
-            <img src="/logo.png" alt="MediaStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4">Choose your plan</h1>
           <p className="text-white/50 text-lg mb-6">From free trial to full enterprise media production.</p>

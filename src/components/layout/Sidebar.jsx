@@ -123,7 +123,7 @@ export default function Sidebar({ userTier = 0, isAdmin = false, user = null }) 
         <Link to="/dashboard" className="block" onClick={() => setMobileOpen(false)}>
           {/* Dark bg wrapper — visible in light mode (white sidebar bg), transparent in dark mode */}
           <div className="dark:bg-transparent bg-[#12121e] dark:p-0 p-2 rounded-xl transition-colors">
-            <img src="/logo.png" alt="MediaStudios.app"
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app"
               className="w-full max-h-24 object-contain object-left"
               onError={(e) => e.target.style.display="none"} />
           </div>
