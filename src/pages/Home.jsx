@@ -4,8 +4,8 @@ import {
   Sparkles, Megaphone, Share2, GitBranch, UserPlus, Globe,
   BarChart3, Zap, ArrowRight, Check, PlayCircle, Bot, Monitor,
   Menu, X, Send, MessageCircle, Mic, MicOff, Volume2, VolumeX, Wand2, Users,
-  Film, Music, Sliders, PenTool
-} from "lucide-react";
+  Film, Music, Sliders, PenTool } from
+"lucide-react";
 
 const M_LOGO = "/favicon.png";
 
@@ -14,34 +14,34 @@ const M_LOGO = "/favicon.png";
 const DEMO_VIDEO_URL = "https://media.base44.com/videos/public/69c3c2f5acaefc3a7afad5fd/916073a9e_demo-walkthrough.webm";
 
 const FEATURES = [
-  { Icon: Wand2,     title: "AI Content Studio",    desc: "Generate images, videos, voiceovers, ad creatives and branded captions with AI, then assemble them into ready-to-post content in one place.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
-  { Icon: Share2,    title: "Social Scheduling",     desc: "Connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
-  { Icon: GitBranch, title: "Funnel Builder",        desc: "Drag-drop visual funnels. Automated follow-up sequences.", colSpan: "md:col-span-1", color: "from-amber-500 to-orange-600" },
-  { Icon: Megaphone, title: "Bulk Messaging",        desc: "Send thousands of SMS, WhatsApp & Email campaigns with real-time tracking.", colSpan: "md:col-span-2", color: "from-pink-500 to-rose-600" },
-  { Icon: UserPlus,  title: "Lead Capture",          desc: "QR codes, forms, social leads. Score and nurture automatically.", colSpan: "md:col-span-1", color: "from-emerald-500 to-teal-600" },
-  { Icon: PenTool,   title: "Ad Creator",            desc: "AI-generated ad copy and visuals for Instagram, TikTok, Facebook, LinkedIn, YouTube, and Google — post directly to any connected account after review.", colSpan: "md:col-span-1", color: "from-fuchsia-500 to-pink-600" },
-  { Icon: Globe,     title: "Website Scanner",       desc: "Scan any website to extract brand voice, services and offers, then auto-generate ad creatives and campaign copy.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600" },
-  { Icon: Monitor,   title: "AI Demo Video Maker",   desc: "Paste any website URL and AI scans it, writes a script, and assembles a narrated demo video — great for sales outreach, onboarding, and social proof.", colSpan: "md:col-span-1", color: "from-indigo-500 to-violet-600" },
-  { Icon: Film,      title: "Movie Maker",           desc: "Multi-scene AI film production: generate scripts, AI images per scene, full voiceover narration, background music, and language dubbing — Enterprise.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600", badge: "Enterprise" },
-  { Icon: Music,     title: "Song Creator",          desc: "Generate original song lyrics in any language, AI voiceover rendering with dubbing into any other language — Enterprise.", colSpan: "md:col-span-1", color: "from-violet-500 to-pink-600", badge: "Enterprise" },
-  { Icon: Sliders,   title: "AI Media Editor",       desc: "Apply AI style presets to any image or video: cinematic grading, anime, pop art, and more. Add captions, music, and export directly to your library.", colSpan: "md:col-span-1", color: "from-sky-500 to-indigo-600", badge: "Enterprise" },
-  { Icon: BarChart3, title: "Analytics & ROI",       desc: "Track campaign performance, conversion rates, and revenue.", colSpan: "md:col-span-1", color: "from-red-500 to-rose-600" },
-  { Icon: Users,     title: "Brand & Agency Manager", desc: "Manage multiple brands or white-label client workspaces, each with its own voice, colors and connected accounts.", colSpan: "md:col-span-1", color: "from-sky-500 to-cyan-600" },
-  { Icon: Zap,       title: "Automation Engine",     desc: "Trigger sequences from form fills or stage changes. Fully automated.", colSpan: "md:col-span-1", color: "from-yellow-500 to-amber-600" },
-];
+{ Icon: Wand2, title: "AI Content Studio", desc: "Generate images, videos, voiceovers, ad creatives and branded captions with AI, then assemble them into ready-to-post content in one place.", colSpan: "md:col-span-2", color: "from-fuchsia-500 to-purple-600" },
+{ Icon: Share2, title: "Social Scheduling", desc: "Connect Instagram, TikTok, LinkedIn, YouTube, Facebook & Pinterest with live connection verification. Visual content calendar.", colSpan: "md:col-span-1", color: "from-violet-500 to-indigo-600" },
+{ Icon: GitBranch, title: "Funnel Builder", desc: "Drag-drop visual funnels. Automated follow-up sequences.", colSpan: "md:col-span-1", color: "from-amber-500 to-orange-600" },
+{ Icon: Megaphone, title: "Bulk Messaging", desc: "Send thousands of SMS, WhatsApp & Email campaigns with real-time tracking.", colSpan: "md:col-span-2", color: "from-pink-500 to-rose-600" },
+{ Icon: UserPlus, title: "Lead Capture", desc: "QR codes, forms, social leads. Score and nurture automatically.", colSpan: "md:col-span-1", color: "from-emerald-500 to-teal-600" },
+{ Icon: PenTool, title: "Ad Creator", desc: "AI-generated ad copy and visuals for Instagram, TikTok, Facebook, LinkedIn, YouTube, and Google — post directly to any connected account after review.", colSpan: "md:col-span-1", color: "from-fuchsia-500 to-pink-600" },
+{ Icon: Globe, title: "Website Scanner", desc: "Scan any website to extract brand voice, services and offers, then auto-generate ad creatives and campaign copy.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600" },
+{ Icon: Monitor, title: "AI Demo Video Maker", desc: "Paste any website URL and AI scans it, writes a script, and assembles a narrated demo video — great for sales outreach, onboarding, and social proof.", colSpan: "md:col-span-1", color: "from-indigo-500 to-violet-600" },
+{ Icon: Film, title: "Movie Maker", desc: "Multi-scene AI film production: generate scripts, AI images per scene, full voiceover narration, background music, and language dubbing — Enterprise.", colSpan: "md:col-span-1", color: "from-cyan-500 to-blue-600", badge: "Enterprise" },
+{ Icon: Music, title: "Song Creator", desc: "Generate original song lyrics in any language, AI voiceover rendering with dubbing into any other language — Enterprise.", colSpan: "md:col-span-1", color: "from-violet-500 to-pink-600", badge: "Enterprise" },
+{ Icon: Sliders, title: "AI Media Editor", desc: "Apply AI style presets to any image or video: cinematic grading, anime, pop art, and more. Add captions, music, and export directly to your library.", colSpan: "md:col-span-1", color: "from-sky-500 to-indigo-600", badge: "Enterprise" },
+{ Icon: BarChart3, title: "Analytics & ROI", desc: "Track campaign performance, conversion rates, and revenue.", colSpan: "md:col-span-1", color: "from-red-500 to-rose-600" },
+{ Icon: Users, title: "Brand & Agency Manager", desc: "Manage multiple brands or white-label client workspaces, each with its own voice, colors and connected accounts.", colSpan: "md:col-span-1", color: "from-sky-500 to-cyan-600" },
+{ Icon: Zap, title: "Automation Engine", desc: "Trigger sequences from form fills or stage changes. Fully automated.", colSpan: "md:col-span-1", color: "from-yellow-500 to-amber-600" }];
+
 
 const PLANS = [
-  { name: "Starter",    price: 49,  desc: "Small businesses",     features: ["1 Client Workspace", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"],                                                              popular: false },
-  { name: "Growth",     price: 149, desc: "Growing teams",        features: ["5 Client Workspaces", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"],                                   popular: true  },
-  { name: "Agency",     price: 399, desc: "Full agencies",        features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "BYO messaging (zero platform fee)", "White-label & API access"],            popular: false },
-  { name: "Enterprise", price: 999, desc: "Studios & enterprises",features: ["25 brands / unlimited clients", "Unlimited AI generations", "🎬 Movie Maker with dubbing", "🎵 Song Creator (any language)", "🎞 AI Media Editor", "Dedicated success manager"], popular: false, enterprise: true },
-];
+{ name: "Starter", price: 49, desc: "Small businesses", features: ["1 Client Workspace", "500 AI generations/mo", "1,000 messages/mo", "3 social accounts", "Basic funnels"], popular: false },
+{ name: "Growth", price: 149, desc: "Growing teams", features: ["5 Client Workspaces", "2,500 AI generations/mo", "10,000 messages/mo", "15 social accounts", "Website scanner", "Priority support"], popular: true },
+{ name: "Agency", price: 399, desc: "Full agencies", features: ["Unlimited clients", "10,000 AI generations/mo", "50,000 messages/mo", "Unlimited socials", "BYO messaging (zero platform fee)", "White-label & API access"], popular: false },
+{ name: "Enterprise", price: 999, desc: "Studios & enterprises", features: ["25 brands / unlimited clients", "Unlimited AI generations", "🎬 Movie Maker with dubbing", "🎵 Song Creator (any language)", "🎞 AI Media Editor", "Dedicated success manager"], popular: false, enterprise: true }];
+
 
 const TESTIMONIALS = [
-  { name: "Sarah M.", role: "Marketing Director", text: "DigitalStudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
-  { name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
-  { name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 },
-];
+{ name: "Sarah M.", role: "Marketing Director", text: "DigitalStudios.app replaced 6 different tools. Our campaign output tripled in the first month.", rating: 5 },
+{ name: "James K.", role: "Agency Owner", text: "Managing 20 clients from one dashboard. The funnel builder alone saved us 10 hours a week.", rating: 5 },
+{ name: "Priya R.", role: "E-commerce Founder", text: "The AI media generation is insane. Professional ad creatives in minutes, not days.", rating: 5 }];
+
 
 const SITE_KNOWLEDGE = `
 You are Sree, the AI assistant for DigitalStudios.app — an AI-powered marketing OS platform.
@@ -71,16 +71,16 @@ function SreeFloatBot({ accentColor }) {
   const recogRef = React.useRef(null);
   const ac = accentColor;
 
-  React.useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
-  React.useEffect(() => { if (!open && msgs.length > 1) setUnread(u => u + 1); }, [msgs]);
-  React.useEffect(() => { if (open) setUnread(0); }, [open]);
-  React.useEffect(() => { if (!open) window.speechSynthesis?.cancel(); }, [open]);
+  React.useEffect(() => {endRef.current?.scrollIntoView({ behavior: "smooth" });}, [msgs]);
+  React.useEffect(() => {if (!open && msgs.length > 1) setUnread((u) => u + 1);}, [msgs]);
+  React.useEffect(() => {if (open) setUnread(0);}, [open]);
+  React.useEffect(() => {if (!open) window.speechSynthesis?.cancel();}, [open]);
 
   const speak = (text) => {
     if (!speakerOn || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 1.0; utt.pitch = 1.0; utt.lang = "en-IN";
+    utt.rate = 1.0;utt.pitch = 1.0;utt.lang = "en-IN";
     window.speechSynthesis.speak(utt);
   };
 
@@ -105,24 +105,24 @@ function SreeFloatBot({ accentColor }) {
       });
       const data = await res.json();
       const reply = data?.reply || data?.content || "How can I help you today?";
-      setMsgs(h => [...h, { role: "assistant", content: reply }]);
+      setMsgs((h) => [...h, { role: "assistant", content: reply }]);
       speak(reply);
     } catch {
-      setMsgs(h => [...h, { role: "assistant", content: "Something went wrong. Please try again!" }]);
+      setMsgs((h) => [...h, { role: "assistant", content: "Something went wrong. Please try again!" }]);
     }
     setLoading(false);
   };
 
   const startVoice = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { alert("Voice input requires Chrome browser."); return; }
+    if (!SR) {alert("Voice input requires Chrome browser.");return;}
     window.speechSynthesis?.cancel();
-    if (listening) { recogRef.current?.stop(); return; }
+    if (listening) {recogRef.current?.stop();return;}
     const r = new SR();
     recogRef.current = r;
-    r.lang = "en-IN"; r.continuous = false; r.interimResults = false;
+    r.lang = "en-IN";r.continuous = false;r.interimResults = false;
     r.onstart = () => setListening(true);
-    r.onresult = (e) => { setListening(false); sendMsg(e.results[0][0].transcript); };
+    r.onresult = (e) => {setListening(false);sendMsg(e.results[0][0].transcript);};
     r.onerror = () => setListening(false);
     r.onend = () => setListening(false);
     r.start();
@@ -140,13 +140,13 @@ function SreeFloatBot({ accentColor }) {
         .glass-panel { background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
       `}</style>
 
-      <button onClick={() => setOpen(o => !o)} className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_6px_28px_rgba(217,70,239,0.3)]" style={{ background: `linear-gradient(135deg, ${ac}, ${ac}bb)` }}>
+      <button onClick={() => setOpen((o) => !o)} className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_6px_28px_rgba(217,70,239,0.3)]" style={{ background: `linear-gradient(135deg, ${ac}, ${ac}bb)` }}>
         {open ? <X size={22} color="white" /> : <MessageCircle size={24} color="white" />}
         {!open && unread > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">{unread}</span>}
       </button>
 
-      {open && (
-        <div className="fixed bottom-[90px] right-6 z-[9998] w-[360px] max-h-[520px] h-[80vh] rounded-2xl flex flex-col glass-panel shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+      {open &&
+      <div className="fixed bottom-[90px] right-6 z-[9998] w-[360px] max-h-[520px] h-[80vh] rounded-2xl flex flex-col glass-panel shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center gap-3 p-3 border-b border-white/10 bg-white/5 shrink-0">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}99)` }}><Bot size={18} color="white" /></div>
             <div className="flex-1">
@@ -159,27 +159,27 @@ function SreeFloatBot({ accentColor }) {
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2 min-h-0">
-            {msgs.map((m, i) => (
-              <div key={i} className={`flex gap-2 items-end ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            {msgs.map((m, i) =>
+          <div key={i} className={`flex gap-2 items-end ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 {m.role === "assistant" && <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}88)` }}><Bot size={12} color="white" /></div>}
                 <div className={`max-w-[82%] p-3 text-[13px] leading-relaxed ${m.role === "user" ? "rounded-[14px_14px_3px_14px] text-white" : "rounded-[3px_14px_14px_14px] bg-white/10 text-slate-200"}`} style={m.role === "user" ? { background: `linear-gradient(135deg,${ac},${ac}bb)` } : {}}>
                   {m.content}
                 </div>
               </div>
-            ))}
-            {loading && (
-              <div className="flex gap-2 items-end">
+          )}
+            {loading &&
+          <div className="flex gap-2 items-end">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${ac},${ac}88)` }}><Bot size={12} color="white" /></div>
                 <div className="p-3 rounded-[3px_14px_14px_14px] bg-white/10 flex gap-1 items-center">
-                  {[0,1,2].map(j => <span key={j} className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block animate-pulse" style={{ animationDelay: `${j*0.15}s` }} />)}
+                  {[0, 1, 2].map((j) => <span key={j} className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block animate-pulse" style={{ animationDelay: `${j * 0.15}s` }} />)}
                 </div>
               </div>
-            )}
-            {msgs.length === 1 && (
-              <div className="flex flex-col gap-1.5 mt-1">
-                {QUICK.map(q => <button key={q} onClick={() => sendMsg(q)} className="p-2 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-[11px] text-left hover:bg-white/10 transition-colors">{q}</button>)}
+          }
+            {msgs.length === 1 &&
+          <div className="flex flex-col gap-1.5 mt-1">
+                {QUICK.map((q) => <button key={q} onClick={() => sendMsg(q)} className="p-2 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-[11px] text-left hover:bg-white/10 transition-colors">{q}</button>)}
               </div>
-            )}
+          }
             <div ref={endRef} />
           </div>
 
@@ -190,15 +190,15 @@ function SreeFloatBot({ accentColor }) {
                 {listening ? <MicOff size={16} color="white" /> : <Mic size={16} color="white" />}
               </button>
             </div>
-            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } }} placeholder={listening ? "Listening..." : "Type or speak..."} disabled={loading} className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-[13px] outline-none focus:border-fuchsia-500/50 transition-colors" />
-            <button onClick={() => sendMsg()} disabled={!input.trim() || loading} style={{ ...btnBase, background: `linear-gradient(135deg,${ac},${ac}bb)`, opacity: (!input.trim() || loading) ? 0.4 : 1 }}>
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => {if (e.key === "Enter") {e.preventDefault();sendMsg();}}} placeholder={listening ? "Listening..." : "Type or speak..."} disabled={loading} className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-[13px] outline-none focus:border-fuchsia-500/50 transition-colors" />
+            <button onClick={() => sendMsg()} disabled={!input.trim() || loading} style={{ ...btnBase, background: `linear-gradient(135deg,${ac},${ac}bb)`, opacity: !input.trim() || loading ? 0.4 : 1 }}>
               <Send size={15} color="white" />
             </button>
           </div>
         </div>
-      )}
-    </>
-  );
+      }
+    </>);
+
 }
 
 export default function Home() {
@@ -214,14 +214,14 @@ export default function Home() {
   }, []);
 
   return (
-  <>
+    <>
     <div className="min-h-screen bg-[#050505] text-white selection:bg-fuchsia-500/30">
 
       {/* NAV */}
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${scrolled ? "border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center">
-            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-12 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-12 object-contain hidden" onError={(e) => e.target.style.display = "none"} />
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -239,17 +239,17 @@ export default function Home() {
           </button>
         </div>
         
-        {mobileOpen && (
+        {mobileOpen &&
           <div className="md:hidden bg-[#0a0a0a] border-b border-white/10 px-6 py-6 space-y-4 absolute w-full animate-in slide-in-from-top-4">
-            {["features","pricing","testimonials"].map(s => (
-              <a key={s} href={`#${s}`} className="block text-base font-medium text-white/80 py-2 capitalize" onClick={() => setMobileOpen(false)}>{s}</a>
-            ))}
+            {["features", "pricing", "testimonials"].map((s) =>
+            <a key={s} href={`#${s}`} className="block text-base font-medium text-white/80 py-2 capitalize" onClick={() => setMobileOpen(false)}>{s}</a>
+            )}
             <div className="pt-4 flex flex-col gap-3">
               <Link to="/login" className="block text-center py-3 rounded-xl border border-white/10 font-bold">Sign In</Link>
               <Link to="/free-trial" className="block text-center py-3 rounded-xl bg-white text-black font-bold">Start Free Trial</Link>
             </div>
           </div>
-        )}
+          }
       </nav>
 
       {/* HERO */}
@@ -264,7 +264,7 @@ export default function Home() {
           <div className="flex justify-center mb-8">
             <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app"
               className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_0_32px_rgba(217,70,239,0.35)]"
-              onError={(e) => e.target.style.display="none"} />
+              onError={(e) => e.target.style.display = "none"} />
           </div>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-xs font-bold mb-8 uppercase tracking-widest">
@@ -294,9 +294,9 @@ export default function Home() {
           <div className="pt-10 border-t border-white/5">
             <p className="text-xs text-neutral-500 font-medium uppercase tracking-widest mb-6">Replaces your entire stack</p>
             <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-              {["Instagram", "TikTok", "LinkedIn", "YouTube", "Mailchimp", "Twilio"].map(p => (
+              {["Instagram", "TikTok", "LinkedIn", "YouTube", "Mailchimp", "Twilio"].map((p) =>
                 <span key={p} className="text-sm md:text-base font-bold text-white">{p}</span>
-              ))}
+                )}
             </div>
           </div>
         </div>
@@ -311,23 +311,23 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
+            {FEATURES.map((f, i) =>
               <div key={f.title} className={`${f.colSpan} p-8 rounded-3xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent hover:border-white/10 transition-colors group relative overflow-hidden`}>
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${f.color} opacity-10 blur-3xl group-hover:opacity-20 transition-opacity`} />
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
                     <f.Icon className="w-6 h-6 text-white" />
                   </div>
-                  {f.badge && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                  {f.badge &&
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
                       {f.badge}
                     </span>
-                  )}
+                  }
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
                 <p className="text-neutral-400 leading-relaxed">{f.desc}</p>
               </div>
-            ))}
+              )}
           </div>
         </div>
       </section>
@@ -354,22 +354,22 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
-            {PLANS.map((plan) => (
+            {PLANS.map((plan) =>
               <div key={plan.name} className={`relative rounded-3xl p-7 border backdrop-blur-xl transition-transform hover:-translate-y-1 flex flex-col ${
-                plan.enterprise ? "border-cyan-500/40 bg-gradient-to-b from-cyan-500/8 to-blue-500/5"
-                : plan.popular  ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-[0_0_40px_rgba(217,70,239,0.15)]"
-                : "border-white/10 bg-white/5"
-              }`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg tracking-wide uppercase whitespace-nowrap">
+              plan.enterprise ? "border-cyan-500/40 bg-gradient-to-b from-cyan-500/8 to-blue-500/5" :
+              plan.popular ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-[0_0_40px_rgba(217,70,239,0.15)]" :
+              "border-white/10 bg-white/5"}`
+              }>
+                {plan.popular &&
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 rounded-full text-xs font-bold text-white shadow-lg tracking-wide uppercase whitespace-nowrap">
                     Most Popular
                   </div>
-                )}
-                {plan.enterprise && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-xs font-bold text-white shadow-lg whitespace-nowrap">
+                }
+                {plan.enterprise &&
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-xs font-bold text-white shadow-lg whitespace-nowrap">
                     🎬 Media Hub
                   </div>
-                )}
+                }
                 <div className="mb-5 mt-1">
                   <h3 className="text-xl font-black text-white mb-1">{plan.name}</h3>
                   <p className="text-neutral-400 text-xs">{plan.desc}</p>
@@ -379,21 +379,21 @@ export default function Home() {
                   <span className="text-neutral-500 font-medium text-sm">/mo</span>
                 </div>
                 <div className="space-y-3 mb-8 flex-1">
-                  {plan.features.map(f => (
-                    <div key={f} className="flex items-start gap-2.5 text-xs text-neutral-300 font-medium">
+                  {plan.features.map((f) =>
+                  <div key={f} className="flex items-start gap-2.5 text-xs text-neutral-300 font-medium">
                       <Check className={`w-4 h-4 shrink-0 mt-0.5 ${plan.enterprise ? "text-cyan-400" : plan.popular ? "text-fuchsia-400" : "text-neutral-500"}`} /> {f}
                     </div>
-                  ))}
+                  )}
                 </div>
                 <Link to="/pricing" className={`block text-center py-3 rounded-xl font-bold text-sm transition-all ${
-                  plan.enterprise ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90"
-                  : plan.popular  ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg"
-                  : "bg-white/10 hover:bg-white/20 text-white"
-                }`}>
+                plan.enterprise ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90" :
+                plan.popular ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg" :
+                "bg-white/10 hover:bg-white/20 text-white"}`
+                }>
                   {plan.enterprise ? "Contact Sales" : "Get Started"}
                 </Link>
               </div>
-            ))}
+              )}
           </div>
         </div>
       </section>
@@ -417,7 +417,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 px-6 bg-neutral-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
-            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-11 object-contain" onError={(e) => e.target.style.display="none"} />
+            <img src="https://media.base44.com/images/public/69c3c2f5acaefc3a7afad5fd/db61ca772_IMG_8881.jpg" alt="DigitalStudios.app" className="h-11 object-contain" onError={(e) => e.target.style.display = "none"} />
           </div>
           <div className="flex flex-wrap gap-6 text-sm font-medium items-center justify-center">
             <a href="mailto:care@aevoice.ai" className="text-neutral-400 hover:text-white transition-colors">care@aevoice.ai</a>
@@ -431,7 +431,7 @@ export default function Home() {
       </footer>
 
       {/* CINEMATIC WATCH DEMO MODAL */}
-      {showDemo && (
+      {showDemo &&
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
           <div className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-6xl overflow-hidden shadow-[0_0_100px_rgba(217,70,239,0.15)] relative flex flex-col">
             
@@ -440,7 +440,7 @@ export default function Home() {
               <h3 className="font-bold text-white flex items-center gap-3 text-lg">
                 <Sparkles className="w-5 h-5 text-fuchsia-500" /> Aevoice Marketing OS
               </h3>
-              <button 
+              <button
                 onClick={() => setShowDemo(false)}
                 className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white backdrop-blur-md">
                 <X className="w-5 h-5" />
@@ -448,27 +448,27 @@ export default function Home() {
             </div>
 
             {/* Video Container */}
-            {DEMO_VIDEO_URL ? (
-              <div className="aspect-video w-full bg-black relative pt-[72px]">
+            {DEMO_VIDEO_URL ?
+            <div className="aspect-video w-full bg-black relative pt-[72px]">
                 <video
-                  src={DEMO_VIDEO_URL}
-                  title="Aevoice Marketing OS Demo"
-                  className="w-full h-full object-contain"
-                  controls
-                  autoPlay
-                  playsInline>
+                src={DEMO_VIDEO_URL}
+                title="Aevoice Marketing OS Demo"
+                className="w-full h-full object-contain"
+                controls
+                autoPlay
+                playsInline>
                 </video>
-              </div>
-            ) : (
-              /* Fallback product tour — shown until a real recorded demo video is added above */
-              <div className="w-full bg-neutral-950 relative pt-[88px] pb-8 px-6 md:px-12 max-h-[80vh] overflow-y-auto">
+              </div> : (
+
+            /* Fallback product tour — shown until a real recorded demo video is added above */
+            <div className="w-full bg-neutral-950 relative pt-[88px] pb-8 px-6 md:px-12 max-h-[80vh] overflow-y-auto">
                 <div className="max-w-2xl mb-10 animate-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">Automate your entire growth engine.</h2>
                   <p className="text-fuchsia-400 font-medium mt-4 text-base md:text-xl">AI content generation, seamless scheduling, and data-driven insights — all in one place.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                  {FEATURES.map((f) => (
-                    <div key={f.title} className={`${f.colSpan} p-6 rounded-2xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent relative overflow-hidden`}>
+                  {FEATURES.map((f) =>
+                <div key={f.title} className={`${f.colSpan} p-6 rounded-2xl border border-white/5 bg-gradient-to-b from-white/5 to-transparent relative overflow-hidden`}>
                       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${f.color} opacity-10 blur-3xl`} />
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg`}>
                         <f.Icon className="w-5 h-5 text-white" />
@@ -476,21 +476,21 @@ export default function Home() {
                       <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
                       <p className="text-neutral-400 text-sm leading-relaxed">{f.desc}</p>
                     </div>
-                  ))}
+                )}
                 </div>
                 <div className="mt-10 text-center">
                   <Link to="/free-trial" onClick={() => setShowDemo(false)} className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white text-black font-black text-base hover:scale-105 transition-transform">
                     Start Free Trial <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>
-              </div>
-            )}
+              </div>)
+            }
           </div>
         </div>
-      )}
+        }
 
     </div>
     <SreeFloatBot accentColor="#d946ef" />
-    </>
-  );
+    </>);
+
 }
