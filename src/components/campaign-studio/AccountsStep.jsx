@@ -1,8 +1,7 @@
 import { Share2, CheckCircle2 } from "lucide-react";
+import { connectionBadge } from "@/utils/socialAccountStatus";
 
-const isAccountConnected = (a) => a?.status === "active" || a?.status === "connected";
-
-export default function AccountsStep({ campaign, setCampaign, brandAccounts, navigate }) {
+export default function AccountsStep({ campaign, setCampaign, brandAccounts, navigate, verifiedStatus = {} }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <h2 className="text-xl font-bold text-white">Target Social Accounts</h2>
@@ -16,7 +15,7 @@ export default function AccountsStep({ campaign, setCampaign, brandAccounts, nav
         <div className="grid sm:grid-cols-3 gap-4">
           {brandAccounts.map(a => {
             const selected = campaign.selected_accounts.includes(a.id);
-            const connected = isAccountConnected(a);
+            const badge = connectionBadge(verifiedStatus[a.id]?.status || a.status);
             return (
               <button key={a.id} onClick={() => setCampaign(p => ({
                 ...p, selected_accounts: selected ? p.selected_accounts.filter(id => id !== a.id) : [...p.selected_accounts, a.id],
@@ -24,9 +23,9 @@ export default function AccountsStep({ campaign, setCampaign, brandAccounts, nav
                 <div>
                   <p className="font-bold text-white">{a.account_name}</p>
                   <p className="text-xs text-neutral-500 capitalize">{a.platform}</p>
-                  <p className={`text-[10px] font-bold mt-1.5 flex items-center gap-1 ${connected ? "text-emerald-400" : "text-amber-400"}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-emerald-400" : "bg-amber-400"}`} />
-                    {connected ? "Connected" : "Not connected"}
+                  <p className={`text-[10px] font-bold mt-1.5 flex items-center gap-1 ${badge.text}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                    {badge.label}
                   </p>
                 </div>
                 {selected && <CheckCircle2 className="w-5 h-5 text-fuchsia-500 shrink-0" />}

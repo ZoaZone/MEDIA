@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useOutletContext, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -10,14 +10,7 @@ import {
   Hash, Users, List, Zap, Check
 } from "lucide-react";
 import AddAccountModal from "@/components/social-hub/AddAccountModal";
-
-// ── Account connection status ────────────────────────────────────────────────
-const ACCOUNT_STATUS = {
-  active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Connected" },
-  connected:    { dot: "bg-emerald-400", text: "text-emerald-400", label: "Connected" },
-  expired:      { dot: "bg-amber-400",   text: "text-amber-400",   label: "Token expired" },
-  disconnected: { dot: "bg-red-400",     text: "text-red-400",     label: "Disconnected" },
-};
+import { connectionBadge, verifyAccounts } from "@/utils/socialAccountStatus";
 
 // ── Platform config ──────────────────────────────────────────────────────────
 const PLATFORMS = [
@@ -144,6 +137,28 @@ export default function SocialHub() {
     queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 50),
     enabled: !!user?.email,
   });
+
+  // Real connection status per account — the stored `status` field is only
+  // ever corrected when something explicitly re-tests it, so it can sit
+  // stale (e.g. a "credentials"-only account showing "active" indefinitely).
+  // Verifies each newly-seen account once per load; ids already present
+  // (including the "checking" placeholder) are skipped on later re-renders.
+  const [verifiedStatus, setVerifiedStatus] = useState({});
+  useEffect(() => {
+    const unverified = accounts.filter(a => !(a.id in verifiedStatus));
+    if (!unverified.length) return;
+    setVerifiedStatus(prev => {
+      const next = { ...prev };
+      unverified.forEach(a => { next[a.id] = { status: "checking", message: "", verified: false }; });
+      return next;
+    });
+    let cancelled = false;
+    verifyAccounts(unverified, (id, result) => {
+      if (!cancelled) setVerifiedStatus(prev => ({ ...prev, [id]: result }));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts]);
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["scheduled_posts", user?.email],
     queryFn: () => base44.entities.ScheduledPost.filter(mine(user), "-scheduled_at", 200),
@@ -305,7 +320,12 @@ HASHTAGS:
   const testConnection = async (accountId) => {
     setTestingId(accountId);
     try {
-      await base44.functions.invoke("testSocialConnection", { account_id: accountId });
+      const res = await base44.functions.invoke("testSocialConnection", { account_id: accountId });
+      const data = res?.data ?? res;
+      // Update the badge immediately from this response — invalidating the
+      // query alone wouldn't re-trigger verification, since this account id
+      // is already marked as checked.
+      setVerifiedStatus(prev => ({ ...prev, [accountId]: { status: data?.status, message: data?.message || "", verified: true } }));
       qc.invalidateQueries(["social_accounts"]);
     } catch (e) {
       alert("Connection test failed: " + e.message);
@@ -410,7 +430,7 @@ HASHTAGS:
               <div className="flex flex-wrap gap-2">
                 {accounts.map(acc => {
                   const plt = PLATFORMS.find(p => p.id === acc.platform);
-                  const st = ACCOUNT_STATUS[acc.status] || ACCOUNT_STATUS.disconnected;
+                  const st = connectionBadge(verifiedStatus[acc.id]?.status || acc.status);
                   const isTesting = testingId === acc.id;
                   return (
                     <div key={acc.id} title={acc.description || st.label} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${plt?.bg || "bg-muted border-border text-foreground"}`}>
@@ -505,6 +525,9 @@ HASHTAGS:
                           </span>
                         )}
                       </div>
+                      {post.status === "failed" && post.failure_reason && (
+                        <p className="text-xs text-red-400 mt-1">{post.failure_reason}</p>
+                      )}
                       {publishError[post.id] && (
                         <p className="text-xs text-red-400 mt-1">{publishError[post.id]}</p>
                       )}

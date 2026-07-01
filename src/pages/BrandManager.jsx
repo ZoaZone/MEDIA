@@ -7,7 +7,7 @@ import { mine } from "../utils/scope";
 import {
   Building2, Plus, Pencil, Trash2,
   CheckCircle2, X, Loader2, Zap, Upload, ImagePlus, Share2, ChevronRight, ChevronDown,
-  Eye, EyeOff, RefreshCw
+  RefreshCw
 } from "lucide-react";
 
 const ACCOUNT_STATUS = {
@@ -70,7 +70,6 @@ export default function BrandManager() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
-  const [showPassword, setShowPassword] = useState({});
 
   const emptyForm = {
     name:"", tagline:"", industry:"", logo_url:"", logo_file_url:"",
@@ -80,7 +79,7 @@ export default function BrandManager() {
   const [form, setForm] = useState(emptyForm);
   const [logoUrlError, setLogoUrlError] = useState("");
 
-  const [newAccount, setNewAccount] = useState({ platform:"instagram", account_name:"", username:"", password:"", access_token:"", connection_method:"credentials" });
+  const [newAccount, setNewAccount] = useState({ platform:"instagram", account_name:"", username:"", access_token:"", connection_method:"api" });
   const [addingAccount, setAddingAccount] = useState(false);
   const [savingAccount, setSavingAccount] = useState(false);
   const [testingId, setTestingId] = useState(null);
@@ -165,7 +164,7 @@ export default function BrandManager() {
         await base44.functions.invoke("testSocialConnection", { account_id: created.id });
       } catch (_e) { /* verification is best-effort */ }
       qc.invalidateQueries(["social_accounts"]);
-      setNewAccount({ platform:"instagram", account_name:"", username:"", password:"", access_token:"", connection_method:"credentials" });
+      setNewAccount({ platform:"instagram", account_name:"", username:"", access_token:"", connection_method:"api" });
       setAddingAccount(false);
     } catch (e) { alert(e.message); }
     setSavingAccount(false);
@@ -333,8 +332,8 @@ export default function BrandManager() {
                             </button>
                           ))}
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[{id:"credentials",icon:"🔑",l:"Login"},{id:"api",icon:"🔌",l:"API Token"},{id:"webhook",icon:"🔗",l:"Webhook"}].map(m => (
+                        <div className="grid grid-cols-2 gap-2">
+                          {[{id:"api",icon:"🔌",l:"API Token"},{id:"webhook",icon:"🔗",l:"Webhook"}].map(m => (
                             <button key={m.id} onClick={() => setNewAccount(a => ({ ...a, connection_method: m.id }))}
                               className={`py-2 rounded-xl border text-center text-xs font-bold transition ${newAccount.connection_method === m.id ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-white/10 text-muted-foreground hover:border-white/20"}`}>
                               {m.icon} {m.l}
@@ -351,19 +350,11 @@ export default function BrandManager() {
                             <input value={newAccount.username} onChange={e => setNewAccount(a => ({ ...a, username: e.target.value }))} placeholder="@yourhandle" className={inp} />
                           </div>
                         </div>
-                        {newAccount.connection_method === "credentials" && (
-                          <div className="relative">
-                            <label className={lbl}>Password</label>
-                            <input type={showPassword[currentBrandId] ? "text" : "password"} value={newAccount.password} onChange={e => setNewAccount(a => ({ ...a, password: e.target.value }))} placeholder="Account password" className={inp + " pr-10"} />
-                            <button type="button" onClick={() => setShowPassword(p => ({ ...p, [currentBrandId]: !p[currentBrandId] }))} className="absolute right-3 bottom-2.5 text-muted-foreground">
-                              {showPassword[currentBrandId] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        )}
                         {newAccount.connection_method === "api" && (
                           <div>
                             <label className={lbl}>Access Token</label>
                             <input type="password" value={newAccount.access_token} onChange={e => setNewAccount(a => ({ ...a, access_token: e.target.value }))} placeholder="Paste API token" className={inp} />
+                            <p className="text-[10px] text-muted-foreground mt-1">Required — none of these platforms accept a username/password for posting.</p>
                           </div>
                         )}
                         <div className="flex gap-2 justify-end">

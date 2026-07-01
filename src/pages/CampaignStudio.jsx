@@ -10,6 +10,7 @@ import {
 import { generateText, generateImage, uploadFile, generateVoiceover, splitScriptIntoScenes, shortenCaption } from "@/utils/aiClient";
 import { assembleVideo, compositeLogo } from "@/utils/videoAssembler";
 import { computeOccurrenceDates } from "@/utils/recurrence";
+import { verifyOneAccount, verifyAccounts, isAuthorizedStatus } from "@/utils/socialAccountStatus";
 import { PLATFORM_META } from "@/components/campaign-studio/platformMeta";
 import BrandStep from "@/components/campaign-studio/BrandStep";
 import AccountsStep from "@/components/campaign-studio/AccountsStep";
@@ -42,8 +43,6 @@ const CONTENT_TYPE_TO_ASSET_TYPE = {
 // Platforms ScheduledPost.platform actually accepts (whatsapp/email accounts
 // are valid SocialAccounts but go through Social Hub's bulk-send tools instead)
 const SCHEDULABLE_PLATFORMS = new Set(["instagram", "facebook", "tiktok", "linkedin", "youtube", "twitter_x", "pinterest"]);
-
-const isAccountConnected = (a) => a?.status === "active" || a?.status === "connected";
 
 const WALKTHROUGH_STEPS = [
   { icon: Building2, title: "1. Brand", desc: "Pick which brand this campaign represents — its name, voice and colors feed everything else." },
@@ -123,6 +122,29 @@ export default function CampaignStudio() {
 
   const selectedBrand = brands.find(b => b.id === campaign.brand_id);
   const brandAccounts = allAccounts.filter(a => a.brand_id === campaign.brand_id);
+
+  // Real connection status per account, keyed by id — `status` on the entity
+  // itself is stale until someone re-tests it (see socialAccountStatus.js),
+  // so the Accounts step badge and publish gating both read from this
+  // instead of trusting the stored field. Verifies each newly-seen account
+  // exactly once per load: ids already present here (including a "checking"
+  // placeholder) are skipped on subsequent effect runs.
+  const [verifiedStatus, setVerifiedStatus] = useState({});
+  useEffect(() => {
+    const unverified = allAccounts.filter(a => !(a.id in verifiedStatus));
+    if (!unverified.length) return;
+    setVerifiedStatus(prev => {
+      const next = { ...prev };
+      unverified.forEach(a => { next[a.id] = { status: "checking", message: "", verified: false }; });
+      return next;
+    });
+    let cancelled = false;
+    verifyAccounts(unverified, (id, result) => {
+      if (!cancelled) setVerifiedStatus(prev => ({ ...prev, [id]: result }));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAccounts]);
 
   // ── Real AI content generation (was a raw fetch to /api/functions) ──
   const generateContent = async () => {
@@ -452,12 +474,28 @@ Topic: ${topic}`;
       const accounts = brandAccounts.filter(a => campaign.selected_accounts.includes(a.id));
       const report = [];
 
+      // Re-verify every selected account's real connection status right
+      // before publishing — not the stored field, which can be stale — so a
+      // never-actually-authorized or since-expired account is caught here
+      // instead of failing silently downstream. Also updates the Accounts
+      // step badges for consistency.
+      setPublishStatus("Checking account connections...");
+      const freshChecks = {};
+      await Promise.all(accounts.map(async (acc) => {
+        freshChecks[acc.id] = await verifyOneAccount(acc);
+      }));
+      setVerifiedStatus(prev => ({ ...prev, ...freshChecks }));
+      setPublishStatus("");
+      const isAuthorized = (acc) => isAuthorizedStatus(freshChecks[acc.id]?.status || acc.status);
+      const authFailureMessage = (acc) =>
+        freshChecks[acc.id]?.message || "Not connected — reconnect this account in Brand Manager.";
+
       if (campaign.postNow) {
         // Post Now: create a draft post per eligible account, then publish each immediately.
         const toPublish = [];
         for (const acc of accounts) {
-          if (!isAccountConnected(acc)) {
-            report.push({ account_name: acc.account_name, platform: acc.platform, status: "skipped", message: "Not connected — reconnect this account in Brand Manager." });
+          if (!isAuthorized(acc)) {
+            report.push({ account_name: acc.account_name, platform: acc.platform, status: "skipped", message: authFailureMessage(acc) });
           } else if (!SCHEDULABLE_PLATFORMS.has(acc.platform)) {
             report.push({ account_name: acc.account_name, platform: acc.platform, status: "skipped", message: "Use the Email / WhatsApp tools in Social Hub for this channel." });
           } else {
@@ -495,8 +533,8 @@ Topic: ${topic}`;
         setPublishStatus("");
       } else {
         for (const acc of accounts) {
-          if (!isAccountConnected(acc)) {
-            report.push({ account_name: acc.account_name, platform: acc.platform, status: "skipped", message: "Not connected — reconnect this account in Brand Manager." });
+          if (!isAuthorized(acc)) {
+            report.push({ account_name: acc.account_name, platform: acc.platform, status: "skipped", message: authFailureMessage(acc) });
             continue;
           }
           if (!SCHEDULABLE_PLATFORMS.has(acc.platform)) {
@@ -633,7 +671,7 @@ Topic: ${topic}`;
 
         {step === 0 && <BrandStep campaign={campaign} setCampaign={setCampaign} brands={brands} navigate={navigate} />}
 
-        {step === 1 && <AccountsStep campaign={campaign} setCampaign={setCampaign} brandAccounts={brandAccounts} navigate={navigate} />}
+        {step === 1 && <AccountsStep campaign={campaign} setCampaign={setCampaign} brandAccounts={brandAccounts} navigate={navigate} verifiedStatus={verifiedStatus} />}
 
         {step === 2 && (
           <ContentStep campaign={campaign} setCampaign={setCampaign} selectedBrand={selectedBrand}

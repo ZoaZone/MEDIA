@@ -9,11 +9,10 @@
     },
     "account_name":      { "type": "string" },
     "username":          { "type": "string" },
-    "password":          { "type": "string" },
     "access_token":      { "type": "string" },
     "refresh_token":     { "type": "string" },
     "page_id":           { "type": "string" },
-    "connection_method": { "type": "string", "enum": ["credentials","api","webhook"], "default": "credentials" },
+    "connection_method": { "type": "string", "enum": ["credentials","api","webhook"], "default": "api", "description": "\"credentials\" (raw username/password) is kept only for reading pre-existing records — none of these platforms' posting APIs accept it, so it's no longer offered when creating a new account." },
     "status":            { "type": "string", "enum": ["active","connected","disconnected","expired"], "default": "active" },
     "connected_at":      { "type": "string", "format": "date-time" },
     "description":       { "type": "string", "maxLength": 1000 }

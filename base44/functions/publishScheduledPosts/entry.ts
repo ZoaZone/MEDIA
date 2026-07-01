@@ -212,12 +212,13 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Update post record. Note: ScheduledPost has no `error_message` field —
-      // writing one would make this update throw and leave the post stuck as
-      // "draft" with the real failure reason only visible in `results` below.
+      // Persist the failure reason onto the post itself (not just returned
+      // in `results` below) so it's visible after the fact — in Social Hub,
+      // after a page reload — not just in this call's transient response.
       await base44.entities.ScheduledPost.update(post.id, {
         status,
         post_url: postUrl || null,
+        failure_reason: status === 'failed' ? errorMsg : '',
       });
 
       if (status === 'posted') published++;

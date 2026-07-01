@@ -16,7 +16,6 @@ const emptyForm = {
   platform: "instagram",
   account_name: "",
   username: "",
-  password: "",
   access_token: "",
   connection_method: "api",
 };
@@ -45,19 +44,15 @@ export default function AddAccountModal({ open, onClose, platforms, onSaved }) {
   const save = async () => {
     setError("");
     if (!form.account_name.trim()) { setError("Account / display name is required."); return; }
-    if (!isDecorative) {
-      if (form.connection_method === "api" && !form.access_token.trim()) { setError("An access token is required for an API connection."); return; }
-      if (form.connection_method === "credentials" && (!form.username.trim() || !form.password.trim())) { setError("Username and password are required for a login connection."); return; }
-    }
+    if (!isDecorative && !form.access_token.trim()) { setError("An access token is required for an API connection."); return; }
     setSaving(true);
     try {
       const created = await base44.entities.SocialAccount.create({
         platform: form.platform,
         account_name: form.account_name.trim(),
         username: form.username || "",
-        password: form.password || "",
         access_token: form.access_token || "",
-        connection_method: isDecorative ? "webhook" : form.connection_method,
+        connection_method: isDecorative ? "webhook" : "api",
         status: "disconnected",
       });
       try {
@@ -123,52 +118,20 @@ export default function AddAccountModal({ open, onClose, platforms, onSaved }) {
               </div>
             </div>
           ) : (
-            <>
-              {/* Connection method */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Connection Method</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[{ id: "api", label: "API Access Token" }, { id: "credentials", label: "Username & Password" }].map(m => (
-                    <button key={m.id} onClick={() => setForm(f => ({ ...f, connection_method: m.id }))}
-                      className={`py-2 rounded-xl border text-center text-xs font-bold transition ${
-                        form.connection_method === m.id ? "border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-300" : "border-border text-muted-foreground hover:border-foreground/20"
-                      }`}>
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Access Token *</label>
+              {tokenMeta?.help && <p className="text-[10px] text-muted-foreground mb-1">{tokenMeta.help}</p>}
+              <div className="relative">
+                <input type={showSecret ? "text" : "password"} value={form.access_token}
+                  onChange={e => setForm(f => ({ ...f, access_token: e.target.value }))}
+                  placeholder={tokenMeta?.ph || "Your access token"}
+                  className="w-full px-3 py-2.5 pr-10 rounded-xl bg-background border border-border text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50" />
+                <button type="button" onClick={() => setShowSecret(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-
-              {form.connection_method === "api" ? (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">Access Token *</label>
-                  {tokenMeta?.help && <p className="text-[10px] text-muted-foreground mb-1">{tokenMeta.help}</p>}
-                  <div className="relative">
-                    <input type={showSecret ? "text" : "password"} value={form.access_token}
-                      onChange={e => setForm(f => ({ ...f, access_token: e.target.value }))}
-                      placeholder={tokenMeta?.ph || "Your access token"}
-                      className="w-full px-3 py-2.5 pr-10 rounded-xl bg-background border border-border text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50" />
-                    <button type="button" onClick={() => setShowSecret(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">Password *</label>
-                  <div className="relative">
-                    <input type={showSecret ? "text" : "password"} value={form.password}
-                      onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                      placeholder="Account password"
-                      className="w-full px-3 py-2.5 pr-10 rounded-xl bg-background border border-border text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:border-fuchsia-500/50" />
-                    <button type="button" onClick={() => setShowSecret(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-amber-400/80">Login-based connections can't be used to publish via API — connect with an access token instead if you want to schedule posts.</p>
-                </div>
-              )}
-            </>
+              <p className="text-[10px] text-muted-foreground">An API access token is required — none of these platforms accept a username/password for posting.</p>
+            </div>
           )}
 
           {error && <p className="text-xs text-red-400">{error}</p>}

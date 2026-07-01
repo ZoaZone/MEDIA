@@ -51,13 +51,11 @@ function SocialAccountsTab() {
     platform: "instagram",
     account_name: "",
     username: "",
-    password: "",
     access_token: "",
     refresh_token: "",
     page_id: "",
-    connection_method: "api", // credentials | api | webhook
+    connection_method: "api",
   });
-  const [showPassword, setShowPassword] = useState(false);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ["social_accounts", user?.email],
@@ -68,8 +66,7 @@ function SocialAccountsTab() {
   const selectedPlatform = SOCIAL_PLATFORMS.find(p => p.id === form.platform);
 
   const handleAdd = async () => {
-    if (form.connection_method === "api" && !form.access_token.trim()) { alert("Access token is required for API connection"); return; }
-    if (form.connection_method === "credentials" && (!form.username.trim() || !form.password.trim())) { alert("Username and password are required"); return; }
+    if (!form.access_token.trim()) { alert("Access token is required for API connection"); return; }
     if (!form.account_name.trim()) { alert("Account / display name is required"); return; }
     setSaving(true);
     try {
@@ -77,11 +74,10 @@ function SocialAccountsTab() {
         platform: form.platform,
         account_name: form.account_name,
         username: form.username || "",
-        password: form.password || "",
         access_token: form.access_token || "",
         refresh_token: form.refresh_token || "",
         page_id: form.page_id || "",
-        connection_method: form.connection_method || "api",
+        connection_method: "api",
         status: "disconnected",
       });
       try {
@@ -89,7 +85,7 @@ function SocialAccountsTab() {
       } catch (_e) { /* verification is best-effort */ }
       qc.invalidateQueries(["social_accounts"]);
       setAdding(false);
-      setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" });
+      setForm({ platform: "instagram", account_name: "", username: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" });
     } catch (e) {
       alert("Failed to save account: " + e.message);
     }
@@ -313,7 +309,7 @@ function SocialAccountsTab() {
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => { setAdding(false); setForm({ platform: "instagram", account_name: "", username: "", password: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" }); }}
+              onClick={() => { setAdding(false); setForm({ platform: "instagram", account_name: "", username: "", access_token: "", refresh_token: "", page_id: "", connection_method: "api" }); }}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               Cancel

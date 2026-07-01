@@ -54,6 +54,10 @@
     "post_url": {
       "type": "string"
     },
+    "failure_reason": {
+      "type": "string",
+      "description": "Why this post failed to publish (set by publishScheduledPosts), so the reason is visible after the fact and not just in transient logs."
+    },
     "engagement_likes": {
       "type": "number",
       "default": 0
