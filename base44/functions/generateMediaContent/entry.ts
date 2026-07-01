@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { type, platform, tone, prompt, client_id, website_scan_id } = await req.json();
+    const { type, platform, tone, prompt, client_id, website_scan_id, model } = await req.json();
     if (!type || !prompt) {
       return Response.json({ error: 'type and prompt are required' }, { status: 400 });
     }
@@ -140,24 +140,45 @@ Deno.serve(async (req) => {
       }
     }
 
+    // If the caller asked for a specific model (account-wide default from
+    // Settings, or a per-generation override) and it fails or is rejected,
+    // retry once on the platform's own default model before falling all the
+    // way through to the hardcoded last-resort fallback. `modelFallback`
+    // tells the frontend this happened, so it can show a notice instead of
+    // silently swapping models on the user.
+    let modelFallback = false;
     if (!result) {
       try {
-        result = await base44.integrations.Core.InvokeLLM({ prompt: finalPromptWithGuardrail });
+        const invokeParams: { prompt: string; model?: string } = { prompt: finalPromptWithGuardrail };
+        if (model) invokeParams.model = model;
+        result = await base44.integrations.Core.InvokeLLM(invokeParams);
       } catch (llmError) {
-        const openaiKey = Deno.env.get("OPENAI_API_KEY");
-        if (!openaiKey) throw llmError;
-        const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: finalPrompt }],
-          }),
-        });
-        if (!openaiRes.ok) throw new Error(`OpenAI fallback failed: ${await openaiRes.text()}`);
-        const openaiData = await openaiRes.json();
-        result = openaiData.choices[0].message.content;
+        if (model) {
+          try {
+            result = await base44.integrations.Core.InvokeLLM({ prompt: finalPromptWithGuardrail });
+            modelFallback = true;
+          } catch (_retryError) {
+            result = undefined;
+          }
+        }
       }
+    }
+
+    if (!result) {
+      const openaiKey = Deno.env.get("OPENAI_API_KEY");
+      if (!openaiKey) throw new Error("Base44 built-in AI is unavailable and no fallback is configured.");
+      if (model) modelFallback = true;
+      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: finalPrompt }],
+        }),
+      });
+      if (!openaiRes.ok) throw new Error(`OpenAI fallback failed: ${await openaiRes.text()}`);
+      const openaiData = await openaiRes.json();
+      result = openaiData.choices[0].message.content;
     }
 
     // Persist to ContentAsset
@@ -176,7 +197,7 @@ Deno.serve(async (req) => {
     } catch (_) { /* non-fatal */ }
 
     return Response.json(
-      { success: true, asset_id: asset?.id, content: result, text: result },
+      { success: true, asset_id: asset?.id, content: result, text: result, model_fallback: modelFallback },
       { headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   } catch (error: any) {

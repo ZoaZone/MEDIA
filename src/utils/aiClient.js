@@ -1,12 +1,49 @@
 import { base44 } from "@/api/base44Client";
 
+// Short-lived cache for the account-wide "preferred platform model" setting
+// (Settings > AI Provider), so generateText() doesn't fetch the user record
+// on every single call. Refreshed at most once per PLATFORM_MODEL_CACHE_MS.
+let platformModelCache = { value: "", fetchedAt: 0 };
+const PLATFORM_MODEL_CACHE_MS = 30_000;
+
+async function getDefaultPlatformModel() {
+  if (Date.now() - platformModelCache.fetchedAt < PLATFORM_MODEL_CACHE_MS) {
+    return platformModelCache.value;
+  }
+  try {
+    const user = await base44.auth.me();
+    const value = user?.settings?.api_keys?.platform_model || "";
+    platformModelCache = { value, fetchedAt: Date.now() };
+    return value;
+  } catch (_e) {
+    return platformModelCache.value;
+  }
+}
+
 /**
  * Generate marketing/script text via the platform's AI content engine.
  * Mirrors the call pattern already used in AdCreator, SocialHub, WebsiteScanner.
+ *
+ * `model` optionally overrides the account-wide default (Settings > AI
+ * Provider > Preferred platform model) for this one call — e.g. a
+ * per-generation picker. If omitted, the account-wide default is used
+ * automatically. Only applies on the platform-default generation path; a
+ * configured "bring your own LLM" key takes priority over both.
+ *
+ * `onModelFallback`, if provided, is called (no args) when the requested
+ * model wasn't available and the backend silently fell back to the
+ * platform's own default model, so the caller can surface a notice instead
+ * of leaving the user unaware their chosen model wasn't actually used.
  */
-export async function generateText({ type = "caption", prompt, platform = "General", tone = "Professional" }) {
-  const res = await base44.functions.invoke("generateMediaContent", { type, prompt, platform, tone });
-  const raw = res?.data?.text ?? res?.text ?? res?.data?.content ?? res?.content ?? "";
+export async function generateText({ type = "caption", prompt, platform = "General", tone = "Professional", model, onModelFallback }) {
+  const chosenModel = model || (await getDefaultPlatformModel());
+  const res = await base44.functions.invoke("generateMediaContent", {
+    type, prompt, platform, tone,
+    model: chosenModel || undefined,
+  });
+  const data = res?.data ?? res;
+  if (chosenModel && data?.model_fallback) onModelFallback?.();
+  const raw = data?.text ?? data?.content ?? "";
   return typeof raw === "string" ? raw : JSON.stringify(raw);
 }
 

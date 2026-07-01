@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { mine } from "@/utils/scope";
+import { LLM_MODELS } from "@/utils/llmModels";
 
 const ACCOUNT_STATUS = {
   active:       { dot: "bg-emerald-400", text: "text-emerald-400", label: "Active" },
@@ -343,6 +344,7 @@ export default function SettingsPage() {
     sendgrid_key: "", twilio_sid: "", twilio_token: "", twilio_phone: "",
     whatsapp_token: "", whatsapp_phone_id: "", stripe_key: "",
     llm_provider: "", llm_api_key: "", llm_model: "", llm_base_url: "",
+    platform_model: "",
   });
   const [profile, setProfile] = useState({ full_name: "", business_name: "", website: "", logo_url: "", timezone: "Asia/Calcutta" });
   const [notifs, setNotifs] = useState({ email_campaigns: true, email_leads: true, email_social: false, weekly_report: true });
@@ -491,6 +493,23 @@ export default function SettingsPage() {
             <p><strong className="text-foreground">1. Base44 built-in AI</strong> — the default for every plan, no setup needed.</p>
             <p><strong className="text-foreground">2. Platform backup model</strong> — used automatically if the built-in AI is briefly unavailable.</p>
             <p><strong className="text-foreground">3. Your own LLM key</strong> (below) — when set, your requests use it first, before falling back to 1 and 2.</p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-1">Preferred platform model</label>
+            <p className="text-xs text-muted-foreground mb-1.5">
+              Applies to Base44's built-in AI (step 1 above) — has no effect if you've set your own LLM key below. If your
+              preferred model is briefly unavailable, generation automatically falls back to the platform default and
+              shows a notice.
+            </p>
+            <select
+              value={keys.platform_model || ""}
+              onChange={e => setKeys(p => ({ ...p, platform_model: e.target.value }))}
+              className="w-full px-3 py-2.5 rounded-xl bg-card border border-border text-sm focus:outline-none focus:border-fuchsia-500/50 transition-colors"
+            >
+              <option value="">Platform default (auto)</option>
+              {LLM_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
           </div>
 
           {userTier < 2 && !isAdmin ? (

@@ -3,7 +3,9 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { mine } from "@/utils/scope";
-import { PenTool, Wand2, Copy, CheckCircle2, Loader2, Download, Send, Check, AlertCircle, Share2 } from "lucide-react";
+import { generateText } from "@/utils/aiClient";
+import { LLM_MODELS } from "@/utils/llmModels";
+import { PenTool, Wand2, Copy, CheckCircle2, Loader2, Download, Send, Check, AlertCircle, Share2, Info } from "lucide-react";
 
 const PLATFORMS=[{v:"instagram",l:"Instagram",formats:["Story","Reel","Feed Post","Carousel"]},{v:"facebook",l:"Facebook",formats:["News Feed","Story","Video Ad","Carousel"]},{v:"tiktok",l:"TikTok",formats:["Video Ad","TopView"]},{v:"linkedin",l:"LinkedIn",formats:["Sponsored Post","Message Ad","Banner"]},{v:"youtube",l:"YouTube",formats:["Pre-roll","Bumper","Display"]},{v:"google",l:"Google",formats:["Search Ad","Display","Responsive"]}];
 const OBJECTIVES=["Brand Awareness","Lead Generation","Sales/Conversion","App Install","Website Traffic","Engagement"];
@@ -17,6 +19,8 @@ export default function AdCreator() {
   const [adResult, setAdResult] = useState(null);
   const [imageResult, setImageResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("");
+  const [modelFallbackNotice, setModelFallbackNotice] = useState(false);
   const [imgLoading, setImgLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -38,11 +42,18 @@ export default function AdCreator() {
 
   const generate = async () => {
     if (!form.product) { alert("Describe your product/service"); return; }
-    setLoading(true); setAdResult(null); setPostSuccess(false); setPostError("");
+    setLoading(true); setAdResult(null); setPostSuccess(false); setPostError(""); setModelFallbackNotice(false);
     try {
       const prompt = `Create a ${form.tone.toLowerCase()} ${form.format} ad for ${selectedPlatform?.l} for: ${form.product}. Target: ${form.audience||"general"}. Objective: ${form.objective}. CTA: ${form.cta}. Format as:\nHEADLINE: ...\nBODY: ...\nCTA: ...\nHASHTAGS: ...`;
-      const res = await base44.functions.invoke("generateMediaContent",{type:"ad_copy",platform:selectedPlatform?.l,tone:form.tone,prompt});
-      setAdResult(res?.data?.text||res?.text||"Ad copy appears here.");
+      const text = await generateText({
+        type: "ad_copy",
+        platform: selectedPlatform?.l,
+        tone: form.tone,
+        prompt,
+        model: selectedModel || undefined,
+        onModelFallback: () => setModelFallbackNotice(true),
+      });
+      setAdResult(text || "Ad copy appears here.");
     } catch(e) { setAdResult("Error: "+e.message); }
     setLoading(false);
   };
@@ -130,10 +141,21 @@ export default function AdCreator() {
             <input value={form.product} onChange={e=>setForm(p=>({...p,product:e.target.value}))} placeholder="e.g. AI voice assistant for restaurants" className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"/></div>
             <div className="space-y-1.5 col-span-2"><label className="text-xs font-medium text-muted-foreground">Target Audience</label>
             <input value={form.audience} onChange={e=>setForm(p=>({...p,audience:e.target.value}))} placeholder="e.g. Restaurant owners 30-55, US" className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"/></div>
+            <div className="space-y-1.5 col-span-2"><label className="text-xs font-medium text-muted-foreground">Model (optional)</label>
+            <select value={selectedModel} onChange={e=>setSelectedModel(e.target.value)} className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none">
+              <option value="">Account default</option>
+              {LLM_MODELS.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}
+            </select></div>
           </div>
           <button onClick={generate} disabled={loading||!form.product} className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg">
             {loading?<><Loader2 className="w-4 h-4 animate-spin"/>Writing…</>:<><Wand2 className="w-4 h-4"/>Generate Ad Copy</>}
           </button>
+          {modelFallbackNotice && (
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs">
+              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              The selected model wasn't available for this generation — used the platform default instead.
+            </div>
+          )}
         </div>
 
         {/* Creative output */}
