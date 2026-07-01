@@ -16,10 +16,10 @@ function generateOTP() {
 function buildEmailHtml(otp, purpose) {
   const title = purpose === 'signup' ? 'Verify your email' : purpose === 'reset' ? 'Reset your password' : 'Your sign-in code';
   const body = purpose === 'signup'
-    ? 'Use the code below to verify your email and complete your DigitalStudios registration.'
+    ? 'Use the code below to verify your email and complete your media.aevoice.ai registration.'
     : purpose === 'reset'
     ? 'Use the code below to reset your password. If you didn\'t request this, ignore this email.'
-    : 'Use the code below to sign in to your DigitalStudios account.';
+    : 'Use the code below to sign in to your media.aevoice.ai account.';
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -27,8 +27,8 @@ function buildEmailHtml(otp, purpose) {
 <tr><td align="center">
 <table width="480" cellpadding="0" cellspacing="0" style="background:#111118;border-radius:20px;border:1px solid #1f1f2e;overflow:hidden;max-width:480px;width:100%;">
   <tr><td style="background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);padding:28px 36px;text-align:center;">
-    <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">DigitalStudios</div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:3px;">AI Marketing & Media Platform · digitalstudios.app</div>
+    <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">media.aevoice.ai</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:3px;">AI Marketing & Media Platform · media.aevoice.ai</div>
   </td></tr>
   <tr><td style="padding:36px;">
     <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 10px;">${title}</h2>
@@ -40,7 +40,7 @@ function buildEmailHtml(otp, purpose) {
     <p style="color:#444;font-size:12px;margin:0;">If you didn't request this, you can safely ignore this email.</p>
   </td></tr>
   <tr><td style="background:#0d0d14;padding:16px 36px;border-top:1px solid #1f1f2e;text-align:center;">
-    <p style="color:#444;font-size:11px;margin:0;">© 2026 DigitalStudios · <a href="https://digitalstudios.app" style="color:#555;text-decoration:none;">digitalstudios.app</a></p>
+    <p style="color:#444;font-size:11px;margin:0;">© 2026 media.aevoice.ai · <a href="https://media.aevoice.ai" style="color:#555;text-decoration:none;">media.aevoice.ai</a></p>
   </td></tr>
 </table>
 </td></tr></table>
@@ -92,16 +92,16 @@ Deno.serve(async (req) => {
       }
 
       // Send email
-      const subjects = { login: 'Your DigitalStudios sign-in code', signup: 'Verify your DigitalStudios email', reset: 'Reset your DigitalStudios password' };
-      const subject = subjects[purpose] || 'Your DigitalStudios verification code';
+      const subjects = { login: 'Your media.aevoice.ai sign-in code', signup: 'Verify your media.aevoice.ai email', reset: 'Reset your media.aevoice.ai password' };
+      const subject = subjects[purpose] || 'Your media.aevoice.ai verification code';
       const html = buildEmailHtml(otp, purpose);
-      const text = `Your ${purpose === 'reset' ? 'password reset' : 'verification'} code for DigitalStudios is: ${otp}\n\nValid for 10 minutes.\n\n— The DigitalStudios Team\nhttps://digitalstudios.app`;
+      const text = `Your ${purpose === 'reset' ? 'password reset' : 'verification'} code for media.aevoice.ai is: ${otp}\n\nValid for 10 minutes.\n\n— The media.aevoice.ai Team\nhttps://media.aevoice.ai`;
 
       let provider = 'none';
       const resendKey = Deno.env.get('RESEND_API_KEY');
       if (resendKey) {
-        const fromEmail = (Deno.env.get('RESEND_FROM_EMAIL') || 'hello@digitalstudios.app').trim();
-        const fromField = fromEmail.includes('<') ? fromEmail : `digitalstudios.app <${fromEmail}>`;
+        const fromEmail = (Deno.env.get('RESEND_FROM_EMAIL') || 'hello@media.aevoice.ai').trim();
+        const fromField = fromEmail.includes('<') ? fromEmail : `media.aevoice.ai <${fromEmail}>`;
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -113,13 +113,13 @@ Deno.serve(async (req) => {
       if (provider === 'none') {
         const sgKey = Deno.env.get('SENDGRID_API_KEY');
         if (sgKey) {
-          const sgFrom = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@aevoice.ai';
+          const sgFrom = Deno.env.get('SENDGRID_FROM_EMAIL') || 'care@media.aevoice.ai';
           const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
             method: 'POST',
             headers: { Authorization: `Bearer ${sgKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               personalizations: [{ to: [{ email }] }],
-              from: { email: sgFrom, name: 'digitalstudios.app' },
+              from: { email: sgFrom, name: 'media.aevoice.ai' },
               subject,
               content: [{ type: 'text/plain', value: text }, { type: 'text/html', value: html }],
             }),
