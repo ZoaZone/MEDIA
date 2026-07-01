@@ -29,6 +29,13 @@ const BRAND_VOICES = [
   "Empathetic & Supportive","Educational & Informative"
 ];
 
+// blob:/data: URLs only resolve inside the browser tab/session that created
+// them (or bloat the record, for data:) — they must never be persisted as a
+// brand's logo_url, or every later render (a different session, a page
+// reload, a video compile) gets a dead reference and the logo silently fails
+// to load.
+const isTemporaryBrowserUrl = (url) => /^(blob|data):/i.test((url || "").trim());
+
 const PLATFORMS = [
   { id:"instagram", label:"Instagram", color:"from-pink-500 to-rose-600" },
   { id:"facebook",  label:"Facebook",  color:"from-blue-500 to-blue-700" },
@@ -71,6 +78,7 @@ export default function BrandManager() {
     brand_voice:"", target_audience:"", website:"", email:"", phone:""
   };
   const [form, setForm] = useState(emptyForm);
+  const [logoUrlError, setLogoUrlError] = useState("");
 
   const [newAccount, setNewAccount] = useState({ platform:"instagram", account_name:"", username:"", password:"", access_token:"", connection_method:"credentials" });
   const [addingAccount, setAddingAccount] = useState(false);
@@ -94,13 +102,13 @@ export default function BrandManager() {
   const tierName = TIER_NAMES[userTier] || "Free Trial";
 
   const openNew = () => {
-    setEditing(null); setForm(emptyForm); setFormStep(0); setShowForm(true);
+    setEditing(null); setForm(emptyForm); setFormStep(0); setShowForm(true); setLogoUrlError("");
   };
 
   const openEdit = (b) => {
     setEditing(b.id);
     setForm({ name:b.name||"", tagline:b.tagline||"", industry:b.industry||"", logo_url:b.logo_url||"", logo_file_url:b.logo_file_url||"", primary_color:b.primary_color||"#7c3aed", secondary_color:b.secondary_color||"#a855f7", accent_color:b.accent_color||"#ec4899", font_family:b.font_family||"Arial", brand_voice:b.brand_voice||"", target_audience:b.target_audience||"", website:b.website||"", email:b.email||"", phone:b.phone||"" });
-    setFormStep(0); setShowForm(true);
+    setFormStep(0); setShowForm(true); setLogoUrlError("");
   };
 
   // FIXED: Converted to use standard native Base44 core upload payload schemas
@@ -122,6 +130,13 @@ export default function BrandManager() {
 
   const save = async () => {
     if (!form.name.trim()) { alert("Brand name is required"); return; }
+    // Defense in depth: never persist a blob:/data: logo URL, even if one
+    // slipped into form state some other way — it would be dead in every
+    // future session (including video compiles) the moment it's saved.
+    if (isTemporaryBrowserUrl(form.logo_url) || isTemporaryBrowserUrl(form.logo_file_url)) {
+      alert("The logo URL isn't a real link (it looks like a temporary browser address). Please use Upload Logo, or paste a real https:// link.");
+      return;
+    }
     setSaving(true);
     try {
       if (editing) {
@@ -448,7 +463,16 @@ export default function BrandManager() {
                         </button>
                         <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={e => uploadLogo(e.target.files?.[0])} />
                         <p className="text-xs text-slate-500">Or paste URL below</p>
-                        <input value={form.logo_url} onChange={e => setForm(f => ({ ...f, logo_url: e.target.value }))} placeholder="https://..." className={inp} />
+                        <input value={form.logo_url} onChange={e => {
+                          const value = e.target.value;
+                          if (isTemporaryBrowserUrl(value)) {
+                            setLogoUrlError("That's a temporary browser address, not a real link — it won't work once this page reloads or in a compiled video. Use Upload Logo instead, or paste a real https:// link.");
+                            return;
+                          }
+                          setLogoUrlError("");
+                          setForm(f => ({ ...f, logo_url: value }));
+                        }} placeholder="https://..." className={inp} />
+                        {logoUrlError && <p className="text-xs text-red-400 mt-1">{logoUrlError}</p>}
                       </div>
                     </div>
                   </div>

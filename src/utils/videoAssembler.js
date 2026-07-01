@@ -45,6 +45,16 @@ async function loadImage(src, { onWarning, label = "Image" } = {}) {
   try {
     return await loadImageOnce(src);
   } catch (_e) {
+    // blob:/data: URLs point at in-memory data scoped to the browser tab
+    // that created them (or, for data:, are already inline) — there's no
+    // server behind them, so a server-side proxy fetch can never help and
+    // would just fail again after a wasted round-trip. This is a stale
+    // reference (e.g. a blob: URL saved somewhere in a previous session),
+    // not a CORS problem — warn accordingly and skip the retry.
+    if (/^(blob|data):/i.test(src)) {
+      onWarning?.(`${label} failed to load and was skipped — it's a temporary browser address (${src.slice(0, 16)}…) that has expired, not a real hosted link. Re-upload it: ${src}`);
+      return null;
+    }
     const proxied = await proxyImageAsObjectUrl(src);
     if (proxied) {
       try {

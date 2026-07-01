@@ -42,7 +42,10 @@ export default function FreeTrial() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setProfile(p => ({ ...p, logo_url: file_url }));
     } catch {
-      setProfile(p => ({ ...p, logo_url: URL.createObjectURL(file) }));
+      // Don't fall back to a blob: preview — it only resolves in this tab
+      // and would leave logo_url pointing at a dead reference everywhere
+      // else (the lead email, any later session).
+      alert("Logo upload failed. Please try again.");
     }
     setUploading(false);
   };
