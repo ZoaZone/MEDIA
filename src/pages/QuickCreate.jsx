@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { generateText, generateImage, generateVoiceover, uploadFile, splitScriptIntoScenes, shortenCaption } from "@/utils/aiClient";
 import { assembleVideo, VIDEO_RATIOS } from "@/utils/videoAssembler";
-import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic, Sparkles, Paperclip, X, RefreshCw } from "lucide-react";
+import { Wand2, Image as ImageIcon, Video, Loader2, Download, Save, CheckCircle2, AlertTriangle, Mic, Sparkles, Paperclip, X, RefreshCw, Music, Tag } from "lucide-react";
 
 // Pixel-dimension hints passed to the image generator per aspect ratio.
 const RATIO_DIMENSIONS = { "1:1": "1024x1024", "16:9": "1792x1024", "9:16": "1024x1792", "4:5": "1024x1280" };
@@ -26,6 +26,12 @@ export default function QuickCreate() {
   const [attachments, setAttachments] = useState([]); // [{ url, name }]
   const [uploadingFile, setUploadingFile] = useState(false);
   const [expandingPrompt, setExpandingPrompt] = useState(false);
+  const [musicUrl, setMusicUrl] = useState("");
+  const [musicName, setMusicName] = useState("");
+  const [uploadingMusic, setUploadingMusic] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [warnings, setWarnings] = useState([]);
 
   const expandPrompt = async () => {
     if (!prompt.trim()) { setError("Enter a brief description first."); return; }
@@ -59,9 +65,33 @@ export default function QuickCreate() {
 
   const removeAttachment = (idx) => setAttachments(prev => prev.filter((_, i) => i !== idx));
 
+  const handleMusicUpload = async (file) => {
+    if (!file) return;
+    setUploadingMusic(true);
+    setError("");
+    try {
+      const url = await uploadFile(file);
+      if (url) { setMusicUrl(url); setMusicName(file.name); }
+      else setError("Music upload failed.");
+    } catch (e) { setError(e?.message || "Music upload failed."); }
+    setUploadingMusic(false);
+  };
+
+  const handleLogoUpload = async (file) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    setError("");
+    try {
+      const url = await uploadFile(file);
+      if (url) setLogoUrl(url);
+      else setError("Logo upload failed.");
+    } catch (e) { setError(e?.message || "Logo upload failed."); }
+    setUploadingLogo(false);
+  };
+
   const generate = async () => {
     if (!prompt.trim()) { setError("Describe what you'd like to create."); return; }
-    setError(""); setUpgradeRequired(false); setResult(null); setSaved(false); setGenerating(true); setProgress(0); setStatusMsg("");
+    setError(""); setWarnings([]); setUpgradeRequired(false); setResult(null); setSaved(false); setGenerating(true); setProgress(0); setStatusMsg("");
     const referenceImageUrls = attachments.map(a => a.url);
     try {
       if (outputType === "image") {
@@ -92,8 +122,11 @@ export default function QuickCreate() {
         setStatusMsg("Assembling video...");
         const { url, blob } = await assembleVideo({
           scenes, ratio, sceneSeconds: 5, audio,
+          musicUrl: musicUrl || undefined,
+          logoUrl: logoUrl || undefined,
           subtitleStyle: voiceover ? "none" : "bottom",
           onProgress: (p) => setProgress(0.6 + p * 0.3),
+          onWarning: (msg) => setWarnings(prev => prev.includes(msg) ? prev : [...prev, msg]),
         });
         setStatusMsg("Uploading...");
         const hostedUrl = await uploadFile(new File([blob], "quick-create-video.webm", { type: "video/webm" }));
@@ -216,7 +249,44 @@ export default function QuickCreate() {
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${voiceover ? "translate-x-4" : ""}`} />
                 </div>
               </button>
+
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Background Music (optional)</label>
+                <label className="w-full flex items-center gap-3 p-3 rounded-xl border border-border text-left cursor-pointer hover:bg-muted/20 transition-all">
+                  <Music className="w-4 h-4 shrink-0 text-muted-foreground" />
+                  <span className="flex-1 text-sm text-muted-foreground truncate">
+                    {uploadingMusic ? "Uploading…" : musicName || "Upload a music track"}
+                  </span>
+                  {uploadingMusic ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : musicUrl ? <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" /> : null}
+                  <input type="file" accept="audio/*" className="hidden" disabled={uploadingMusic}
+                    onChange={e => { handleMusicUpload(e.target.files?.[0]); e.target.value = ""; }} />
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Brand Logo (optional)</label>
+                <label className="w-full flex items-center gap-3 p-3 rounded-xl border border-border text-left cursor-pointer hover:bg-muted/20 transition-all">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="logo" className="w-6 h-6 rounded object-contain shrink-0" />
+                  ) : (
+                    <Tag className="w-4 h-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <span className="flex-1 text-sm text-muted-foreground truncate">
+                    {uploadingLogo ? "Uploading…" : logoUrl ? "Logo attached — click to replace" : "Upload a logo to overlay on the video"}
+                  </span>
+                  {uploadingLogo && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+                  <input type="file" accept="image/*" className="hidden" disabled={uploadingLogo}
+                    onChange={e => { handleLogoUpload(e.target.files?.[0]); e.target.value = ""; }} />
+                </label>
+              </div>
             </>
+          )}
+
+          {warnings.length > 0 && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-1">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="space-y-1">{warnings.map((w, i) => <p key={i}>{w}</p>)}</div>
+            </div>
           )}
 
           {error && !upgradeRequired && (

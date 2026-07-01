@@ -143,7 +143,7 @@ export default function MediaStep({
               </button>
             )}
             <input ref={musicRef} type="file" accept="audio/*" className="hidden" onChange={e => uploadMusic(e.target.files?.[0])} />
-            <p className="text-[11px] text-neutral-500 mt-1.5">The style above is for AI reference only. Upload a track here to add real background audio — it'll be mixed under the voiceover.</p>
+            <p className="text-[11px] text-neutral-500 mt-1.5">The style dropdown above is just a label for your own notes — there's no audio behind it. Upload a track here for real background music; it'll be mixed under the voiceover.</p>
           </div>
 
           <p className="text-xs text-neutral-500 mb-4">Compiles your {imageCount} image{imageCount !== 1 ? "s" : ""} into a captioned vertical video. Captions are pulled from your generated copy.</p>

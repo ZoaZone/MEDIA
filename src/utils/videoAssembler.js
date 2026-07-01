@@ -10,6 +10,8 @@
  * or download, and `blob` is the raw video for upload.
  */
 
+import { proxyImageAsObjectUrl } from "./aiClient";
+
 const RATIOS = {
   "9:16": { w: 720, h: 1280 },
   "16:9": { w: 1280, h: 720 },
@@ -17,15 +19,43 @@ const RATIOS = {
   "4:5": { w: 1080, h: 1350 },
 };
 
-function loadImage(src) {
-  return new Promise((resolve) => {
-    if (!src) return resolve(null);
+function loadImageOnce(src) {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
+    img.onerror = () => reject(new Error(`Failed to load: ${src}`));
     img.src = src;
   });
+}
+
+// Load an image for canvas drawing. Cross-origin sources without
+// Access-Control-Allow-Origin fail to load under crossOrigin="anonymous" —
+// which is required so MediaRecorder can capture the canvas — and would
+// otherwise render as a black scene or a missing logo. On failure, retry
+// once via the proxyImage backend function, which fetches the bytes
+// server-side (no browser CORS involved) and hands back a same-origin
+// blob: URL.
+/**
+ * @param {string} src
+ * @param {{ onWarning?: (message: string) => void, label?: string }} [opts]
+ */
+async function loadImage(src, { onWarning, label = "Image" } = {}) {
+  if (!src) return null;
+  try {
+    return await loadImageOnce(src);
+  } catch (_e) {
+    const proxied = await proxyImageAsObjectUrl(src);
+    if (proxied) {
+      try {
+        return await loadImageOnce(proxied);
+      } catch (_e2) {
+        // fall through to the warning below
+      }
+    }
+    onWarning?.(`${label} failed to load and was skipped (it may be blocked by CORS, or the URL is unreachable): ${src}`);
+    return null;
+  }
 }
 
 // Draw an image with object-fit: cover into the target rect.
@@ -46,7 +76,23 @@ function drawCover(ctx, img, W, H) {
   ctx.drawImage(img, dx, dy, dw, dh);
 }
 
-// Word-wrap text to fit within maxWidth, returns array of lines.
+// Break a single line that's wider than maxWidth on its own (e.g. a long
+// word or URL with no spaces) into width-fitting pieces.
+function breakLongLine(ctx, line, maxWidth) {
+  const pieces = [];
+  while (ctx.measureText(line).width > maxWidth && line.length > 1) {
+    let cut = line.length;
+    while (cut > 1 && ctx.measureText(line.slice(0, cut)).width > maxWidth) cut--;
+    pieces.push(line.slice(0, cut));
+    line = line.slice(cut);
+  }
+  if (line) pieces.push(line);
+  return pieces;
+}
+
+// Word-wrap text to fit within maxWidth, returns array of lines. Words wider
+// than maxWidth on their own (long words/URLs) are hard-broken instead of
+// being left to overflow past the frame edge.
 function wrapText(ctx, text, maxWidth) {
   const words = (text || "").split(/\s+/).filter(Boolean);
   const lines = [];
@@ -59,6 +105,11 @@ function wrapText(ctx, text, maxWidth) {
     } else {
       line = test;
     }
+    if (ctx.measureText(line).width > maxWidth) {
+      const broken = breakLongLine(ctx, line, maxWidth);
+      lines.push(...broken.slice(0, -1));
+      line = broken[broken.length - 1] || "";
+    }
   }
   if (line) lines.push(line);
   return lines;
@@ -66,34 +117,65 @@ function wrapText(ctx, text, maxWidth) {
 
 function drawCaption(ctx, text, W, H, opts = {}) {
   if (!text) return;
-  const { accent = "#e040fb", subtitleStyle = "bottom", maxLines = 3, fontFamily = "Arial" } = opts;
-  const fontSize = Math.round(W * 0.038);
+  const { accent = "#e040fb", subtitleStyle = "bottom", maxLines: maxLinesOverride, fontFamily = "Arial" } = opts;
+
+  const maxWidth = W * 0.86;
+  const bottomMargin = H * 0.08;
+
+  let fontSize = Math.round(W * 0.038);
+  let lineHeight = fontSize * 1.25;
+  let maxLines = maxLinesOverride || 3;
+
+  // For the default "bottom" placement, cap the font size and line count so
+  // the caption block (text + its legibility scrim) can never cross into the
+  // middle third of the frame, no matter how long the source text is. Fixed
+  // aspect ratios (e.g. 16:9, where H is short relative to W) would otherwise
+  // let a full 3-line caption spill above the lower third. "center" placement
+  // is an intentional mid-frame style and isn't constrained by this.
+  if (subtitleStyle !== "center") {
+    const availH = H / 3 - bottomMargin;
+    while (fontSize > 14 && lineHeight + fontSize * 1.2 > availH) {
+      fontSize -= 2;
+      lineHeight = fontSize * 1.25;
+    }
+    const linesThatFit = Math.max(1, Math.floor(availH / lineHeight));
+    maxLines = Math.max(1, Math.min(linesThatFit, maxLinesOverride || 3));
+  }
+
   ctx.font = `700 ${fontSize}px ${fontFamily}, Arial, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  const maxWidth = W * 0.86;
   let lines = wrapText(ctx, text, maxWidth);
   if (lines.length > maxLines) {
     lines = lines.slice(0, maxLines);
     let last = lines[maxLines - 1];
+    // Drop whole trailing words first so truncation never slices a word in
+    // half; only fall back to a character-level cut for a single word that
+    // still doesn't fit on its own (e.g. one very long word/URL).
+    const words = last.split(" ");
+    while (words.length > 1 && ctx.measureText(`${words.join(" ")}…`).width > maxWidth) {
+      words.pop();
+    }
+    last = words.join(" ");
     while (last.length > 1 && ctx.measureText(`${last}…`).width > maxWidth) {
       last = last.slice(0, -1).trimEnd();
     }
     lines[maxLines - 1] = `${last}…`;
   }
-  const lineHeight = fontSize * 1.25;
   const blockH = lines.length * lineHeight;
 
   const centerX = W / 2;
-  const baseY = subtitleStyle === "center" ? H / 2 - blockH / 2 : H - blockH - H * 0.08;
+  let baseY = subtitleStyle === "center" ? H / 2 - blockH / 2 : H - blockH - bottomMargin;
+
+  const padY = fontSize * 0.6;
+  // Hard safety clamp: even after the sizing above, never let the scrim
+  // cross into the middle third for the default bottom placement.
+  if (subtitleStyle !== "center") {
+    baseY = Math.max(baseY, (H * 2) / 3 + padY);
+  }
 
   // Scrim behind text for legibility
-  const padY = fontSize * 0.6;
-  const grad = ctx.createLinearGradient(0, baseY - padY, 0, baseY + blockH + padY);
-  grad.addColorStop(0, "rgba(0,0,0,0)");
-  grad.addColorStop(0.5, "rgba(0,0,0,0.55)");
-  grad.addColorStop(1, "rgba(0,0,0,0.55)");
   if (subtitleStyle !== "center") {
     ctx.fillStyle = "rgba(0,0,0,0.45)";
     ctx.fillRect(0, baseY - padY, W, blockH + padY * 2);
@@ -137,6 +219,9 @@ function drawLogo(ctx, logoImg, W, H) {
  * @param {Blob|string} [cfg.audio]  voiceover Blob or URL
  * @param {string} [cfg.musicUrl]  background music URL, mixed under the voiceover
  * @param {(p:number)=>void} [cfg.onProgress]  0..1 progress callback
+ * @param {(message:string)=>void} [cfg.onWarning]  called (possibly more than once) for
+ *   non-fatal problems — an image/logo that failed to load, or audio that failed to play —
+ *   so callers can surface them instead of the video silently rendering with a gap
  * @returns {Promise<{url:string, blob:Blob}>}
  */
 export async function assembleVideo(cfg = {}) {
@@ -152,6 +237,7 @@ export async function assembleVideo(cfg = {}) {
     audio = null,
     musicUrl = "",
     onProgress = () => {},
+    onWarning = () => {},
   } = cfg;
 
   if (!scenes.length) throw new Error("No scenes to render.");
@@ -166,8 +252,10 @@ export async function assembleVideo(cfg = {}) {
   const ctx = canvas.getContext("2d");
 
   // Pre-load all imagery + logo
-  const images = await Promise.all(scenes.map((s) => loadImage(s.imageUrl)));
-  const logoImg = logoUrl ? await loadImage(logoUrl) : null;
+  const images = await Promise.all(
+    scenes.map((s, i) => loadImage(s.imageUrl, { onWarning, label: `Scene ${i + 1} image` }))
+  );
+  const logoImg = logoUrl ? await loadImage(logoUrl, { onWarning, label: "Logo" }) : null;
 
   // Set up the recording stream (video + optional audio)
   const fps = 30;
@@ -208,7 +296,8 @@ export async function assembleVideo(cfg = {}) {
       dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
     } catch (_e) {
       audioEl = null;
-      musicEl = null; // continue silently
+      musicEl = null;
+      onWarning("Audio setup failed — this video will render without sound.");
     }
   }
 
@@ -224,8 +313,8 @@ export async function assembleVideo(cfg = {}) {
   });
 
   recorder.start();
-  if (audioEl) audioEl.play().catch(() => {});
-  if (musicEl) musicEl.play().catch(() => {});
+  if (audioEl) audioEl.play().catch(() => onWarning("Voiceover audio failed to start playing (the browser may have blocked autoplay) — this video may render without narration."));
+  if (musicEl) musicEl.play().catch(() => onWarning("Background music failed to start playing (the browser may have blocked autoplay) — this video may render without music."));
 
   // Per-scene durations: use `sceneDurations` (one entry per scene) if provided,
   // otherwise fall back to a uniform `sceneSeconds` for every scene.

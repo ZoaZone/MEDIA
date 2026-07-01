@@ -73,7 +73,7 @@ export default function CampaignStudio() {
     ai_prompt: "", ai_output: "", auto_mode: false,
     outputs: {}, include_hashtags: true,
     selected_accounts: [], media_urls: [], video_url: "",
-    clip_durations: [],
+    clip_durations: [], video_narration: "",
     video_settings: { music: "Trending TikTok", voice: "AI Female (Natural)", mood: "Energetic", musicUrl: "", musicName: "", subtitleStyle: "bottom" },
     schedules: [{ date: "", time: "09:00", topic: "" }],
     postNow: true,
@@ -93,6 +93,7 @@ export default function CampaignStudio() {
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [publishReport, setPublishReport] = useState([]);
   const [publishStatus, setPublishStatus] = useState("");
+  const [warnings, setWarnings] = useState([]);
 
   const { data: brands = [] } = useQuery({ queryKey: ["brands", user?.email], queryFn: () => base44.entities.Brand.filter(mine(user), "-created_date", 20), enabled: !!user?.email });
   const { data: allAccounts = [] } = useQuery({ queryKey: ["social_accounts", user?.email], queryFn: () => base44.entities.SocialAccount.filter(mine(user), "-created_date", 100), enabled: !!user?.email });
@@ -222,15 +223,40 @@ Topic: ${topic}`;
     setUploadingMusic(false);
   };
 
+  // Write a narration script purpose-built for the video — not the raw post
+  // copy/caption (`ai_output`), which was previously chopped mechanically
+  // across scenes and read verbatim regardless of what's actually on screen.
+  // Falls back to the post copy if the AI call fails, so video assembly
+  // never hard-fails just because narration generation did.
+  const buildVideoNarration = async (sceneCount) => {
+    const brandContext = selectedBrand
+      ? ` Brand: ${selectedBrand.name}. Industry: ${selectedBrand.industry || "General"}. Voice: ${selectedBrand.brand_voice || campaign.tone}.`
+      : "";
+    const topic = campaign.ai_prompt || campaign.ai_output || campaign.campaign_name || "this brand's product or service";
+    try {
+      const narration = await generateText({
+        type: "video_script",
+        prompt: `Write a short, vivid voiceover narration (plain prose, no scene labels, no markdown, no preamble) for a ${sceneCount}-scene marketing video.${brandContext} Topic: ${topic}`,
+        platform: selectedBrand?.name || "General",
+        tone: campaign.tone,
+      });
+      return (narration || "").trim();
+    } catch (_e) {
+      return "";
+    }
+  };
+
   // ── Real video assembly (was setTimeout + hardcoded sample mp4) ──
   const compileVideo = async () => {
     const images = campaign.media_urls.filter(isImageUrl);
     if (!images.length) { setError("Add or generate at least one image before compiling a video."); return; }
-    setError("");
+    setError(""); setWarnings([]);
     setGeneratingMedia(true);
     setVideoProgress(0);
     try {
-      const sceneScripts = splitScriptIntoScenes(campaign.ai_output || campaign.campaign_name || "", images.length);
+      const narration = await buildVideoNarration(images.length);
+      setCampaign(p => ({ ...p, video_narration: narration }));
+      const sceneScripts = splitScriptIntoScenes(narration || campaign.ai_output || campaign.campaign_name || "", images.length);
       // `text` (full) drives the voiceover narration; `caption` (short) is what's drawn on screen.
       const scenes = images.map((url, i) => ({
         imageUrl: url,
@@ -253,6 +279,7 @@ Topic: ${topic}`;
         subtitleStyle: campaign.video_settings.subtitleStyle || "bottom",
         fontFamily: selectedBrand?.font_family || "Arial",
         onProgress: setVideoProgress,
+        onWarning: (msg) => setWarnings(prev => prev.includes(msg) ? prev : [...prev, msg]),
       });
       // Show the local preview immediately, then swap in a persistent, publicly
       // fetchable URL — platform APIs (Instagram, TikTok, etc.) can't reach blob: URLs.
@@ -269,10 +296,14 @@ Topic: ${topic}`;
   const repurposeVideo = async (platform, ratio) => {
     const images = campaign.media_urls.filter(isImageUrl);
     if (!images.length) { setError("Add at least one image in Media & Clips before resizing for platforms."); return; }
-    setError("");
+    setError(""); setWarnings([]);
     setRepurposing(p => ({ ...p, [platform]: true }));
     try {
-      const sceneScripts = splitScriptIntoScenes(campaign.ai_output || campaign.campaign_name || "", images.length);
+      // Reuse the narration generated for the main compiled video so the
+      // repurposed (resized) version stays consistent with it — only
+      // generate a fresh one if the user repurposes before compiling.
+      const narration = campaign.video_narration || await buildVideoNarration(images.length);
+      const sceneScripts = splitScriptIntoScenes(narration || campaign.ai_output || campaign.campaign_name || "", images.length);
       const scenes = images.map((url, i) => ({
         imageUrl: url,
         text: sceneScripts[i]?.text || "",
@@ -292,6 +323,7 @@ Topic: ${topic}`;
         accent: selectedBrand?.accent_color || "#e040fb",
         subtitleStyle: campaign.video_settings.subtitleStyle || "bottom",
         fontFamily: selectedBrand?.font_family || "Arial",
+        onWarning: (msg) => setWarnings(prev => prev.includes(msg) ? prev : [...prev, msg]),
       });
       setCampaign(p => ({ ...p, platform_overrides: { ...p.platform_overrides, [platform]: { ...(p.platform_overrides?.[platform] || {}), media_url: url, ratio } } }));
       // Swap in a persistent, publicly fetchable URL once uploaded (see compileVideo).
@@ -555,6 +587,14 @@ Topic: ${topic}`;
       {error && !upgradeRequired && (
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" /> {error}
+        </div>
+      )}
+
+      {warnings.length > 0 && (
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="space-y-1 flex-1">{warnings.map((w, i) => <p key={i}>{w}</p>)}</div>
+          <button onClick={() => setWarnings([])} className="shrink-0"><X className="w-4 h-4" /></button>
         </div>
       )}
 

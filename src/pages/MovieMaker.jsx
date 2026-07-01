@@ -70,6 +70,7 @@ export default function MovieMaker() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [warnings, setWarnings] = useState([]);
 
   // Dubbing studio state
   const [dubStep, setDubStep] = useState(0);
@@ -205,7 +206,7 @@ export default function MovieMaker() {
   const assembleMovie = async () => {
     const imageScenes = scenes.filter(s => s.imageUrl);
     if (!imageScenes.length) return setError("Add at least one image to a scene before assembling.");
-    setLoading(true); setError(""); setProgress(0);
+    setLoading(true); setError(""); setWarnings([]); setProgress(0);
 
     try {
       // Combine all scene texts into one voiceover narration
@@ -232,6 +233,7 @@ export default function MovieMaker() {
         subtitleStyle: "none",
         ratio: "16:9",
         onProgress: p => setProgress(0.3 + p * 0.65),
+        onWarning: (msg) => setWarnings(prev => prev.includes(msg) ? prev : [...prev, msg]),
       });
       if (result?.url) setVideoUrl(result.url);
       else setError("Assembly failed.");
@@ -343,6 +345,14 @@ export default function MovieMaker() {
           <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             <button onClick={() => setError("")} className="ml-auto"><X className="w-3.5 h-3.5" /></button>
+          </div>
+        )}
+
+        {warnings.length > 0 && (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="space-y-1 flex-1">{warnings.map((w, i) => <p key={i}>{w}</p>)}</div>
+            <button onClick={() => setWarnings([])} className="shrink-0"><X className="w-3.5 h-3.5" /></button>
           </div>
         )}
 

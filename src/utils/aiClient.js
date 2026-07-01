@@ -53,6 +53,30 @@ export async function uploadFile(file) {
 }
 
 /**
+ * Fetch an image URL server-side (via the proxyImage function) and return a
+ * same-origin blob: URL for it. Used as a fallback when a cross-origin image
+ * fails to load in the browser with crossOrigin="anonymous" — usually
+ * because the hosting server doesn't send Access-Control-Allow-Origin, which
+ * the canvas/MediaRecorder pipeline in videoAssembler.js requires. Returns
+ * null if the proxy is unavailable or the fetch fails.
+ */
+export async function proxyImageAsObjectUrl(url) {
+  if (!url) return null;
+  try {
+    const res = await base44.functions.invoke("proxyImage", { url });
+    const data = res?.data ?? res;
+    const b64 = data?.data_base64;
+    if (!b64) return null;
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: data?.mime || "image/png" }));
+  } catch (_e) {
+    return null;
+  }
+}
+
+/**
  * Generate a short AI voiceover for a block of text. Returns an audio Blob,
  * or null if voiceover generation isn't available — callers should treat
  * null as "render silently", not as a hard error.
