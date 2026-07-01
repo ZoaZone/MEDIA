@@ -81,7 +81,7 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/Pricing" element={<Pricing />} />
       <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/onboarding" element={<PostPaymentOnboarding />} />
       <Route path="/lead-capture" element={<LeadCapturePage />} />
